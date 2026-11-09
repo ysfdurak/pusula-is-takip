@@ -18,8 +18,10 @@ export function loadConfig(env = process.env) {
   const production = env.NODE_ENV === 'production';
   const authMode = env.AUTH_MODE || 'entra';
   if (!['entra', 'dev'].includes(authMode)) errors.push('AUTH_MODE "entra" ya da "dev" olmalı.');
+  const local = parsed && ['localhost', '127.0.0.1', '[::1]'].includes(parsed.hostname);
   if (authMode === 'dev' && production) errors.push('AUTH_MODE=dev üretimde (NODE_ENV=production) kullanılamaz.');
-  if (production && parsed && parsed.protocol !== 'https:') errors.push('Üretimde APP_URL https:// ile başlamalı.');
+  if (authMode === 'dev' && parsed && !local) errors.push('AUTH_MODE=dev yalnızca APP_URL localhost iken kullanılabilir.');
+  if (parsed && !local && parsed.protocol !== 'https:') errors.push('APP_URL https:// ile başlamalı (yalnızca localhost için http kabul edilir).');
 
   const entra = {
     tenantId: env.ENTRA_TENANT_ID,
@@ -59,6 +61,7 @@ export function loadConfig(env = process.env) {
     backupDir: resolve(env.BACKUP_DIR || join(dataDir, 'backups')),
     backupKeep: Number(env.BACKUP_KEEP || 14),
     sessionHours: Number(env.SESSION_HOURS || 10),
+    sessionIdleMinutes: Number(env.SESSION_IDLE_MINUTES || 120),
     htmlFile: resolve(env.PUSULA_HTML || new URL('../dist-pilot/index.html', import.meta.url).pathname),
   };
 }

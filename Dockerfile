@@ -1,6 +1,6 @@
 # Pusula pilot sunucusu
 #   docker build -t pusula:0.6.0 .
-#   docker run -d --name pusula --env-file .env -p 8080:8080 -v pusula-data:/data pusula:0.6.0
+#   docker run -d --name pusula --env-file .env -p 127.0.0.1:8080:8080 -v pusula-data:/data pusula:0.6.0
 # Ayrıntı: docs/PILOT_KURULUM.md
 
 FROM node:22-bookworm-slim AS build

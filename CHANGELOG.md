@@ -8,6 +8,18 @@
 - **Paket:** Docker imajı ve `docker-compose.yml`, `.env.example`. CI'da imaj derlenip konteyner içinde test ediliyor.
 - **Test:** 7 sunucu entegrasyon testi ve pilot tarayıcı testi (giriş, kayıt, yeniden başlatmada kalıcılık, oturum kapatma).
 - **Belge:** `docs/PILOT_KURULUM.md`: BT kurulum kılavuzu.
+- **Güvenlik incelemesi sonrası:**
+  - Giriş sonrası dönüş adresinde açık yönlendirme kapatıldı (`/\evil.example`).
+  - Giriş `state` değeri tarayıcı çerezine bağlandı (giriş CSRF'i).
+  - Üye ilk girişte Microsoft hesap kimliğine (`oid`) bağlanıyor.
+  - Hareketsiz oturum 2 saatte kapanıyor.
+  - Yönetici rolünü `PUSULA_ADMINS` belirliyor.
+  - Geliştirme girişi yalnızca localhost'ta çalışıyor; localhost dışında https zorunlu.
+  - Kaynak bilgisi olmayan POST istekleri reddediliyor.
+  - Oturum kapatma POST ile yapılıyor.
+  - Oturum kimlikleri özetlenerek saklanıyor.
+  - Beklenmeyen hatalar ayrıntı sızdırmıyor.
+  - Rol, politika ve yorum girdilerine sınır kondu.
 
 ## 0.5.0 — 2026-11-09
 - **Outlook bildirimleri:** İş atama, durum değişikliği, tamamlama ve yorumda ilgili kişilere Jira benzeri e-posta. Microsoft Graph ile tek bir ortak posta kutusundan gönderim; RBAC for Applications ile yalnızca o kutuya sınırlı. Şirket dışı adres engeli, geçici hatalarda yeniden deneme.

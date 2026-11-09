@@ -2,7 +2,7 @@
 // Uygulama verisi koleksiyon başına bir JSON belgesi olarak tutulur; her kayıtta yalnızca değişen koleksiyonlar yazılır.
 // Pilot ölçeği (10–50 kişi) için tasarlandı. Büyük ölçekte koleksiyonlar satır bazlı tablolara taşınmalıdır.
 import { DatabaseSync } from 'node:sqlite';
-import { randomBytes } from 'node:crypto';
+import { createHash, randomBytes } from 'node:crypto';
 import { mkdirSync, readdirSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 
@@ -16,10 +16,14 @@ export function openStore(file) {
     PRAGMA busy_timeout = 5000;
     PRAGMA foreign_keys = ON;
     CREATE TABLE IF NOT EXISTS documents (name TEXT PRIMARY KEY, json TEXT NOT NULL, updated INTEGER NOT NULL);
-    CREATE TABLE IF NOT EXISTS sessions (id TEXT PRIMARY KEY, email TEXT NOT NULL, name TEXT, created INTEGER NOT NULL, expires INTEGER NOT NULL);
+    CREATE TABLE IF NOT EXISTS sessions (id TEXT PRIMARY KEY, email TEXT NOT NULL, name TEXT, created INTEGER NOT NULL, expires INTEGER NOT NULL, last_seen INTEGER NOT NULL DEFAULT 0);
     CREATE TABLE IF NOT EXISTS login_states (state TEXT PRIMARY KEY, nonce TEXT NOT NULL, verifier TEXT NOT NULL, return_to TEXT, created INTEGER NOT NULL);
     CREATE TABLE IF NOT EXISTS audit (id INTEGER PRIMARY KEY AUTOINCREMENT, at INTEGER NOT NULL, email TEXT, action TEXT NOT NULL, detail TEXT);
   `);
+
+  if (!db.prepare("SELECT 1 FROM pragma_table_info('sessions') WHERE name = 'last_seen'").get()) {
+    db.exec('ALTER TABLE sessions ADD COLUMN last_seen INTEGER NOT NULL DEFAULT 0');
+  }
 
   const data = {};
   const written = {};
@@ -53,20 +57,30 @@ export function openStore(file) {
   }
 
   const token = () => randomBytes(32).toString('base64url');
+  // Oturum kimliği veritabanında ve yedeklerde açık tutulmaz; yalnızca SHA-256 özeti saklanır.
+  const digest = (id) => createHash('sha256').update(String(id)).digest('base64url');
   const sessions = {
     create(email, name, hours) {
       const id = token();
       const now = Date.now();
-      db.prepare('INSERT INTO sessions (id, email, name, created, expires) VALUES (?, ?, ?, ?, ?)').run(id, email, name || '', now, now + hours * 3600e3);
+      db.prepare('INSERT INTO sessions (id, email, name, created, expires, last_seen) VALUES (?, ?, ?, ?, ?, ?)').run(digest(id), email, name || '', now, now + hours * 3600e3, now);
       return id;
     },
-    get(id) {
+    /** Süresi dolmamış ve `idleMinutes` boyunca hareketsiz kalmamış oturum; kullanım anını günceller */
+    get(id, idleMinutes = 0) {
       if (!id) return null;
-      const row = db.prepare('SELECT email, name, expires FROM sessions WHERE id = ?').get(id);
-      return row && row.expires > Date.now() ? { email: row.email, name: row.name } : null;
+      const key = digest(id);
+      const row = db.prepare('SELECT email, name, expires, last_seen FROM sessions WHERE id = ?').get(key);
+      const now = Date.now();
+      if (!row || row.expires <= now || (idleMinutes && row.last_seen < now - idleMinutes * 60e3)) {
+        if (row) db.prepare('DELETE FROM sessions WHERE id = ?').run(key);
+        return null;
+      }
+      if (now - row.last_seen > 60e3) db.prepare('UPDATE sessions SET last_seen = ? WHERE id = ?').run(now, key);
+      return { email: row.email, name: row.name };
     },
     delete(id) {
-      db.prepare('DELETE FROM sessions WHERE id = ?').run(id);
+      db.prepare('DELETE FROM sessions WHERE id = ?').run(digest(id));
     },
     deleteForEmail(email) {
       db.prepare('DELETE FROM sessions WHERE email = ?').run(email);
@@ -78,6 +92,7 @@ export function openStore(file) {
   };
   const loginStates = {
     save(state, nonce, verifier, returnTo) {
+      db.prepare('DELETE FROM login_states WHERE created <= ?').run(Date.now() - 10 * 60e3);
       db.prepare('INSERT INTO login_states (state, nonce, verifier, return_to, created) VALUES (?, ?, ?, ?, ?)').run(state, nonce, verifier, returnTo, Date.now());
     },
     /** Tek kullanımlık: okunan durum silinir; 10 dakikadan eskisi geçersizdir */

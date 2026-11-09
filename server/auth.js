@@ -68,7 +68,8 @@ export function createEntraAuth({ tenantId, clientId, clientSecret, redirectUri,
     if (!nonce || claims.nonce !== nonce) throw new Error('Giriş isteği eşleşmedi; yeniden dene.');
     const email = String(claims.email || claims.preferred_username || '').toLowerCase();
     if (!/^\S+@\S+\.\S+$/.test(email)) throw new Error('Hesapta e-posta adresi bulunamadı.');
-    return { email, name: claims.name || email.split('@')[0] };
+    if (!claims.oid) throw new Error('Hesap kimliği (oid) bulunamadı.');
+    return { email, name: claims.name || email.split('@')[0], oid: claims.oid };
   }
 
   return { authorizeUrl, redeem, verify };

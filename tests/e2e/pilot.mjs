@@ -51,6 +51,7 @@ try {
   check(await page.isVisible('text=Rampa 3 kontrolü'), 'Sunucu yeniden başladıktan sonra iş ve oturum korunuyor');
 
   await page.click('.account-logout');
+  await page.click('button:has-text("Oturumu kapat")');
   await page.waitForSelector('text=Oturum kapatıldı');
   const api = (await page.context().request.get(base + '/api/workspace')).status();
   check(api === 401, 'Oturum kapatınca API erişimi kesiliyor');

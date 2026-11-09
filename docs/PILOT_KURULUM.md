@@ -28,7 +28,7 @@ Ardından:
 
 - **Sertifikalar ve gizli anahtarlar:** Yeni bir istemci gizli anahtarı oluşturun; pilot için 6–12 ay süre uygundur.
 - **API izinleri:** Varsayılan `User.Read` yeterlidir; giriş `openid profile email` kapsamlarıyla yapılır. **Graph `Mail.Send` eklemeyin.** E-posta yetkisi Exchange tarafında tek posta kutusuyla sınırlanır ([OUTLOOK_BILDIRIMLERI.md](OUTLOOK_BILDIRIMLERI.md)).
-- **Önerilen:** Kurumsal uygulamalar → Pusula → Özellikler → "Atama gerekli mi?" = **Evet**, ardından pilot kullanıcı grubunu atayın. Böylece pilot dışındaki biri Microsoft girişini de geçemez.
+- **Zorunlu:** Kurumsal uygulamalar → Pusula → Özellikler → "Atama gerekli mi?" = **Evet**, ardından pilot kullanıcı grubunu atayın. Böylece pilot dışındaki kişiler ve misafir (B2B) hesaplar Microsoft girişini geçemez.
 
 Sunucuya iletilecekler: Dizin (kiracı) kimliği, Uygulama (istemci) kimliği ve gizli anahtar.
 
@@ -44,11 +44,12 @@ Sunucuya iletilecekler: Dizin (kiracı) kimliği, Uygulama (istemci) kimliği ve
 | `PUSULA_ADMINS` | Evet | İlk yöneticiler, virgülle ayrılır. İlk açılışta bu kişiler için bir çalışma alanı oluşturulur |
 | `PUSULA_WORKSPACE_NAME` | Hayır | İlk çalışma alanının adı (varsayılan: Pusula) |
 | `ENTRA_TENANT_ID`, `ENTRA_CLIENT_ID`, `ENTRA_CLIENT_SECRET` | Evet | 1. adımdan |
-| `SESSION_HOURS` | Hayır | Oturum süresi (varsayılan: 10 saat) |
+| `SESSION_HOURS` | Hayır | En uzun oturum süresi (varsayılan: 10 saat) |
+| `SESSION_IDLE_MINUTES` | Hayır | Bu kadar dakika işlem yapılmayan oturum kapanır (varsayılan: 120) |
 | `MAIL_MODE`, `MAIL_SENDER`, `MAIL_ALLOWED_DOMAINS` | Hayır | E-posta için. Aynı uygulama kaydı kullanılır |
 | `DATA_DIR`, `BACKUP_KEEP` | Hayır | Docker'da `/data`; tutulacak yedek sayısı (varsayılan: 14) |
 
-Ayarlarda bir hata varsa sunucu açılmaz ve neyin eksik olduğunu Türkçe olarak yazar.
+Ayarlarda bir hata varsa sunucu açılmaz ve neyin eksik olduğunu Türkçe olarak yazar. `APP_URL` https değilse (localhost hariç) sunucu açılmaz. Geliştirme girişi (`AUTH_MODE=dev`) yalnızca localhost adresinde çalışır.
 
 ## 3. Çalıştırma
 
@@ -63,7 +64,7 @@ docker compose logs -f pusula
 
 ```bash
 npm ci && npm run build:pilot
-npm start                            # .env değerleri ortam değişkeni olarak verilmeli
+NODE_ENV=production npm start        # .env değerleri ortam değişkeni olarak verilmeli
 ```
 
 Sağlık kontrolü: `GET /healthz` → `{"ok":true}`
@@ -78,7 +79,8 @@ Uygulama 8080 portunda düz HTTP dinler. HTTPS, önündeki ters vekil tarafında
 
 Gerekenler:
 - İç DNS kaydı ve şirket sertifikası.
-- 8080 portu dışarıya açılmamalı, yalnızca ters vekil erişmeli.
+- 8080 portu dışarıya açılmamalı, yalnızca ters vekil erişmeli (`docker-compose.yml` portu yalnızca 127.0.0.1'e açar).
+- Ters vekilde `/auth/login` için istek sınırı (örneğin IP başına dakikada 20) önerilir.
 - Oturum çerezi `Secure`, `HttpOnly` ve `SameSite=Lax`'tır; API başka sitelerden gelen istekleri reddeder.
 
 ## 5. İlk giriş ve kullanıcılar
@@ -88,8 +90,13 @@ Gerekenler:
    - **Yönetici:** her şeyi düzenler.
    - **Ekip üyesi:** iş açar ve günceller.
    - **Görüntüleyici:** yalnızca okur.
-3. Eklenen kişi kendi Microsoft hesabıyla girebilir. Eklenmemiş biri "Pusula erişimin yok" sayfasını görür.
-4. Bir üye pasifleştirildiğinde açık oturumu bir sonraki istekte kapanır.
+3. Eklenen kişi kendi Microsoft hesabıyla girebilir. Eklenmemiş biri "Pusula erişimin yok" sayfasını görür. İlk girişte üye kaydı Microsoft hesabının değişmeyen kimliğine bağlanır; aynı adresle başka bir hesap giremez.
+
+**Erişimi kaldırma:**
+- **Ekip üyesi veya görüntüleyici:** Ekipler ekranından pasifleştirildiğinde açık oturumu bir sonraki istekte kapanır.
+- **Yönetici rolü:** Yalnızca `PUSULA_ADMINS` ile verilir. Listeden çıkarılan kişi, uygulama yeniden başlatılınca ekip üyesine düşer; ardından pasifleştirilebilir. Bir çalışma alanının son yöneticisi düşürülmez.
+- **Microsoft hesabı kapatılırsa:** Yeni giriş yapılamaz. Açık oturum en geç 2 saat hareketsizlikten sonra ya da en fazla 10 saatte kapanır. Hemen kesmek için kişiyi Pusula'da da pasifleştirin.
+- **Adres başka bir çalışana geçtiyse:** Üyeyi pasifleştirip yeniden etkinleştirin; hesap bağı sıfırlanır.
 
 ## 6. Yedek ve geri yükleme
 

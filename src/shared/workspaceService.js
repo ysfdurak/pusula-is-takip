@@ -152,7 +152,10 @@ export function createWorkspaceService({
       if (membership.role !== 'owner') {
         throw Error('Bu ayarı yalnızca yönetici değiştirebilir.');
       }
-      demoData.policies[request.id] = request.policy;
+      // Yalnızca tanımlı kurallar, açık/kapalı olarak saklanır
+      demoData.policies[request.id] = Object.fromEntries(
+        Object.keys(DEFAULT_NOTIFY_POLICY).map((key) => [key, request.policy?.[key] !== false]),
+      );
       persist();
       return {
         ok: true,
@@ -164,6 +167,16 @@ export function createWorkspaceService({
       }
       // E-posta adresleri küçük harfle tutulur; girişte Microsoft'tan gelen adresle eşleşmesi için.
       request = { ...request, email: String(request.email || '').trim().toLowerCase() };
+      if (!['editor', 'viewer', 'owner'].includes(request.role)) {
+        throw Error('Geçersiz rol.');
+      }
+      if (String(request.name).length > 120 || String(request.department || '').length > 120) {
+        throw Error('Ad veya bölüm çok uzun.');
+      }
+      const currentRole = demoData.members[request.id].find((m) => m.email === request.email)?.role;
+      if (request.role === 'owner' && currentRole !== 'owner') {
+        throw Error('Yönetici rolü yalnızca Pusula ayarlarıyla (PUSULA_ADMINS) verilir.');
+      }
       if (!request.name?.trim() || !/^\S+@\S+\.\S+$/.test(request.email)) {
         throw Error('Ad ve geçerli e-posta gerekli.');
       }
@@ -176,6 +189,8 @@ export function createWorkspaceService({
         active: existingMember?.role === 'owner' ? 1 : +!!request.active,
         mail_enabled: existingMember?.mail_enabled ?? 1,
         notify_self: existingMember?.notify_self ?? 0,
+        // Pasif üye yeniden etkinleştirilince Microsoft hesap bağı (oid) sıfırlanır: adres başka bir kişiye geçmiş olabilir.
+        oid: existingMember?.active || !request.active ? existingMember?.oid : undefined,
       };
       if (existingMember) {
         Object.assign(existingMember, memberRecord);
@@ -384,6 +399,9 @@ export function createWorkspaceService({
     if (request.action === 'comment') {
       if (!request.body?.trim()) {
         throw Error('Yorumunu yaz.');
+      }
+      if (request.body.length > 5000 || String(request.requestId || '').length > 100) {
+        throw Error('Yorum çok uzun (en fazla 5.000 karakter).');
       }
       if (!demoData.comments.some((comment) => comment.id === request.requestId)) {
         demoData.comments.unshift({

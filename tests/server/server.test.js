@@ -29,8 +29,9 @@ async function start({ dir = mkdtempSync(join(tmpdir(), 'pusula-')), mailer = nu
   const fetchImpl = async (url, init) => {
     ctx.tokenRequests.push({ url, body: new URLSearchParams(init.body) });
     const { email, name = 'Ad Soyad', overrides = {} } = ctx.identity;
+    const oid = ctx.identity.oid || 'oid-' + email.toLowerCase();
     const nonce = ctx.lastNonce;
-    const claims = { tid: TENANT, iss: `https://login.microsoftonline.com/${TENANT}/v2.0`, aud: CLIENT, exp: Math.floor(Date.now() / 1000) + 3600, nonce, preferred_username: email, name, ...overrides };
+    const claims = { tid: TENANT, iss: `https://login.microsoftonline.com/${TENANT}/v2.0`, aud: CLIENT, exp: Math.floor(Date.now() / 1000) + 3600, nonce, oid, preferred_username: email, name, ...overrides };
     return { ok: true, status: 200, json: async () => ({ id_token: jwt(claims) }) };
   };
   const server = createServer();
@@ -54,15 +55,18 @@ async function start({ dir = mkdtempSync(join(tmpdir(), 'pusula-')), mailer = nu
   /** Microsoft girişini taklit eder; oturum çerezini döner */
   ctx.login = async (email, opts = {}) => {
     ctx.identity = { email, ...opts };
-    const r1 = await fetch(base + '/auth/login?return_to=%2F', { redirect: 'manual' });
+    const r1 = await fetch(base + '/auth/login?return_to=' + encodeURIComponent(opts.returnTo || '/'), { redirect: 'manual' });
     assert.equal(r1.status, 302);
+    const loginCookie = (r1.headers.get('set-cookie') || '').split(';')[0];
+    ctx.lastLoginCookie = loginCookie;
     const authorize = new URL(r1.headers.get('location'));
     ctx.lastAuthorize = authorize;
     ctx.lastNonce = opts.nonce ?? authorize.searchParams.get('nonce');
     const state = opts.state ?? authorize.searchParams.get('state');
-    const r2 = await fetch(`${base}/auth/callback?code=kod&state=${state}`, { redirect: 'manual' });
-    const cookie = (r2.headers.get('set-cookie') || '').split(';')[0];
-    return { status: r2.status, cookie, setCookie: r2.headers.get('set-cookie'), text: await r2.text() };
+    const r2 = await fetch(`${base}/auth/callback?code=kod&state=${state}`, { redirect: 'manual', headers: opts.noLoginCookie ? {} : { Cookie: loginCookie } });
+    const setCookie = r2.headers.get('set-cookie') || '';
+    const cookie = setCookie.startsWith('pusula_sid=') ? setCookie.split(';')[0] : '';
+    return { status: r2.status, cookie, setCookie, location: r2.headers.get('location'), text: await r2.text() };
   };
   ctx.api = async (cookie, { method = 'GET', query = '', body, headers = {} } = {}) => {
     const r = await fetch(`${base}/api/workspace${query}`, {
@@ -111,7 +115,7 @@ test('giriş reddi: tekrar kullanılan state, başka dizin, başka uygulama, non
   const s = await start();
   const ok = await s.login('deniz@sirket.test');
   assert.equal(ok.status, 302);
-  const replay = await fetch(`${s.base}/auth/callback?code=kod&state=${s.lastAuthorize.searchParams.get('state')}`, { redirect: 'manual' });
+  const replay = await fetch(`${s.base}/auth/callback?code=kod&state=${s.lastAuthorize.searchParams.get('state')}`, { redirect: 'manual', headers: { Cookie: s.lastLoginCookie } });
   assert.equal(replay.status, 400, 'state tek kullanımlık');
   assert.equal((await s.login('deniz@sirket.test', { overrides: { tid: 'baska-dizin' } })).status, 400);
   assert.equal((await s.login('deniz@sirket.test', { overrides: { aud: 'baska-uygulama' } })).status, 400);
@@ -206,10 +210,73 @@ test('e-posta: durum değişince ilgiliye Outlook üzerinden gider, işlemi yapa
   await s.close();
 });
 
+test('güvenlik incelemesi: açık yönlendirme, giriş CSRF, hesap kimliği, kaynak başlığı, oturum kapatma', async () => {
+  const s = await start();
+  // '/\\evil.example': tarayıcı ters bölüyü / sayar → başka siteye gider (incelemede bulunan açık)
+  for (const evil of ['/\\evil.example', '//evil.example', '/\t/evil.example', 'https://evil.example/', 'javascript:alert(1)']) {
+    const r = await s.login('deniz@sirket.test', { returnTo: evil });
+    assert.equal(r.status, 302);
+    assert.equal(r.location, '/', `dönüş adresi reddedilmeli: ${evil}`);
+  }
+  assert.equal((await s.login('deniz@sirket.test', { returnTo: '/?workspace=a&task=b' })).location, '/?workspace=a&task=b');
+  assert.equal((await s.login('deniz@sirket.test', { returnTo: '/%5Cevil.example' })).location, '/%5Cevil.example', 'kodlanmış hali aynı sitede kalır');
+  // Giriş CSRF: tarayıcıda state çerezi yoksa geri dönüş kabul edilmez
+  assert.equal((await s.login('deniz@sirket.test', { noLoginCookie: true })).status, 400);
+  // Aynı adres, başka Microsoft hesabı
+  const other = await s.login('deniz@sirket.test', { oid: 'baska-hesap' });
+  assert.equal(other.status, 403);
+  assert.match(other.text, /başka bir Microsoft hesabına bağlı/);
+
+  const admin = (await s.login('deniz@sirket.test')).cookie;
+  const id = (await s.api(admin)).body.workspaces[0].id;
+  const noOrigin = await fetch(`${s.base}/api/workspace`, { method: 'POST', headers: { Cookie: admin, 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'read', id, notification: 'x' }) });
+  assert.equal(noOrigin.status, 403, 'kaynak bilgisi olmayan POST reddedilir');
+  const sameSite = await fetch(`${s.base}/api/workspace`, { method: 'POST', headers: { Cookie: admin, 'Content-Type': 'application/json', 'Sec-Fetch-Site': 'same-origin' }, body: JSON.stringify({ action: 'read', id, notification: 'x' }) });
+  assert.equal(sameSite.status, 200);
+  const weird = await s.api(admin, { method: 'POST', body: { action: 'save', id, revision: 0, state: null, reason: '' } });
+  assert.equal(weird.status, 400);
+  assert.equal(weird.body.error, 'İstek işlenemedi.', 'beklenmeyen hata ayrıntısı sızmaz');
+  const ownerAttempt = await s.api(admin, { method: 'POST', body: { action: 'member', id, email: 'yeni@sirket.test', name: 'Yeni', role: 'owner', active: true, originalEmail: '' } });
+  assert.equal(ownerAttempt.status, 403);
+
+  // Oturum kapatma: GET yalnızca onay sayfası, POST kapatır
+  const getLogout = await fetch(`${s.base}/auth/logout`, { headers: { Cookie: admin } });
+  assert.match(await getLogout.text(), /method="post"/);
+  assert.equal((await s.api(admin)).status, 200, 'GET ile oturum kapanmaz');
+  await fetch(`${s.base}/auth/logout`, { method: 'POST', headers: { Cookie: admin, Origin: s.base } });
+  assert.equal((await s.api(admin)).status, 401);
+
+  // Oturum kimliği veritabanında açık tutulmaz
+  const fresh = (await s.login('deniz@sirket.test')).cookie.split('=')[1];
+  assert.equal(s.store.db.prepare('SELECT COUNT(*) n FROM sessions WHERE id = ?').get(fresh).n, 0);
+  await s.close();
+});
+
+test('hareketsiz oturum düşer; PUSULA_ADMINS dışındaki yönetici ekip üyesine düşürülür', async () => {
+  const s1 = await start({ env: { PUSULA_ADMINS: 'deniz@sirket.test,ece@sirket.test', SESSION_IDLE_MINUTES: '30' } });
+  const ece = (await s1.login('ece@sirket.test')).cookie;
+  assert.equal((await s1.api(ece)).body.workspaces[0].role, 'owner');
+  s1.store.db.prepare('UPDATE sessions SET last_seen = ?').run(Date.now() - 31 * 60e3);
+  assert.equal((await s1.api(ece)).status, 401, '30 dakika hareketsiz oturum geçersiz');
+  await s1.close();
+
+  const s2 = await start({ dir: s1.dir, env: { PUSULA_ADMINS: 'deniz@sirket.test' } });
+  const ece2 = (await s2.login('ece@sirket.test')).cookie;
+  assert.equal((await s2.api(ece2)).body.workspaces[0].role, 'editor', 'listeden çıkarılan yönetici ekip üyesi olur');
+  await s2.close();
+
+  const s3 = await start({ dir: s1.dir, env: { PUSULA_ADMINS: 'baska@sirket.test' } });
+  const deniz = (await s3.login('deniz@sirket.test')).cookie;
+  assert.equal((await s3.api(deniz)).body.workspaces[0].role, 'owner', 'çalışma alanı yöneticisiz bırakılmaz');
+  await s3.close();
+});
+
 test('ayarlar: üretimde dev girişi ve http adres reddedilir; eksik Microsoft bilgisi bildirilir', () => {
+  assert.match(loadConfig({ AUTH_MODE: 'dev', APP_URL: 'https://pusula.sirket.test/' }).errors.join(), /yalnızca APP_URL localhost/);
+  assert.match(loadConfig({ APP_URL: 'http://pusula.sirket.test/', ENTRA_TENANT_ID: 't', ENTRA_CLIENT_ID: 'c', ENTRA_CLIENT_SECRET: 's' }).errors.join(), /https/, 'NODE_ENV olmadan da https zorunlu');
   assert.match(loadConfig({ NODE_ENV: 'production', AUTH_MODE: 'dev', APP_URL: 'https://p.test/' }).errors.join(), /üretimde/);
   assert.match(loadConfig({ NODE_ENV: 'production', APP_URL: 'http://p.test/', ENTRA_TENANT_ID: 't', ENTRA_CLIENT_ID: 'c', ENTRA_CLIENT_SECRET: 's' }).errors.join(), /https/);
   assert.match(loadConfig({ APP_URL: 'https://p.test/' }).errors.join(), /ENTRA_CLIENT_ID eksik/);
-  assert.match(loadConfig({ APP_URL: 'https://p.test/pusula/', AUTH_MODE: 'dev' }).errors.join(), /kökü olmalı/);
-  assert.deepEqual(loadConfig({ APP_URL: 'https://p.test/', AUTH_MODE: 'dev' }).errors, []);
+  assert.match(loadConfig({ APP_URL: 'https://p.test/pusula/', ENTRA_TENANT_ID: 't', ENTRA_CLIENT_ID: 'c', ENTRA_CLIENT_SECRET: 's' }).errors.join(), /kökü olmalı/);
+  assert.deepEqual(loadConfig({ APP_URL: 'http://localhost:8080/', AUTH_MODE: 'dev' }).errors, []);
 });

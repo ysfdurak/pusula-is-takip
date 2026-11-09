@@ -32,6 +32,7 @@ export function createApp({ config, store, auth, html, mailer = null, log = () =
   });
 
   bootstrap();
+  syncAdmins();
 
   /** İlk kurulum: hiç çalışma alanı yoksa yöneticiler için bir tane oluşturulur. */
   function bootstrap() {
@@ -48,21 +49,48 @@ export function createApp({ config, store, auth, html, mailer = null, log = () =
     log(`İlk çalışma alanı oluşturuldu: ${config.workspaceName} (${[...admins].join(', ')})`);
   }
 
-  const isMember = (email) => Object.values(store.load().members).some((list) => list.some((m) => m.email === email && m.active));
-
-  /** Girişte, yönetici tarafından eklenmiş üye kaydının adını Microsoft'taki adla tamamlar */
-  function syncProfile(email, name) {
-    names.set(email, name);
-    let changed = false;
-    for (const list of Object.values(store.load().members)) {
-      for (const m of list) {
-        if (m.email === email && name && (!m.name || m.name === email.split('@')[0]) && m.name !== name) {
-          m.name = name;
-          changed = true;
-        }
+  /**
+   * Yönetici (owner) rolünü PUSULA_ADMINS belirler: listede olmayan yöneticiler ekip üyesine düşürülür.
+   * Bir çalışma alanı yöneticisiz kalacaksa düşürme yapılmaz.
+   */
+  function syncAdmins() {
+    if (!admins.size) return;
+    const data = store.load();
+    for (const [wsId, list] of Object.entries(data.members)) {
+      const extra = list.filter((m) => m.role === 'owner' && !admins.has(m.email));
+      const remaining = list.filter((m) => m.role === 'owner' && m.active && admins.has(m.email));
+      if (!extra.length) continue;
+      if (!remaining.length) {
+        log(`Uyarı: ${wsId} çalışma alanında PUSULA_ADMINS listesinden yönetici yok; yöneticiler değiştirilmedi.`);
+        continue;
+      }
+      for (const m of extra) {
+        m.role = 'editor';
+        store.audit('system', 'owner_removed', `${wsId} · ${m.email}`);
+        log(`${m.email} artık yönetici değil (PUSULA_ADMINS).`);
       }
     }
-    if (changed) store.persist();
+    store.persist();
+  }
+
+  const isMember = (email) => Object.values(store.load().members).some((list) => list.some((m) => m.email === email && m.active));
+
+  /**
+   * Girişte üye kaydını Microsoft hesabına bağlar ve adını tamamlar.
+   * İlk girişte hesabın değişmeyen kimliği (oid) kaydedilir; sonraki girişlerde aynı adresi taşıyan
+   * başka bir hesap (örneğin yeniden kullanılan bir adres) reddedilir.
+   * @returns {boolean} hesap eşleşiyorsa true
+   */
+  function bindAccount(user) {
+    const memberships = Object.values(store.load().members).flatMap((list) => list.filter((m) => m.email === user.email));
+    if (memberships.some((m) => m.oid && user.oid && m.oid !== user.oid)) return false;
+    names.set(user.email, user.name);
+    for (const m of memberships) {
+      if (user.oid && !m.oid) m.oid = user.oid;
+      if (user.name && (!m.name || m.name === user.email.split('@')[0])) m.name = user.name;
+    }
+    store.persist();
+    return true;
   }
 
   // --- E-posta kuyruğu -----------------------------------------------------
@@ -123,7 +151,21 @@ ${link ? `<p><a href="${escapeHtml(link.href)}" style="color:#2c6549;font-weight
   };
   const sessionCookie = (id, maxAgeSec) =>
     `${COOKIE}=${id}; Path=${basePath || '/'}; HttpOnly; SameSite=Lax; Max-Age=${maxAgeSec}${secure ? '; Secure' : ''}`;
-  const safeReturn = (value) => (typeof value === 'string' && /^\/(?!\/)[^\s]*$/.test(value) ? value : '/');
+  /** Girişten sonra dönülecek yol: yalnızca uygulama içindeki göreli yollar (açık yönlendirmeye karşı) */
+  const safeReturn = (value) => {
+    if (typeof value !== 'string' || !/^\/[A-Za-z0-9\-._~/?=&%#]*$/.test(value) || value.startsWith('//')) return '/';
+    try {
+      return new URL(value, appOrigin).origin === appOrigin ? value : '/';
+    } catch {
+      return '/';
+    }
+  };
+  const LOGIN_COOKIE = 'pusula_login';
+  const loginCookie = (state, maxAgeSec) => `${LOGIN_COOKIE}=${state}; Path=/auth; HttpOnly; SameSite=Lax; Max-Age=${maxAgeSec}${secure ? '; Secure' : ''}`;
+  const readCookie = (req, name) => {
+    const m = (req.headers.cookie || '').match(new RegExp(`(?:^|;\\s*)${name}=([^;]+)`));
+    return m ? m[1] : null;
+  };
 
   async function readJson(req) {
     let size = 0;
@@ -141,10 +183,13 @@ ${link ? `<p><a href="${escapeHtml(link.href)}" style="color:#2c6549;font-weight
   }
 
   function startSession(res, user, returnTo) {
-    syncProfile(user.email, user.name);
+    if (!bindAccount(user)) {
+      store.audit(user.email, 'login_denied', 'hesap kimliği eşleşmedi');
+      return page(res, 403, 'Hesap eşleşmedi', `${user.email} adresi Pusula'da başka bir Microsoft hesabına bağlı. Pusula yöneticine başvur.`);
+    }
     const id = store.sessions.create(user.email, user.name, config.sessionHours);
     store.audit(user.email, 'login');
-    redirect(res, `${basePath}${safeReturn(returnTo)}`, [sessionCookie(id, config.sessionHours * 3600)]);
+    redirect(res, `${basePath}${safeReturn(returnTo)}`, [sessionCookie(id, config.sessionHours * 3600), loginCookie('', 0)]);
   }
 
   function denyNonMember(res, email) {
@@ -171,18 +216,20 @@ ${link ? `<p><a href="${escapeHtml(link.href)}" style="color:#2c6549;font-weight
       const nonce = randomToken();
       const verifier = randomToken();
       store.loginStates.save(state, nonce, verifier, safeReturn(url.searchParams.get('return_to')));
-      return redirect(res, auth.authorizeUrl({ state, nonce, verifier }));
+      // state bu tarayıcıya bağlanır: başkasının giriş bağlantısıyla oturum açtırılamaz (giriş CSRF'i)
+      return redirect(res, auth.authorizeUrl({ state, nonce, verifier }), [loginCookie(state, 600)]);
     }
     if (path === '/auth/dev' && config.authMode === 'dev') {
       const email = String(url.searchParams.get('email') || '').toLowerCase();
       if (!admins.has(email) && !isMember(email)) return denyNonMember(res, email);
-      return startSession(res, { email, name: email.split('@')[0] }, '/');
+      return startSession(res, { email, name: email.split('@')[0], oid: '' }, '/');
     }
     if (path === '/auth/callback' && req.method === 'GET' && auth) {
       if (url.searchParams.get('error')) {
         return page(res, 400, 'Giriş tamamlanamadı', url.searchParams.get('error_description') || url.searchParams.get('error'), { href: `${basePath}/auth/login`, text: 'Yeniden dene' });
       }
-      const saved = store.loginStates.take(url.searchParams.get('state'));
+      const state = url.searchParams.get('state');
+      const saved = state && readCookie(req, LOGIN_COOKIE) === state ? store.loginStates.take(state) : null;
       if (!saved) return page(res, 400, 'Giriş süresi doldu', 'Giriş isteği bulunamadı ya da 10 dakikadan eski. Yeniden giriş yap.', { href: `${basePath}/auth/login`, text: 'Giriş yap' });
       try {
         const idToken = await auth.redeem(url.searchParams.get('code'), saved.verifier);
@@ -194,16 +241,29 @@ ${link ? `<p><a href="${escapeHtml(link.href)}" style="color:#2c6549;font-weight
         return page(res, 400, 'Giriş tamamlanamadı', err.message, { href: `${basePath}/auth/login`, text: 'Yeniden dene' });
       }
     }
-    if (path === '/auth/logout') {
+    if (path === '/auth/logout' && req.method === 'POST') {
+      const origin = req.headers.origin;
+      if (origin && origin !== appOrigin) return page(res, 403, 'İstek reddedildi', 'Oturum kapatma isteği başka bir siteden geldi.');
       const id = cookieValue(req);
       if (id) store.sessions.delete(id);
       headers(res, { 'Set-Cookie': sessionCookie('', 0) });
       return page(res, 200, 'Oturum kapatıldı', 'Pusula oturumun kapatıldı.', { href: `${basePath}/auth/login`, text: 'Yeniden giriş yap' });
     }
+    if (path === '/auth/logout') {
+      // Bağlantıyla (GET) oturum kapatılmaz; onay formu gösterilir.
+      headers(res, { 'Content-Type': 'text/html; charset=utf-8', 'Content-Security-Policy': "default-src 'none'; style-src 'unsafe-inline'; form-action 'self'" });
+      res.statusCode = 200;
+      return res.end(`<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Oturumu kapat · Pusula</title></head>
+<body style="font-family:Segoe UI,Arial,sans-serif;background:#f7f8f4;color:#243c33;display:grid;place-items:center;min-height:90vh;margin:0">
+<form method="post" action="${basePath}/auth/logout" style="max-width:420px;background:#fff;border:1px solid #e6eae1;border-radius:10px;padding:28px">
+<p style="font-weight:bold;margin:0 0 12px">pusula.</p><h1 style="font-size:20px;margin:0 0 16px">Oturumu kapatmak istiyor musun?</h1>
+<button type="submit" style="background:#2c6549;color:#fff;border:0;border-radius:6px;padding:10px 18px;font-weight:bold;cursor:pointer">Oturumu kapat</button>
+<a href="${basePath}/" style="margin-left:12px;color:#2c6549">Vazgeç</a></form></body></html>`);
+    }
 
     // API
     if (path === '/api/workspace') {
-      const session = store.sessions.get(cookieValue(req));
+      const session = store.sessions.get(cookieValue(req), config.sessionIdleMinutes);
       if (!session) return json(res, 401, { error: 'Oturum açman gerekiyor.' });
       const email = session.email;
       if (!admins.has(email) && !isMember(email)) {
@@ -217,7 +277,11 @@ ${link ? `<p><a href="${escapeHtml(link.href)}" style="color:#2c6549;font-weight
         if (req.method !== 'POST') return json(res, 405, { error: 'Yöntem desteklenmiyor.' });
         // Başka sitelerden gelen istekleri reddet (CSRF): kaynak bilgisi varsa uygulama adresiyle aynı olmalı.
         const origin = req.headers.origin;
-        if (origin && origin !== appOrigin) return json(res, 403, { error: 'İstek kaynağı reddedildi.' });
+        const fetchSite = req.headers['sec-fetch-site'];
+        if (origin ? origin !== appOrigin : fetchSite && fetchSite !== 'same-origin') {
+          return json(res, 403, { error: 'İstek kaynağı reddedildi.' });
+        }
+        if (!origin && !fetchSite) return json(res, 403, { error: 'İstek kaynağı belirtilmemiş.' });
         if (!String(req.headers['content-type'] || '').startsWith('application/json')) return json(res, 415, { error: 'JSON bekleniyor.' });
         const body = await readJson(req);
         if (body.action === 'flush') {
@@ -234,9 +298,13 @@ ${link ? `<p><a href="${escapeHtml(link.href)}" style="color:#2c6549;font-weight
         return json(res, 200, result);
       } catch (err) {
         if (err.status) return json(res, err.status, { error: err.message });
-        const message = String(err.message || 'Beklenmeyen hata');
+        // Servisin kendi iş kuralı hataları (Error) kullanıcıya gösterilir; beklenmeyenler (TypeError, şema hatası…) gösterilmez.
+        if (!(err instanceof Error) || err.constructor !== Error) {
+          log(`API hatası: ${err?.stack || err}`);
+          return json(res, 400, { error: 'İstek işlenemedi.' });
+        }
+        const message = err.message;
         const status = message.includes('Kayıt değişti') ? 409 : /erişimin yok|yalnızca|Görüntüleme rolünde/.test(message) ? 403 : 400;
-        if (status === 400 && !(err instanceof Error && err.constructor === Error)) log(`API hatası: ${err.stack || message}`);
         return json(res, status, { error: message });
       }
     }
