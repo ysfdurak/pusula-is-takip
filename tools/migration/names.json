@@ -1,0 +1,516 @@
+{
+ "top": {
+  "pn": "longText",
+  "mn": "idString",
+  "hn": "utcTimestamp",
+  "gn": "taskSchema",
+  "_n": "templateSchema",
+  "vn": "workspaceStateSchema",
+  "yn": "EMPTY_STATE",
+  "bn": "normalizeState",
+  "xn": "validateStructure",
+  "Sn": "taskFromTemplate",
+  "Cn": "validateSchedule",
+  "wn": "WAITING_REASON_LABELS",
+  "Tn": "taskTeamIds",
+  "En": "teamName",
+  "Dn": "canAccessTask",
+  "On": "visibleStateFor",
+  "kn": "assertPermittedChanges",
+  "An": "validateMembership",
+  "jn": "poolTasks",
+  "Mn": "FIELD_LABELS",
+  "Nn": "stampTaskMetadata",
+  "Pn": "DEFAULT_NOTIFY_POLICY",
+  "Fn": "DEMO_USERS",
+  "In": "DEMO_STORAGE_KEY",
+  "Ln": "newDemoId",
+  "Rn": "demoCache",
+  "zn": "createDemoData",
+  "Bn": "loadDemoData",
+  "Vn": "persistDemoData",
+  "K": "demoMembership",
+  "Hn": "setDemoActor",
+  "Un": "resetDemoData",
+  "Wn": "createDemoConflict",
+  "Gn": "demoGet",
+  "Kn": "demoPost",
+  "Jn": "TeamHub",
+  "Yn": "TeamEditor",
+  "Xn": "TaskRouting",
+  "Zn": "FocusQueue",
+  "Qn": "WeekPlan",
+  "$n": "NotificationGroups",
+  "CEr": "CardAssigneeControl",
+  "tr": "isOpenTask",
+  "nr": "dueTimestamp",
+  "rr": "taskObstacles",
+  "ir": "projectSummaries",
+  "ar": "DEFAULT_FOCUS_SETTINGS",
+  "or": "filterFocusTasks",
+  "sr": "EMPTY_QUICK_DRAFT",
+  "cr": "istanbulDay",
+  "lr": "endOfDayInDays",
+  "ur": "buildQuickTask",
+  "dr": "completionIssues",
+  "CFr": "QuickCreate",
+  "CPr": "GlobalSearch",
+  "CMr": "DateShortcuts",
+  "hr": "STATUS_LABELS",
+  "CGr": "TaskBoard",
+  "_r": "PROJECT_HEALTH_LABELS",
+  "CVr": "ProjectPortfolio",
+  "yr": "toLocalDateTimeInput",
+  "br": "fromLocalDateTimeInput",
+  "CXr": "ConflictDialog",
+  "Sr": "sameJson",
+  "Cr": "SYSTEM_FIELDS",
+  "wr": "buildConflictReport",
+  "Tr": "applyConflictChoices",
+  "Er": "HISTORY_VALUE_LABELS",
+  "Dr": "RevisionHistory",
+  "Or": "DASHBOARD_STATUS_LABELS",
+  "CKr": "DashboardInsights",
+  "Ar": "istanbulDayKey",
+  "jr": "isActiveTask",
+  "Mr": "dueTime",
+  "Nr": "buildDashboardStats",
+  "Pr": "TASK_STATUS_LABELS",
+  "Fr": "PRIORITY_LABELS",
+  "Ir": "ROLE_LABELS",
+  "Lr": "NAV_ITEMS",
+  "Rr": "newId",
+  "zr": "todayKey",
+  "Br": "toDateTimeInput",
+  "Vr": "fromDateTimeInput",
+  "Hr": "formatDateTime",
+  "Ur": "formatDate",
+  "Wr": "formatDuration",
+  "Gr": "initials",
+  "Kr": "Avatar",
+  "qr": "trapFocus",
+  "Jr": "PeoplePicker",
+  "Yr": "App"
+ },
+ "locals": {
+  "App": {
+   "t": "workspace",
+   "r": "workspaces",
+   "a": "workspaceId",
+   "s": "members",
+   "l": "role",
+   "d": "user",
+   "p": "revision",
+   "h": "timeEntries",
+   "_": "notifications",
+   "y": "notifyPolicy",
+   "x": "mailConfigured",
+   "C": "teamScope",
+   "ne": "focusView",
+   "pe": "groupNotifications",
+   "O": "page",
+   "ze": "taskFilter",
+   "Be": "searchQuery",
+   "Ve": "filtersOpen",
+   "Ue": "statusFilter",
+   "Ge": "assigneeFilter",
+   "Ke": "projectFilter",
+   "qe": "taskView",
+   "Ye": "showTrackedTime",
+   "Ze": "moreToolsOpen",
+   "P": "notificationScope",
+   "et": "loading",
+   "I": "refreshing",
+   "L": "busy",
+   "rt": "authRequired",
+   "at": "error",
+   "ot": "toast",
+   "B": "modal",
+   "st": "openTaskId",
+   "lt": "comments",
+   "dt": "activities",
+   "pt": "detailsLoading",
+   "ht": "commentDraft",
+   "_t": "detailTab",
+   "yt": "now",
+   "xt": "dashboardProject",
+   "Ct": "reportDays",
+   "Tt": "metricFilter",
+   "Dt": "dueDayFilter",
+   "kt": "bulkMode",
+   "jt": "bulkSelection",
+   "Nt": "focusSettings",
+   "Ft": "loadedViewKey",
+   "Lt": "remoteChanged",
+   "zt": "offline",
+   "Vt": "lastSync",
+   "Ut": "conflict",
+   "Gt": "conflictSaving",
+   "qt": "conflictError",
+   "Yt": "conflictResolver",
+   "Xt": "syncGuard",
+   "Zt": "quickDrafts",
+   "Qt": "detailsRequestSeq",
+   "$t": "commentRequestId",
+   "en": "deepLinkHandled",
+   "tn": "returnFocusRef",
+   "H": "canWrite",
+   "nn": "activeMembers",
+   "rn": "assignableMembers",
+   "U": "selectedTask",
+   "an": "currentMember",
+   "W": "memberName",
+   "G": "projectName",
+   "on": "isOpen",
+   "sn": "isLate",
+   "cn": "isDueToday",
+   "ln": "trackedSeconds",
+   "un": "visibleTeams",
+   "dn": "myTeams",
+   "fn": "inTeamScope",
+   "pn": "assigneesForTask",
+   "mn": "dashboardStats",
+   "hn": "personalStats",
+   "_n": "showTaskList",
+   "vn": "toggleChecklistItem",
+   "bn": "createFromTemplate",
+   "xn": "saveAsTemplate",
+   "Dn": "switchDemoUser",
+   "On": "myNotifications",
+   "kn": "unreadCount",
+   "An": "fetchWorkspace",
+   "Mn": "applySnapshot",
+   "Nn": "refresh",
+   "In": "postAction",
+   "Ln": "saveState",
+   "Rn": "cancelConflict",
+   "zn": "confirmConflict",
+   "Bn": "loadTaskDetails",
+   "Vn": "openTaskDetails",
+   "K": "openModal",
+   "qn": "startDemoConflict",
+   "tr": "closeModal",
+   "nr": "showFilteredTasks",
+   "ir": "navigate",
+   "lr": "withDueDate",
+   "hr": "isScheduleValid",
+   "_r": "changeAssignees",
+   "yr": "toggleWatch",
+   "Sr": "createQuickTask",
+   "Cr": "requestStatusChange",
+   "Er": "recordTime",
+   "Or": "submitComment",
+   "Ar": "submitModal",
+   "jr": "savePreference",
+   "Gr": "savePolicy",
+   "Yr": "exportRecords",
+   "Xr": "scopedTasks",
+   "Zr": "taskSummary",
+   "Qr": "listedTasks",
+   "$r": "filtersActive",
+   "ei": "focusPool",
+   "ti": "focusTasks",
+   "ni": "focusFilters",
+   "ri": "focusItems",
+   "ii": "inputField",
+   "ai": "textareaField",
+   "oi": "statusSelect",
+   "si": "avatarStack"
+  },
+  "demoPost": {
+   "e": [
+    "request",
+    "eachTask"
+   ],
+   "t": "db",
+   "n": [
+    "now",
+    "spaceId",
+    "existingMember",
+    "task"
+   ],
+   "r": [
+    "actor",
+    "memberRecord",
+    "previous",
+    "entry"
+   ],
+   "i": [
+    "membership",
+    "notification",
+    "editors",
+    "task",
+    "blocker",
+    "entry"
+   ],
+   "a": "current",
+   "o": [
+    "notify",
+    "previousBlocker"
+   ],
+   "s": [
+    "merged",
+    "targetTask"
+   ],
+   "c": [
+    "membershipError",
+    "previousTask"
+   ],
+   "u": [
+    "error",
+    "stamped"
+   ],
+   "d": "addedAssignees",
+   "l": "reason"
+  },
+  "demoGet": {
+   "e": "workspaceId",
+   "t": "taskId",
+   "r": "spaces",
+   "i": "membership",
+   "a": "visible"
+  },
+  "validateStructure": {
+   "e": [
+    "state",
+    "workType"
+   ],
+   "t": [
+    "teamIds",
+    "team",
+    "record",
+    "task",
+    "task",
+    "blocker"
+   ],
+   "n": [
+    "workTypes",
+    "item",
+    "visited"
+   ],
+   "r": [
+    "projectIds",
+    "reaches"
+   ],
+   "i": "taskById"
+  },
+  "taskFromTemplate": {
+   "e": "template",
+   "t": "id",
+   "n": "createId",
+   "r": "memberEmails",
+   "i": "allowed"
+  },
+  "validateSchedule": {
+   "e": "next",
+   "t": "current",
+   "n": "task",
+   "r": "previous",
+   "i": "due",
+   "a": "start",
+   "o": "dayOf",
+   "s": "durationDays"
+  },
+  "assertPermittedChanges": {
+   "e": "current",
+   "t": [
+    "proposed",
+    "collection",
+    "task"
+   ],
+   "n": "actor",
+   "r": [
+    "role",
+    "teamId"
+   ],
+   "i": [
+    "currentTeam",
+    "merged"
+   ],
+   "a": [
+    "proposedTeam",
+    "visible",
+    "previous"
+   ],
+   "o": "visibleIds",
+   "s": "hidden"
+  },
+  "validateMembership": {
+   "e": [
+    "next",
+    "previousTeam",
+    "previousTask"
+   ],
+   "t": "current",
+   "n": [
+    "members",
+    "team",
+    "task"
+   ],
+   "r": "activeEmails",
+   "i": "editorEmails"
+  },
+  "stampTaskMetadata": {
+   "e": [
+    "task",
+    "previousStep"
+   ],
+   "t": "previous",
+   "n": "actor",
+   "r": [
+    "now",
+    "step"
+   ],
+   "i": "timestamp",
+   "a": "changes",
+   "o": "dueChanged"
+  },
+  "setDemoActor": {
+   "e": "email"
+  },
+  "demoMembership": {
+   "n": "membership"
+  },
+  "createDemoConflict": {
+   "t": "snapshot",
+   "n": "target",
+   "r": "actor",
+   "i": "otherEditor"
+  },
+  "loadDemoData": {
+   "e": "stored"
+  }
+ },
+ "modules": [
+  [
+   "shared/workspaceModel.js",
+   "pn",
+   "Pn"
+  ],
+  [
+   "demo/demoServer.js",
+   "Fn",
+   "Kn"
+  ],
+  [
+   "components/TeamHub.jsx",
+   "Jn",
+   "Jn"
+  ],
+  [
+   "components/TeamEditor.jsx",
+   "Yn",
+   "Yn"
+  ],
+  [
+   "components/TaskRouting.jsx",
+   "Xn",
+   "Xn"
+  ],
+  [
+   "components/FocusQueue.jsx",
+   "Zn",
+   "Zn"
+  ],
+  [
+   "components/WeekPlan.jsx",
+   "Qn",
+   "Qn"
+  ],
+  [
+   "components/NotificationGroups.jsx",
+   "$n",
+   "$n"
+  ],
+  [
+   "components/CardAssigneeControl.jsx",
+   "CEr",
+   "CEr"
+  ],
+  [
+   "lib/taskViews.js",
+   "tr",
+   "dr"
+  ],
+  [
+   "components/QuickCreate.jsx",
+   "CFr",
+   "CFr"
+  ],
+  [
+   "components/GlobalSearch.jsx",
+   "CPr",
+   "CPr"
+  ],
+  [
+   "components/DateShortcuts.jsx",
+   "CMr",
+   "CMr"
+  ],
+  [
+   "components/TaskBoard.jsx",
+   "hr",
+   "CGr"
+  ],
+  [
+   "components/ProjectPortfolio.jsx",
+   "_r",
+   "CVr"
+  ],
+  [
+   "components/ConflictDialog.jsx",
+   "yr",
+   "CXr"
+  ],
+  [
+   "lib/conflicts.js",
+   "Sr",
+   "Tr"
+  ],
+  [
+   "components/RevisionHistory.jsx",
+   "Er",
+   "Dr"
+  ],
+  [
+   "components/DashboardInsights.jsx",
+   "Or",
+   "CKr"
+  ],
+  [
+   "lib/dashboardStats.js",
+   "Ar",
+   "Nr"
+  ],
+  [
+   "lib/labels.js",
+   "Pr",
+   "Lr"
+  ],
+  [
+   "lib/format.js",
+   "Rr",
+   "Gr"
+  ],
+  [
+   "components/Avatar.jsx",
+   "Kr",
+   "Kr"
+  ],
+  [
+   "lib/focusTrap.js",
+   "qr",
+   "qr"
+  ],
+  [
+   "components/PeoplePicker.jsx",
+   "Jr",
+   "Jr"
+  ],
+  [
+   "App.jsx",
+   "Yr",
+   "Yr"
+  ]
+ ]
+}

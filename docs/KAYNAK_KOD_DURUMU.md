@@ -1,31 +1,43 @@
 # Kaynak kodun durumu
 
-Bu depodaki orijinal yayın yalnızca tek bir derlenmiş HTML dosyasıydı. Özgün React JSX/TSX, bileşen klasörleri ve Vite yapılandırması mevcut değildi.
+## Kısa özet
 
-## Geri kazanılan parçalar
+Pusula'nın ilk sürümü yalnızca derlenmiş, tek dosyalık bir paket olarak vardı (430 KB küçültülmüş JavaScript); özgün React kaynağı yoktu. Kasım 2026'da bu paketten okunabilir bir React kaynağı üretildi. Yeni kaynağın eski paketle aynı davrandığı otomatik testle doğrulandı ve derlenmiş paket depodan kaldırıldı. Eski paket `62d3884` commit'inde durur.
 
-- `src/index.template.html`: özgün HTML kabuğu, iki yer tutucu ile
-- `src/styles.css`: özgün HTML içindeki CSS
-- `src/app.bundle.js`: özgün HTML içindeki **derlenmiş/minify edilmiş** React JavaScript'i
-- `scripts/build.mjs`: bu parçaları tekrar tek bir `index.html` dosyasında birleştirir
+Aynı dönemde ayrıca yazılmış `modern/` prototipi farklı bir veri modeli kullanıyordu ve özelliklerin küçük bir kısmını karşılıyordu. Yerini tam kaynak aldığı için o da kaldırıldı; geçmişte durur.
 
-**Önemli:** Bu, özgün React kaynak kodunu geri getirmez. `src/app.bundle.js` kaynak JSX/TSX değil, derlenmiş pakettir. Bileşen bazında güvenli geliştirme için React uygulamasının yeniden modülerleştirilmesi gerekir. Mevcut paket yalnızca davranışı koruyan ve tekrar üretilebilir bir ara aşamadır.
+## Nasıl üretildi
 
-## Derleme
+1. **Ayırma:** Paketin ilk 255 KB'ı kütüphanelerdi. React 19.2.6, zod 3 ve 40 lucide ikonu belirlenip npm paketleriyle değiştirildi. İkonların çizimleri lucide-react 1.70.0 ile birebir eşleşiyor.
+2. **JSX'e dönüştürme:** `jsx()` çağrıları JSX'e çevrildi.
+3. **Okunabilirlik:** Toplam 1.005 isim verildi. Bunlardan 91 üst düzey, 122 App içi ve 62 iş kuralı ismi elle yazıldı. Ayrıca props'lar, `useState` setter'ları, geri çağrı parametreleri, döngü değişkenleri ve çağrı yerlerinden çıkarılan parametre adları otomatik adlandırıldı. Küçültücünün `a && (b(), c())` biçimli ifadeleri `if` bloklarına çevrildi. Her yeniden adlandırma, başka bir değişkeni gölgeleyip gölgelemediği denetlenerek yapıldı.
+4. **Modüller:** Kod 27 modüle bölündü ve import/export satırları otomatik üretildi; döngüsel bağımlılık yok.
+5. **Bilinçli değişiklikler (yalnızca sunucu modunu etkiler):** Demo/pilot modu artık derleme modundan geliyor. Giriş düğmesi de "ChatGPT ile devam et" yerine şirket hesabıyla girişe (`/auth/login`) gidiyor.
 
-Node.js 20.11+ kurulu olmalıdır. Dış paket kurulumu gerekmiyor.
+Araçlar ve yeniden çalıştırma: [tools/migration/README.md](../tools/migration/README.md)
 
-```bash
-npm run build
-npm run check
-```
+## Eşitlik nasıl doğrulandı
 
-Ardından `index.html` dosyasını tarayıcıda açın. GitHub Pages aynı dosyayı yayınlar.
+Eski paket ile yeni kaynaktan alınan derleme aynı koşullarda açıldı: saat sabitlendi, rastgele sayılar aynı tohumdan üretildi. Ardından iki sürümde de aynı rastgele adımlar uygulandı: düğmeye tıklama, seçim yapma, metin ve tarih yazma, ara sıra sayfayı yenileme. Her adımda iki şey birebir karşılaştırıldı:
 
-## Pilot derlemesi
+- uygulamanın ürettiği HTML'in tamamı (`#root`);
+- tarayıcıda saklanan verinin tamamı (`localStorage`).
 
-`npm run build:pilot`, paketteki kök bileşeni `demo:!1` ile başlatır, giriş bağlantısını `/auth/login` adresine çevirir ve CSP'yi `connect-src 'self'` yapar. Çıktı `pilot/index.html` dosyasıdır ve depoya eklenmez. Paket değişirse betik açık bir hatayla durur.
+Eşitlenen tek ayrıntı, ikon `class` adları. Bunlar CSS'te kullanılmıyor, ikon çizimleri ise ayrıca birebir karşılaştırılıyor.
+
+| Mod | Kapsam | Sonuç |
+|---|---|---|
+| Tasarım demosu | 40 rastgele yürüyüş × 60 adım; masaüstü (1440 px) ve telefon (390 px) genişliği; 2.440 durum | Fark yok |
+| Sunucu (pilot) modu | 12 yürüyüş × 40 adım; her sürüm kendi test API'sine (`/api/workspace`) bağlı; 492 durum | Fark yok |
+
+Test sırasında görülen bütün farklar test aracının zamanlamasından kaynaklandı ve araç düzeltildikten sonra kayboldu. Örneğin işlem bitmeden alınan anlık görüntü ya da durdurulmuş sahte saatte geç kurulan bir zamanlayıcı bu tür farklara yol açıyordu. Aynı tohumla yeniden çalıştırıldığında hiçbiri tekrarlanmadı.
+
+## Neler hâlâ iyileştirilebilir
+
+- `src/App.jsx` yaklaşık 4.900 satır. Ekranlara bölünmesi (Benim panom, İş listesi, İş ayrıntısı, Ayarlar) bakım için bir sonraki adım; bu davranışı değiştirmeyen bir yeniden düzenleme.
+- Bazı kısa geri çağrı parametreleri (`e`, `t`) duruyor; dosyalar düzenlendikçe adlandırılabilir.
+- Birim testleri iş kurallarını kapsıyor; arayüz için yalnızca duman testi var.
 
 ## Geliştirme kuralı
 
-`index.html` doğrudan düzenlenmez. CSS değişiklikleri `src/styles.css` içinde yapılabilir. JavaScript dosyası derlenmiş olduğu için üzerinde değişiklik yapmak kırılgan ve risklidir; React kaynaklarını yeniden oluşturma işi ayrı bir geliştirme aşamasıdır.
+Değişiklikler doğrudan `src/` içinde yapılır. Her gönderimde birim testleri, derleme ve tarayıcı duman testi çalışır.

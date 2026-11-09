@@ -2,7 +2,7 @@
 
 Pusula, operasyon ekiplerinin işlerini, sorumlularını, terminlerini ve işi durduran engelleri tek ekranda izlemesi için tasarlanmış Türkçe bir iş takip uygulamasıdır. Depo, sevkiyat ve stok kontrol gibi vardiyalı ekipler düşünülerek hazırlandı.
 
-**Canlı demo:** https://ysfdurak.github.io/pusula-is-takip/ · **React prototipi:** https://ysfdurak.github.io/pusula-is-takip/modern/
+**Canlı demo:** https://ysfdurak.github.io/pusula-is-takip/
 
 > Tasarım demosudur. Veriler sentetiktir ve yalnızca sizin tarayıcınızda saklanır. Gerçek şirket verisi girmeyin.
 
@@ -44,33 +44,35 @@ Operasyon ekiplerinde işler WhatsApp, e-posta ve Excel arasında dağılır. Ki
 
 Ayrıntılı senaryolar: [docs/DEMO_SENARYOLARI.md](docs/DEMO_SENARYOLARI.md)
 
-## Depodaki iki sürüm
+## Kaynak kod ve geliştirme
 
-| | Tasarım demosu (kök `index.html`) | Modüler React prototipi (`modern/`) |
-|---|---|---|
-| Durum | Tam özellikli arayüz, ana demo | Yeniden yazım, temel akışlar |
-| Kaynak | Derlenmiş paket (`src/app.bundle.js`) + düzenlenebilir CSS | Okunabilir JSX ve iş kuralları, birim testli |
-| Yayın | `/` | `/modern/` |
-
-Derlenmiş paketin özgün React kaynağı mevcut değildir; ayrıntı [docs/KAYNAK_KOD_DURUMU.md](docs/KAYNAK_KOD_DURUMU.md).
-
-## Çalıştırma ve geliştirme
+Uygulama React 19 + Vite ile yazılmıştır; derleme tek bir HTML dosyası üretir ve internetsiz açılabilir.
 
 ```bash
-# Tasarım demosu: index.html dosyasını tarayıcıda açmanız yeterli.
-npm run build          # src/ → index.html
-npm run check          # index.html kaynakla uyumlu mu?
-npm run build:pilot    # sunucu moduna alınmış arayüz → pilot/index.html
-
-# React prototipi
-cd modern && npm install && npm test && npm run dev
+npm install
+npm run dev            # geliştirme sunucusu
+npm test               # iş kuralı birim testleri
+npm run build          # dist/index.html  → tasarım demosu
+npm run build:pilot    # dist-pilot/index.html → sunucu modu (/api/workspace)
+npm run dev:api        # pilot derlemesini yerelde örnek API ile çalıştırır (yalnızca geliştirme)
 ```
 
-`main` dalına her gönderimde GitHub Actions statik kontrolleri, birim testlerini, derlemeyi ve tarayıcı duman testini (`tests/e2e/smoke.mjs`) çalıştırır; hepsi geçerse GitHub Pages güncellenir.
+| Klasör | İçerik |
+|---|---|
+| `src/App.jsx` | Uygulama kabuğu: gezinme, panolar, iş ayrıntısı, formlar |
+| `src/components/` | Statü panosu, hızlı iş ekleme, genel arama, ekipler, proje portföyü, çakışma penceresi vb. (17 bileşen) |
+| `src/shared/workspaceModel.js` | Veri şeması (zod) ve iş kuralları: görünürlük, yetki, termin, revizyon |
+| `src/demo/demoServer.js` | Tarayıcı içi örnek sunucu; `/api/workspace` sözleşmesinin başvuru uygulaması |
+| `src/lib/` | Pano istatistikleri, çakışma raporu, tarih biçimleri, etiketler |
+| `tests/` | Birim testleri ve tarayıcı duman testi |
+
+İlk sürüm yalnızca derlenmiş bir paket olarak vardı. Bugünkü kaynak o paketten üretildi ve iki sürümün aynı davrandığı otomatik testle doğrulandı. Ayrıntı: [docs/KAYNAK_KOD_DURUMU.md](docs/KAYNAK_KOD_DURUMU.md).
+
+`main` dalına her gönderimde GitHub Actions birim testlerini, derlemeyi ve tarayıcı duman testini çalıştırır; hepsi geçerse GitHub Pages güncellenir.
 
 ## Şirket içi pilot
 
-Arayüz bir sunucuyla çalışmaya hazırdır (`/api/workspace`, oturum ve çakışma ekranları paketin içinde), ancak sunucu, giriş ve veritabanı bu depoda yoktur. Birkaç kullanıcıyla deneme için gerekenler: [docs/PILOT_IHTIYACLARI.md](docs/PILOT_IHTIYACLARI.md)
+Arayüz bir sunucuyla çalışmaya hazırdır (`/api/workspace`, oturum ve çakışma ekranları uygulamada var) ve sunucunun uygulaması gereken kurallar `src/shared/` ile `src/demo/` altında okunabilir durumda. Gerçek sunucu, şirket hesabıyla giriş ve veritabanı ise henüz yok. Birkaç kullanıcıyla deneme için gerekenler: [docs/PILOT_IHTIYACLARI.md](docs/PILOT_IHTIYACLARI.md)
 
 ## Belgeler
 
@@ -79,7 +81,6 @@ Arayüz bir sunucuyla çalışmaya hazırdır (`/api/workspace`, oturum ve çak�
 - [Pilot ihtiyaçları](docs/PILOT_IHTIYACLARI.md)
 - [Kaynak kodun durumu](docs/KAYNAK_KOD_DURUMU.md)
 - [Yayın kontrol listesi](docs/YAYIN_KONTROL.md)
-- [React prototipi](modern/README.md)
 
 ## Portföy notu
 

@@ -7,5 +7,5 @@ node_modules/
 *.log
 __pycache__/
 _site/
-modern/dist/
-pilot/
+dist/
+dist-pilot/

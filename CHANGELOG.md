@@ -1,5 +1,12 @@
 # Değişiklik geçmişi
 
+## 0.4.0 — 2026-11-09
+- **Kaynak koda geçiş:** Uygulama artık okunabilir React kaynağından (`src/`, 27 modül) derleniyor. Derlenmiş paket (`src/app.bundle.js`) ve ayrı `modern/` prototipi kaldırıldı. Tüm özellikler, veri yapısı ve tasarım aynı; eşitlik otomatik testle doğrulandı (`docs/KAYNAK_KOD_DURUMU.md`).
+- **Derleme:** Vite 7; tek dosyalı çıktı korunuyor (`dist/index.html`). Pilot derlemesi `dist-pilot/index.html`.
+- **Test:** İş kuralları ve örnek sunucu için birim testleri; tarayıcı duman testine iş ayrıntısı ve görüntüleyici rolü eklendi.
+- **Pilot:** `npm run dev:api` ile pilot derlemesi yerelde örnek API'yle denenebiliyor (yalnızca geliştirme).
+- **Yayın:** GitHub Pages yalnızca ana uygulamayı yayınlıyor; `/modern/` adresi kaldırıldı.
+
 ## 0.3.0 — 2026-11-09
 - **Yayın:** Tek Pages akışı; tasarım demosu `/`, React prototipi `/modern/` adresinde. Önceki akış React prototipini sitenin köküne yayınlayarak tasarım demosunun yerini alıyordu.
 - **Test:** Tarayıcı duman testi (açılış, hızlı iş ekleme, yenilemede kalıcılık, ana ekranlar, telefon görünümü, React prototipi). Yayın bu test geçmeden yapılmaz.
