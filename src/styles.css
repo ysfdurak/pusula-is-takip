@@ -3,3 +3,14 @@
 /* Sunucu modunda oturumu kapat bağlantısı */
 .account-logout{margin-left:auto;display:grid;place-items:center;width:30px;height:30px;border-radius:8px;color:#d9e6c8}
 .account-logout:hover,.account-logout:focus-visible{background:rgba(255,255,255,.12);color:#fff}
+
+/* Kanban kartı: ikincil işlemler "Diğer" menüsünde */
+.card-more{margin-top:6px}
+.card-more>summary{list-style:none;cursor:pointer;display:inline-flex;align-items:center;gap:4px;padding:4px 8px;border-radius:6px;color:#4c6052;font-size:12px;font-weight:600}
+.card-more>summary::-webkit-details-marker{display:none}
+.card-more>summary:hover,.card-more>summary:focus-visible{background:#eef2e8}
+.card-more[open]>div{display:grid;gap:6px;margin-top:6px;padding:8px;border:1px solid #e3e8dd;border-radius:8px;background:#fafbf8}
+.card-more .card-status-menu{width:100%}
+.card-more .text-button{justify-self:start}
+.select-all-assignees{margin:-4px 0 8px}
+.form-due{display:block}

@@ -180,7 +180,7 @@ export function TaskDrawer() {
               >
                 {selectedTask.waitingReason
                   ? WAITING_REASON_LABELS[selectedTask.waitingReason]
-                  : 'Bekleme bildir'}
+                  : 'Engel / bekleme bildir'}
               </button>
               {selectedTask.waitingReason && <small>{selectedTask.waitingNote}</small>}
             </div>

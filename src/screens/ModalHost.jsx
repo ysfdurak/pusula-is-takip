@@ -88,7 +88,7 @@ export function ModalHost() {
                   : modal.type === 'group'
                     ? 'Ekip tanımı'
                     : modal.type === 'waiting'
-                      ? 'Bekleme nedeni'
+                      ? 'Engel veya bekleme bildir'
                       : modal.type === 'search'
                         ? 'Bul ve devam et'
                         : modal.type === 'complete'
@@ -161,24 +161,33 @@ export function ModalHost() {
               <>
                 <p className="form-intro">
                   {modal.item.title}
-                  {' · Ana statü değişmez; bekleme bilgisi ayrıca izlenir.'}
+                  {' · İşin statüsü değişmez; durum kartta ve ekip panosunda görünür.'}
                 </p>
                 <label className="form-label">
-                  Neden
+                  Ne oluyor?
                   <select
-                    aria-label="Bekleme nedeni"
+                    aria-label="Engel veya bekleme nedeni"
                     value={modal.item.waitingReason}
                     onChange={(event) =>
-                      setModal({
-                        ...modal,
-                        item: {
-                          ...modal.item,
-                          waitingReason: event.target.value,
-                        },
-                      })
+                      event.target.value === '__blocker'
+                        ? openModal('blocker', {
+                            project: modal.item.project,
+                            task: modal.item.id,
+                            owner: memberName(user),
+                            title: '',
+                            resolved: false,
+                          })
+                        : setModal({
+                            ...modal,
+                            item: {
+                              ...modal.item,
+                              waitingReason: event.target.value,
+                            },
+                          })
                     }
                   >
-                    <option value="">Beklemiyor / bekleme bitti</option>
+                    <option value="">Bir şey beklenmiyor / bekleme bitti</option>
+                    <option value="__blocker">Engel var: çözmesi için birinin bir şey yapması gerekiyor →</option>
                     {Object.entries(WAITING_REASON_LABELS).map(([key, value]) => (
                       <option value={key} key={key}>
                         {value}
@@ -741,28 +750,7 @@ export function ModalHost() {
                     }
                   >
                     <UsersIcon size={16} />
-                    {' Seçili kişilere'}
-                  </button>
-                  <button
-                    type="button"
-                    className={
-                      modal.item.kind === 'shared' && modal.item.assignees.length === assignableMembers.length
-                        ? 'active'
-                        : ''
-                    }
-                    onClick={() =>
-                      setModal({
-                        ...modal,
-                        item: {
-                          ...modal.item,
-                          kind: 'shared',
-                          assignees: assigneesForTask(modal.item).map((e) => e.email),
-                        },
-                      })
-                    }
-                  >
-                    <UsersIcon size={16} />
-                    {' Seçili ekiplerin tamamına'}
+                    {' Birden fazla kişiye'}
                   </button>
                   <button
                     type="button"
@@ -798,30 +786,26 @@ export function ModalHost() {
                   }
                   single={modal.item.kind === 'individual'}
                 />
+                {modal.item.kind === 'shared' && assigneesForTask(modal.item).length > 1 && (
+                  <button
+                    type="button"
+                    className="text-button select-all-assignees"
+                    onClick={() =>
+                      setModal({
+                        ...modal,
+                        item: { ...modal.item, assignees: assigneesForTask(modal.item).map((e) => e.email) },
+                      })
+                    }
+                  >
+                    Seçili ekiplerin tamamını ekle
+                  </button>
+                )}
                 {assignableMembers.length < 2 && role === 'owner' && (
                   <p className="form-footnote">
                     Yeni kişiler eklemek için Ekip ekranındaki “Üye ekle” düğmesini kullan.
                   </p>
                 )}
-                <div className="form-two">
-                  <label className="form-label">
-                    Başlangıç
-                    <input
-                      type="datetime-local"
-                      name="plannedStart"
-                      value={toDateTimeInput(modal.item.plannedStart)}
-                      onChange={(event) =>
-                        setModal({
-                          ...modal,
-                          item: {
-                            ...modal.item,
-                            plannedStart: fromDateTimeInput(event.target.value),
-                          },
-                        })
-                      }
-                    />
-                    <small>Yeni işte bugün otomatik doldurulur.</small>
-                  </label>
+                <div className="form-due">
                   <label className="form-label">
                     {'Termin '}
                     <span className="optional">
@@ -862,9 +846,19 @@ export function ModalHost() {
                     })
                   }
                 />
-                {textareaField('İş tarifi (isteğe bağlı)', 'description', modal.item.description)}
-                {workspace.tasks.some((task) => task.id === modal.item.id) &&
-                  textareaField('Revizyon gerekçesi (termin değişiyorsa zorunlu)', 'reason', '')}
+                {(() => {
+                  const saved = workspace.tasks.find((task) => task.id === modal.item.id);
+                  const dueChanged = saved && (saved.dueAt || '') !== (modal.item.dueAt || '');
+                  return dueChanged ? textareaField('Termin neden değişiyor? (zorunlu)', 'reason', '') : null;
+                })()}
+                <details className="form-details" open={!!modal.item.description}>
+                  <summary>
+                    {'İş tarifi '}
+                    <span>isteğe bağlı</span>
+                    <ChevronDownIcon size={14} />
+                  </summary>
+                  {textareaField('Nasıl yapılacak, neye dikkat edilecek?', 'description', modal.item.description)}
+                </details>
                 <details className="form-details">
                   <summary>
                     {'Kontrol listesi ekle '}
@@ -891,9 +885,28 @@ export function ModalHost() {
                 <details className="form-details">
                   <summary>
                     {'Diğer seçenekler '}
-                    <span>Süre, öncelik, proje ve takipçiler</span>
+                    <span>Başlangıç, öncelik, proje, süre ve takipçiler</span>
                     <ChevronDownIcon size={14} />
                   </summary>
+                  <label className="form-label">
+                    Başlangıç
+                    <input
+                      type="datetime-local"
+                      name="plannedStart"
+                      value={toDateTimeInput(modal.item.plannedStart)}
+                      onChange={(event) =>
+                        setModal({
+                          ...modal,
+                          item: {
+                            ...modal.item,
+                            plannedStart: fromDateTimeInput(event.target.value),
+                          },
+                        })
+                      }
+                    />
+                    <small>Yeni işte bugün otomatik doldurulur.</small>
+                  </label>
+
                   <div className="form-two">
                     <label className="form-label">
                       Öncelik
