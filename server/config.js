@@ -62,6 +62,8 @@ export function loadConfig(env = process.env) {
     backupKeep: Number(env.BACKUP_KEEP || 14),
     sessionHours: Number(env.SESSION_HOURS || 10),
     sessionIdleMinutes: Number(env.SESSION_IDLE_MINUTES || 120),
+    // Sabah özeti saati (Türkiye saati, 5–11); DIGEST_HOUR=off kapatır
+    digestHour: env.DIGEST_HOUR === 'off' ? null : Math.min(Math.max(Number(env.DIGEST_HOUR) || 8, 5), 11),
     maxFileMb: Math.min(Math.max(Number(env.MAX_FILE_MB || 5), 1), 5),
     htmlFile: resolve(env.PUSULA_HTML || new URL('../dist-pilot/index.html', import.meta.url).pathname),
   };

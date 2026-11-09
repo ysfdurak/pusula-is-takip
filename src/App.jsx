@@ -1352,6 +1352,7 @@ export function App({ demo = false }) {
         id: workspaceId,
         mailEnabled: e === 'mailEnabled' ? checked : !!currentMember?.mail_enabled,
         notifySelf: e === 'notifySelf' ? checked : !!currentMember?.notify_self,
+        digest: e === 'digest' ? checked : currentMember?.digest_enabled !== 0,
       });
       await refresh();
       setToast('Tercihin kaydedildi');

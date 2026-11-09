@@ -48,6 +48,7 @@ Sunucuya iletilecekler: Dizin (kiracı) kimliği, Uygulama (istemci) kimliği ve
 | `SESSION_IDLE_MINUTES` | Hayır | Bu kadar dakika işlem yapılmayan oturum kapanır (varsayılan: 120) |
 | `MAX_FILE_MB` | Hayır | İşe eklenen dosyanın azami boyutu, MB (varsayılan ve üst sınır: 5) |
 | `MAIL_MODE`, `MAIL_SENDER`, `MAIL_ALLOWED_DOMAINS` | Hayır | E-posta için. Aynı uygulama kaydı kullanılır |
+| `DIGEST_HOUR` | Hayır | Sabah özeti saati, Türkiye saati (varsayılan 8; kapatmak için `off`). Üye kendisi Ayarlar'dan kapatabilir |
 | `DATA_DIR`, `BACKUP_KEEP` | Hayır | Docker'da `/data`; tutulacak yedek sayısı (varsayılan: 14) |
 
 Ayarlarda bir hata varsa sunucu açılmaz ve neyin eksik olduğunu Türkçe olarak yazar. `APP_URL` https değilse (localhost hariç) sunucu açılmaz. Geliştirme girişi (`AUTH_MODE=dev`) yalnızca localhost adresinde çalışır.

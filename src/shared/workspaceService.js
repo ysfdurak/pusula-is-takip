@@ -192,6 +192,9 @@ export function createWorkspaceService({
     if (request.action === 'preferences') {
       membership.mail_enabled = +!!request.mailEnabled;
       membership.notify_self = +!!request.notifySelf;
+      if (typeof request.digest === 'boolean') {
+        membership.digest_enabled = +request.digest;
+      }
       persist();
       return {
         ok: true,

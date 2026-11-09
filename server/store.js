@@ -6,7 +6,7 @@ import { createHash, randomBytes } from 'node:crypto';
 import { mkdirSync, readdirSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 
-const OBJECT_COLLECTIONS = ['members', 'states', 'revisions', 'policies'];
+const OBJECT_COLLECTIONS = ['members', 'states', 'revisions', 'policies', 'digests'];
 const ARRAY_COLLECTIONS = ['workspaces', 'notifications', 'comments', 'activities', 'times', 'files'];
 
 export function openStore(file) {

@@ -91,6 +91,20 @@ export function SettingsPage() {
               onChange={(event) => savePreference('notifySelf', event.target.checked)}
             />
           </label>
+          <label className="switch-row">
+            <span>
+              Sabah özeti
+              <small>
+                Hafta içi her sabah 08:00'de geciken, bugün ve bu hafta termini olan işlerin tek e-postada.
+              </small>
+            </span>
+            <input
+              type="checkbox"
+              checked={!!currentMember?.mail_enabled && currentMember?.digest_enabled !== 0}
+              disabled={busy || !currentMember?.mail_enabled}
+              onChange={(event) => savePreference('digest', event.target.checked)}
+            />
+          </label>
         </section>
         <section className="settings-card">
           <h2>

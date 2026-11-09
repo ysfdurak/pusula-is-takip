@@ -2,6 +2,7 @@
 import { createWorkspaceService } from '../src/shared/workspaceService.js';
 import { DEFAULT_NOTIFY_POLICY, EMPTY_STATE } from '../src/shared/workspaceModel.js';
 import { processOutbox } from './mail/outbox.js';
+import { runDigest } from './mail/digest.js';
 import { randomToken } from './auth.js';
 import { randomUUID } from 'node:crypto';
 
@@ -109,6 +110,23 @@ export function createApp({ config, store, auth, html, mailer = null, log = () =
       .catch((err) => {
         log(`E-posta kuyruğu hatası: ${err.message}`);
         return { accepted: 0, failed: 0, retry: 0 };
+      });
+    return sending;
+  }
+
+  /** Sabah özeti; aynı gün aynı kişiye ikinci kez gitmez (sunucu saatlik/5 dakikalık çağırır) */
+  function sendDigest(now = Date.now()) {
+    if (!mailer || config.digestHour === null) return Promise.resolve({ sent: 0, skipped: 0, failed: 0 });
+    sending = sending
+      .catch(() => {})
+      .then(() => runDigest({ load: store.load, persist: store.persist, mailer, appUrl: config.appUrl, hour: config.digestHour, allowedDomains: config.mailAllowedDomains, now, log }))
+      .then((r) => {
+        if (r.sent || r.failed) log(`Sabah özeti: ${r.sent} gönderildi, ${r.failed} başarısız`);
+        return r;
+      })
+      .catch((err) => {
+        log(`Sabah özeti hatası: ${err.message}`);
+        return { sent: 0, skipped: 0, failed: 0 };
       });
     return sending;
   }
@@ -327,6 +345,7 @@ ${link ? `<p><a href="${escapeHtml(link.href)}" style="color:#2c6549;font-weight
         if (!res.headersSent) json(res, 500, { error: 'Sunucu hatası.' });
       }),
     flushMail,
+    sendDigest,
     service,
   };
 }

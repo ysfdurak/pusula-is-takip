@@ -28,6 +28,7 @@ const app = createApp({ config, store, auth, html: readFileSync(config.htmlFile)
 
 const timers = [
   setInterval(() => app.flushMail(), 30_000),
+  setInterval(() => app.sendDigest(), 5 * 60_000),
   setInterval(() => store.sessions.purge(), 3600e3),
   setInterval(() => {
     try {
