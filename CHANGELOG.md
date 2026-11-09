@@ -1,5 +1,11 @@
 # Değişiklik geçmişi
 
+## 0.5.0 — 2026-11-09
+- **Outlook bildirimleri:** İş atama, durum değişikliği, tamamlama ve yorumda ilgili kişilere Jira benzeri e-posta. Microsoft Graph ile tek bir ortak posta kutusundan gönderim; RBAC for Applications ile yalnızca o kutuya sınırlı. Şirket dışı adres engeli, geçici hatalarda yeniden deneme.
+- **Bildirim kuralları:** Ayarlar'daki ekip kuralları (olay türü, "Yöneticiler de bilgilendirilsin") artık uygulanıyor; yorumlarda önceki yorumcular da bilgilendiriliyor; kişinin kendi işlemi için e-posta gitmiyor (tercihe bağlı).
+- **Geliştirme:** `npm run dev:api` e-postaları `tmp/mail-preview/` klasörüne HTML olarak yazar.
+- **Belge:** `docs/OUTLOOK_BILDIRIMLERI.md` — BT için adım adım kurulum.
+
 ## 0.4.0 — 2026-11-09
 - **Kaynak koda geçiş:** Uygulama artık okunabilir React kaynağından (`src/`, 27 modül) derleniyor. Derlenmiş paket (`src/app.bundle.js`) ve ayrı `modern/` prototipi kaldırıldı. Tüm özellikler, veri yapısı ve tasarım aynı; eşitlik otomatik testle doğrulandı (`docs/KAYNAK_KOD_DURUMU.md`).
 - **Derleme:** Vite 7; tek dosyalı çıktı korunuyor (`dist/index.html`). Pilot derlemesi `dist-pilot/index.html`.

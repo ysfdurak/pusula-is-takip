@@ -26,7 +26,7 @@ Operasyon ekiplerinde işler WhatsApp, e-posta ve Excel arasında dağılır. Ki
 | Görünümler | Statü panosu (sürükle-bırak kanban), liste, toplu işlem, arama (Ctrl/⌘ K), filtreler |
 | Kayıtlar | Projeler, engeller, kararlar, yorumlar, işlem geçmişi |
 | Ekip | Birden fazla ekip, kişi rehberi, roller (yönetici, ekip üyesi, görüntüleyici) |
-| Bildirim | Uygulama içi bildirimler, bildirim kuralları (e-posta gönderimi bağlı değil) |
+| Bildirim | Uygulama içi bildirimler ve Jira benzeri Outlook e-postaları: atama, durum, tamamlama, yorum ([kurulum](docs/OUTLOOK_BILDIRIMLERI.md)) |
 | Veri | JSON dışa aktarma, örnek verileri sıfırlama |
 
 <p>
@@ -54,7 +54,7 @@ npm run dev            # geliştirme sunucusu
 npm test               # iş kuralı birim testleri
 npm run build          # dist/index.html  → tasarım demosu
 npm run build:pilot    # dist-pilot/index.html → sunucu modu (/api/workspace)
-npm run dev:api        # pilot derlemesini yerelde örnek API ile çalıştırır (yalnızca geliştirme)
+npm run dev:api        # pilot derlemesini yerelde örnek API ile çalıştırır; e-postalar tmp/mail-preview/ (yalnızca geliştirme)
 ```
 
 | Klasör | İçerik |
@@ -64,6 +64,7 @@ npm run dev:api        # pilot derlemesini yerelde örnek API ile çalıştırı
 | `src/shared/workspaceModel.js` | Veri şeması (zod) ve iş kuralları: görünürlük, yetki, termin, revizyon |
 | `src/demo/demoServer.js` | Tarayıcı içi örnek sunucu; `/api/workspace` sözleşmesinin başvuru uygulaması |
 | `src/lib/` | Pano istatistikleri, çakışma raporu, tarih biçimleri, etiketler |
+| `server/mail/` | Outlook (Microsoft Graph) e-posta bildirimleri: gönderici, şablon, kuyruk |
 | `tests/` | Birim testleri ve tarayıcı duman testi |
 
 İlk sürüm yalnızca derlenmiş bir paket olarak vardı. Bugünkü kaynak o paketten üretildi ve iki sürümün aynı davrandığı otomatik testle doğrulandı. Ayrıntı: [docs/KAYNAK_KOD_DURUMU.md](docs/KAYNAK_KOD_DURUMU.md).
@@ -79,6 +80,7 @@ Arayüz bir sunucuyla çalışmaya hazırdır (`/api/workspace`, oturum ve çak�
 - [Demo senaryoları](docs/DEMO_SENARYOLARI.md)
 - [Mimari, API sözleşmesi ve sınırlar](docs/MIMARI_VE_SINIRLAR.md)
 - [Pilot ihtiyaçları](docs/PILOT_IHTIYACLARI.md)
+- [Outlook e-posta bildirimleri ve BT kurulumu](docs/OUTLOOK_BILDIRIMLERI.md)
 - [Kaynak kodun durumu](docs/KAYNAK_KOD_DURUMU.md)
 - [Yayın kontrol listesi](docs/YAYIN_KONTROL.md)
 

@@ -9,6 +9,7 @@ required = [
     "docs/img/benim-panom.png",
     "tests/e2e/smoke.mjs",
     "docs/KAYNAK_KOD_DURUMU.md",
+    "docs/OUTLOOK_BILDIRIMLERI.md",
     "src/shared/workspaceModel.js",
 ]
 for filename in required:

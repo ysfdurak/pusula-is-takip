@@ -11,6 +11,8 @@
 | `src/lib/` | Pano istatistikleri, çakışma raporu, biçimlendirme | |
 | `src/styles.css` | Tüm stiller | |
 | `vite.config.js` | Tek dosyalı derleme, mod ve güvenlik politikası (CSP) | `--mode pilot` sunucu modu |
+| `src/shared/notificationRules.js` | Bildirim alıcıları ve e-posta durumu | Jira benzeri kurallar |
+| `server/mail/` | Outlook göndericisi (Graph), şablon, gönderim kuyruğu | Yalnızca sunucuda çalışır; tarayıcı paketine girmez |
 | `tools/dev-api-server.mjs` | Pilot derlemesini yerelde örnek API ile çalıştırır | Yalnızca geliştirme; giriş ve yetki yok |
 | `tests/` | Birim testleri ve tarayıcı duman testi | CI'da ve yayından önce çalışır |
 
@@ -54,7 +56,7 @@ Roller: `owner` (arayüzde "Yönetici"), `editor` ("Ekip üyesi"), `viewer` ("G�
 ## Sınırlar
 
 - Tasarım demosunda veriler tek tarayıcıdadır; kullanıcılar arasında paylaşım yoktur. Rol menüsü kimlik doğrulama değildir.
-- E-posta gönderimi yoktur; yalnızca uygulama içi bildirim çalışır.
+- E-posta gönderimi sunucu modunda Outlook ile yapılır (`docs/OUTLOOK_BILDIRIMLERI.md`); tasarım demosunda yalnızca uygulama içi bildirim vardır.
 - Dosya eki, tekrarlayan iş, @bahsetme ve Excel/CSV aktarımı yoktur.
 - CSS `DM Sans` ve `Manrope` yazı tiplerini ister ama CSP font yüklemeyi kapattığı için sistem yazı tipi kullanılır.
 - Duman testi temel akışları doğrular; erişilebilirlik ve güvenlik testinin yerine geçmez.
