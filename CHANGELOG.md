@@ -1,5 +1,15 @@
 # Değişiklik geçmişi
 
+## 0.7.0 — 2026-11-09
+- **Pilot önizlemesi (`/pilot-onizleme/`):** Demodan ayrı, örnek veri olmadan boş başlayan sürüm. İlk ekranda yönetici (adın, e-postan) ve çalışma alanı adı girilir; ekipler ve kişiler yönetici tarafından kurulur. "Kullanıcı olarak dene" ile eklenen kişilerin gözünden bakılır. Veriler yalnızca o tarayıcıda, demodan ayrı tutulur; tek tıkla sıfırlanır.
+- **Tekrarlanan işler:** Her gün, hafta içi, her hafta, her ay. İş tamamlanınca sıradaki tekrar aynı sorumlularla, sıfırlanmış kontrol listesiyle ve bir sonraki terminle açılır; kaçırılan tekrarlar atlanır. Termin zorunlu.
+- **Ekler:** İşe fotoğraf, PDF, Office, metin ve CSV dosyası eklenebilir (pilotta 5 MB, tarayıcı sürümlerinde 1 MB). Büyük fotoğraflar tarayıcıda küçültülür. Dosyayı işi görebilen herkes açar; ekleyen kişi ya da yönetici siler. Pilotta SQLite'ta ayrı tabloda saklanır, yedeğe dahildir; silinen işin ekleri de silinir.
+- **Excel'e aktarma:** İş listesindeki (filtrelenmiş) işler .xlsx olarak indirilir: durum, sorumlu, ekip, termin, gecikme, revizyon sayıları, tekrar ve bekleme notu. Ek paket kullanılmadı.
+- **Sabah özeti:** Pilot sunucusu hafta içi her sabah (varsayılan 08:00, `DIGEST_HOUR`) her kişiye geciken, bugün ve bu hafta termini olan işlerini; ekip yöneticisine sorumlu bekleyen havuz işlerini tek e-postada gönderir. Kişi Ayarlar'dan kapatabilir.
+- **Sadeleştirme:** "Bekleme" ve "Engel" tek "Engel / bekleme bildir" akışında birleşti. Kanban kartından açıklama ve koordinatör satırı kaldırıldı; statü, termin ve engel seçenekleri "⋯ Diğer" menüsünde. Yeni iş formunda başlangıç tarihi ve iş tarifi açılır bölümlere alındı; termin gerekçesi yalnızca termin değişince isteniyor.
+- **Kod:** `App.jsx` ekranlara bölündü (`src/screens/`); bölme öncesi ve sonrası 656 rastgele etkileşim durumunda karşılaştırıldı, fark yok.
+- **Test:** Tekrarlanan iş, ek dosya (sunucu entegrasyonu dahil), Excel, sabah özeti birim testleri; pilot önizlemesi tarayıcı testi.
+
 ## 0.6.0 — 2026-11-09
 - **Pilot sunucusu (`server/`):** Microsoft Entra ID ile giriş (OpenID Connect + PKCE, tek kullanımlık state ve nonce, kiracı, hedef kitle ve süre kontrolü). Sunucu tarafı oturum (`HttpOnly`, `SameSite=Lax`, https'te `Secure`). SQLite (yerleşik `node:sqlite`). Açılışta ve günlük yedek. Güvenlik başlıkları, başka siteden gelen isteklerin reddi, istek boyutu sınırı. Denetim kaydı. İlk yöneticiler `PUSULA_ADMINS` ile tanımlanır.
 - **Ortak servis:** `/api/workspace` mantığı `src/shared/workspaceService.js` içinde; tarayıcı demosu ve pilot sunucusu aynı kodu kullanıyor.

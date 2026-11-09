@@ -14,6 +14,8 @@ Bu belge, Pusula'yı şirket içinde 5–50 kişilik bir pilot için kurmak iste
 
 **Kaynak ihtiyacı:** 1 vCPU, 1 GB RAM, 5 GB disk yeterlidir. Uygulama dışarıya yalnızca `login.microsoftonline.com` ve (e-posta açıksa) `graph.microsoft.com` adreslerine HTTPS ile çıkar.
 
+> **Sunucu kurmadan önce denemek için:** [Pilot önizlemesi](https://ysfdurak.github.io/pusula-is-takip/pilot-onizleme/) aynı arayüzü boş bir çalışma alanıyla tarayıcıda açar. Ekipleri ve kişileri kurup akışı görmek içindir; veriler yalnızca o tarayıcıda kalır, gerçek veri girilmemelidir.
+
 ## 1. Microsoft Entra ID uygulama kaydı
 
 Entra yönetim merkezi → Uygulama kayıtları → Yeni kayıt:
@@ -115,7 +117,7 @@ Gerekenler:
 ## 7. Kayıtlar ve izleme
 
 - Uygulama günlükleri standart çıktıya yazılır (`docker compose logs`). Girişler, giriş retleri, e-posta sonuçları ve hatalar burada görünür.
-- Veritabanındaki `audit` tablosu şunları tutar: giriş, reddedilen giriş, kayıt (gerekçesiyle), üye ve kural değişiklikleri.
+- Veritabanındaki `audit` tablosu şunları tutar: giriş, reddedilen giriş, kayıt (gerekçesiyle), üye ve kural değişiklikleri, dosya ekleme ve silme.
 - Kişisel veri içerdiği için günlük ve yedeklerin saklama süresi KVKK saklama-imha politikasına uygun belirlenmelidir.
 
 ## 8. Güncelleme
@@ -137,5 +139,6 @@ Veri `/data` biriminde kalır. Güncellemeden önce elle yedek alın.
 
 - Tek sunucu, tek süreç. Yük dengeleme ve birden çok kopya desteklenmez.
 - Bir çalışma alanının tüm iş kayıtları tek belge olarak tutulur. Aynı anda düzenleme sık olursa "Kayıt değişti" çakışma ekranı görülebilir.
-- Dosya eki, tekrarlayan iş ve günlük özet e-postası henüz yok.
+- Ek dosyalar veritabanında tutulur (dosya başına en fazla 5 MB, iş başına 20 dosya). Virüs taraması yapılmaz; şirketin uç nokta korumasına güvenilir. Dosyalar indirilir, tarayıcıda çalıştırılmaz.
+- Sabah özeti yalnızca hafta içi ve sunucu açıkken gönderilir; sunucu o sabah 12:00'ye kadar açılmazsa o günün özeti atlanır.
 - Bağımsız bir güvenlik incelemesi (sızma testi) yapılmadı. Pilot öncesinde BT'nin değerlendirmesi önerilir.

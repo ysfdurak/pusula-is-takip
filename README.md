@@ -2,9 +2,11 @@
 
 Pusula, operasyon ekiplerinin işlerini, sorumlularını, terminlerini ve işi durduran engelleri tek ekranda izlemesi için tasarlanmış Türkçe bir iş takip uygulamasıdır. Depo, sevkiyat ve stok kontrol gibi vardiyalı ekipler düşünülerek hazırlandı.
 
-**Canlı demo:** https://ysfdurak.github.io/pusula-is-takip/
+**Canlı demo (örnek verilerle):** https://ysfdurak.github.io/pusula-is-takip/
+**Pilot önizlemesi (boş başlar):** https://ysfdurak.github.io/pusula-is-takip/pilot-onizleme/
 
-> Tasarım demosudur. Veriler sentetiktir ve yalnızca sizin tarayıcınızda saklanır. Gerçek şirket verisi girmeyin.
+> İkisi de tarayıcıda çalışır; veriler yalnızca sizin tarayıcınızda saklanır, sunucuya gitmez. Gerçek şirket verisi girmeyin.
+> Demo kurgusal bir depo ekibiyle açılır. Pilot önizlemesi şirket pilotundaki gibi boş açılır: yönetici sizsiniz, ekipleri ve kişileri siz kurarsınız, "Kullanıcı olarak dene" ile ekip üyesinin gözünden bakarsınız.
 
 ![Benim panom](docs/img/benim-panom.png)
 
@@ -22,11 +24,11 @@ Operasyon ekiplerinde işler WhatsApp, e-posta ve Excel arasında dağılır. Ki
 | Alan | Neler var |
 |---|---|
 | Panolar | Benim panom, Ekip panosu, 7 günlük plan, ekip havuzu, ortak işler, takip edilenler |
-| İş | Hızlı ekleme (yaz + Enter), şablondan iş, bireysel / ortak iş, tek veya çoklu sorumlu, öncelik, termin ve revizyon gerekçesi, kontrol listesi, onay (doğrulama) adımı, süre takibi |
-| Görünümler | Statü panosu (sürükle-bırak kanban), liste, toplu işlem, arama (Ctrl/⌘ K), filtreler |
+| İş | Hızlı ekleme (yaz + Enter), şablondan iş, bireysel / ortak iş, tek veya çoklu sorumlu, öncelik, termin ve revizyon gerekçesi, kontrol listesi, onay (doğrulama) adımı, süre takibi, tekrarlanan iş (her gün, hafta içi, haftalık, aylık), dosya ve fotoğraf ekleme |
+| Görünümler | Statü panosu (sürükle-bırak kanban), liste, toplu işlem, arama (Ctrl/⌘ K), filtreler, Excel'e aktarma (filtrelenmiş liste) |
 | Kayıtlar | Projeler, engeller, kararlar, yorumlar, işlem geçmişi |
 | Ekip | Birden fazla ekip, kişi rehberi, roller (yönetici, ekip üyesi, görüntüleyici) |
-| Bildirim | Uygulama içi bildirimler ve Jira benzeri Outlook e-postaları: atama, durum, tamamlama, yorum ([kurulum](docs/OUTLOOK_BILDIRIMLERI.md)) |
+| Bildirim | Uygulama içi bildirimler ve Jira benzeri Outlook e-postaları: atama, durum, tamamlama, yorum; hafta içi sabah özeti ([kurulum](docs/OUTLOOK_BILDIRIMLERI.md)) |
 | Veri | JSON dışa aktarma, örnek verileri sıfırlama |
 
 <p>
@@ -53,6 +55,7 @@ npm install
 npm run dev            # geliştirme sunucusu
 npm test               # iş kuralı birim testleri
 npm run build          # dist/index.html  → tasarım demosu
+npm run build:preview  # dist-preview/index.html → pilot önizlemesi (boş başlar, tarayıcıda)
 npm run build:pilot    # dist-pilot/index.html → sunucu modu (/api/workspace)
 npm run dev:api        # pilot derlemesini örnek verilerle çalıştırır; e-postalar tmp/mail-preview/ (yalnızca geliştirme)
 npm run start:dev      # pilot sunucusu: SQLite + geliştirme girişi, boş çalışma alanı (yalnızca geliştirme)
@@ -61,9 +64,10 @@ npm start              # pilot sunucusu (üretim): .env.example ve docs/PILOT_KU
 
 | Klasör | İçerik |
 |---|---|
-| `src/App.jsx` | Uygulama kabuğu: gezinme, panolar, iş ayrıntısı, formlar |
-| `src/components/` | Statü panosu, hızlı iş ekleme, genel arama, ekipler, proje portföyü, çakışma penceresi vb. (17 bileşen) |
-| `src/shared/workspaceModel.js` | Veri şeması (zod) ve iş kuralları: görünürlük, yetki, termin, revizyon |
+| `src/App.jsx` | Uygulama kabuğu: durum, veri akışı, gezinme |
+| `src/screens/` | Ekranlar: panolar, iş listesi, ekipler, bildirimler, ayarlar, kayıtlar, iş ayrıntısı, formlar |
+| `src/components/` | Statü panosu, hızlı iş ekleme, genel arama, ekipler, ekler, çakışma penceresi vb. |
+| `src/shared/` | Veri şeması ve iş kuralları, `/api/workspace` servisi, bildirim kuralları, tekrarlanan iş, sabah özeti |
 | `src/demo/demoServer.js` | Tarayıcı içi örnek sunucu; `/api/workspace` sözleşmesinin başvuru uygulaması |
 | `src/lib/` | Pano istatistikleri, çakışma raporu, tarih biçimleri, etiketler |
 | `server/` | Pilot sunucusu: Microsoft girişi, oturum, SQLite, yedek, API ([kurulum](docs/PILOT_KURULUM.md)) |
@@ -72,11 +76,11 @@ npm start              # pilot sunucusu (üretim): .env.example ve docs/PILOT_KU
 
 İlk sürüm yalnızca derlenmiş bir paket olarak vardı. Bugünkü kaynak o paketten üretildi ve iki sürümün aynı davrandığı otomatik testle doğrulandı. Ayrıntı: [docs/KAYNAK_KOD_DURUMU.md](docs/KAYNAK_KOD_DURUMU.md).
 
-`main` dalına her gönderimde GitHub Actions birim testlerini, derlemeyi ve tarayıcı duman testini çalıştırır; hepsi geçerse GitHub Pages güncellenir.
+`main` dalına her gönderimde GitHub Actions birim testlerini, derlemeyi ve tarayıcı testlerini (demo, pilot önizlemesi, pilot sunucusu) çalıştırır; hepsi geçerse GitHub Pages'te demo `/` adresinde, pilot önizlemesi `/pilot-onizleme/` adresinde güncellenir.
 
 ## Şirket içi pilot
 
-Pilot sunucusu hazır: Microsoft hesabıyla giriş, SQLite veritabanı, Outlook bildirimleri, otomatik yedek ve Docker imajı. BT kurulumu: [docs/PILOT_KURULUM.md](docs/PILOT_KURULUM.md). Şirket tarafında kalanlar (BT, KVKK, pilot planı): [docs/PILOT_IHTIYACLARI.md](docs/PILOT_IHTIYACLARI.md)
+Pilot sunucusu hazır: Microsoft hesabıyla giriş, SQLite veritabanı, Outlook bildirimleri ve sabah özeti, ek dosyalar, otomatik yedek ve Docker imajı. Sunucu kurulmadan önce akışı denemek için [pilot önizlemesini](https://ysfdurak.github.io/pusula-is-takip/pilot-onizleme/) kullanın. BT kurulumu: [docs/PILOT_KURULUM.md](docs/PILOT_KURULUM.md). Şirket tarafında kalanlar (BT, KVKK, pilot planı): [docs/PILOT_IHTIYACLARI.md](docs/PILOT_IHTIYACLARI.md)
 
 ## Belgeler
 

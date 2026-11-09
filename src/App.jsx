@@ -63,7 +63,7 @@ import {
   taskTeamIds,
   validateSchedule,
 } from './shared/workspaceModel.js';
-export function App({ demo = false }) {
+export function App({ demo = false, preview = false }) {
   let [workspace, setWorkspace] = useState(EMPTY_STATE);
   let [workspaces, setWorkspaces] = useState([]);
   let [workspaceId, setWorkspaceId] = useState('');
@@ -1042,7 +1042,11 @@ export function App({ demo = false }) {
     let r = (e) => String(form.get(e) || '');
     let { type: i, item: member } = modal;
     try {
-      if (i === 'resetDemo') {
+      if (i === 'resetDemo' && preview) {
+        resetDemoData();
+        window.location.reload();
+        return;
+      } else if (i === 'resetDemo') {
         resetDemoData();
         let e = demoGet('');
         applySnapshot(e, '');
@@ -1545,6 +1549,7 @@ export function App({ demo = false }) {
     </span>
   );
   const appContext = {
+    preview,
     attachFiles,
     fileCounts,
     maxFileBytes,
@@ -1804,26 +1809,28 @@ export function App({ demo = false }) {
           </aside>
           <div className="main-shell">
             {demo && (
-              <section className="design-banner">
+              <section className={'design-banner' + (preview ? ' preview' : '')}>
                 <div>
                   <ShieldCheckIcon size={18} />
                   <span>
-                    <strong>Tasarım demosu</strong>
+                    <strong>{preview ? 'Pilot önizlemesi' : 'Tasarım demosu'}</strong>
                     <small>
-                      Örnek veriler · Gerçek şirket verisi girmeyin · Ortak canlı kullanım değildir
+                      {preview
+                        ? 'Boş başlar, örnek veri yok · Veriler yalnızca bu tarayıcıda · Gerçek pilotta Microsoft hesabıyla girilir'
+                        : 'Örnek veriler · Gerçek şirket verisi girmeyin · Ortak canlı kullanım değildir'}
                     </small>
                   </span>
                 </div>
                 <div>
                   <label>
-                    Denediğin rol
+                    {preview ? 'Kullanıcı olarak dene' : 'Denediğin rol'}
                     <select
-                      aria-label="Örnek kullanıcı / rol"
+                      aria-label={preview ? 'Kullanıcı olarak dene' : 'Örnek kullanıcı / rol'}
                       disabled={busy}
                       value={user || DEMO_USERS[0].email}
                       onChange={(event) => switchDemoUser(event.target.value)}
                     >
-                      {DEMO_USERS.map((member) => (
+                      {(preview ? members.filter((member) => member.active) : DEMO_USERS).map((member) => (
                         <option value={member.email} key={member.email}>
                           {member.name}
                           {' · '}
@@ -1834,7 +1841,8 @@ export function App({ demo = false }) {
                   </label>
                   <button
                     className="icon-button"
-                    aria-label="Örnek verileri sıfırla"
+                    aria-label={preview ? 'Önizlemeyi sıfırla' : 'Örnek verileri sıfırla'}
+                    title={preview ? 'Önizlemeyi sıfırla' : 'Örnek verileri sıfırla'}
                     disabled={busy}
                     onClick={() => openModal('resetDemo')}
                   >
@@ -1900,7 +1908,7 @@ export function App({ demo = false }) {
                   className={'sync-indicator ' + (offline ? 'offline' : '')}
                   title={lastSync ? 'Son kontrol: ' + formatDateTime(new Date(lastSync).toISOString()) : ''}
                 >
-                  {demo ? 'Yerel demo' : offline ? 'Bağlantı bekleniyor' : '20 sn’de güncellenir'}
+                  {preview ? 'Bu tarayıcıda' : demo ? 'Yerel demo' : offline ? 'Bağlantı bekleniyor' : '20 sn’de güncellenir'}
                 </span>
                 <span className="today-label">
                   {new Date().toLocaleDateString('tr-TR', {

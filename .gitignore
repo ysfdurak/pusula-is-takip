@@ -9,4 +9,5 @@ __pycache__/
 _site/
 dist/
 dist-pilot/
+dist-preview/
 tmp/

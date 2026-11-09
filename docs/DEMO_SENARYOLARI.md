@@ -27,3 +27,15 @@
 ## Anlatım sırası
 
 Problem (dağınık takip) → hızlı iş ekleme → sorumlu ve termin → gecikme ve revizyon geçmişi → engel → ortak iş → onaylı tamamlama → ekip panosu özeti.
+
+## Pilot önizlemesi
+
+Adres: https://ysfdurak.github.io/pusula-is-takip/pilot-onizleme/ — demodan ayrıdır, boş başlar.
+
+1. Adını, e-postanı ve çalışma alanı adını yaz. Yönetici sensin.
+2. **Ekipler → Üye ekle:** İki-üç kişi ekle (biri görüntüleyici olsun). Sonra **Ekip oluştur** ile bir ekip kur ve yönetici seç.
+3. **Yeni iş:** Bir kişiye ata, termin ver, "Tekrar" alanından "Hafta içi her gün" seç. İşi aç ve bir fotoğraf ekle.
+4. Üstteki **Kullanıcı olarak dene** menüsünden atadığın kişiye geç; işi Benim panom'da gör, tamamla. Ertesi günün tekrarının açıldığını gör.
+5. **İş listesi → Excel'e aktar** ile listeyi indir.
+6. Bitince sağ üstteki sıfırlama düğmesiyle önizlemeyi temizle.
+

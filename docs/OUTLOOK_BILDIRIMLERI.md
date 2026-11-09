@@ -12,6 +12,10 @@ Pusula, Jira'daki bildirimlere benzer şekilde, iş atandığında, durumu deği
 | İş tamamlandı | Durum değişikliğiyle aynı | `[Pusula] İş tamamlandı: <iş>` |
 | Yorum yazıldı | İşi açan, koordinatör, sorumlular, takipçiler ve o işe daha önce yorum yazanlar | `[Pusula] Yeni yorum: <iş>` |
 
+| Sabah özeti (hafta içi, varsayılan 08:00) | Her kişiye kendi geciken, bugün ve bu hafta termini olan işleri; ekip yöneticisine sorumlu bekleyen havuz işleri. Boşsa gönderilmez | `[Pusula] Günün özeti: 1 geciken, 2 bugün` |
+
+Sabah özetinin saati `DIGEST_HOUR` ile değişir (`off` kapatır). Kişi Ayarlar → "Sabah özeti" ile kendisi kapatabilir. Aynı gün aynı kişiye ikinci kez gitmez.
+
 E-postada işlemi kimin yaptığı ("Deniz Yılmaz işin durumunu değiştirdi: Başlanmadı → Devam ediyor"), yorumun metni, işin durumu, ekibi, termini ve önceliği yer alır. "İşi Pusula'da aç" düğmesi işi doğrudan açar.
 
 **E-posta gitmeyen durumlar** (arayüzdeki karşılığı Bildirimler ekranında görünür):

@@ -4,6 +4,7 @@ import { viteSingleFile } from 'vite-plugin-singlefile';
 
 // Derleme çıktısı tek bir HTML dosyasıdır; internetsiz açılabilir.
 //   npm run build        → dist/index.html        (tasarım demosu, tarayıcı içi örnek sunucu)
+//   npm run build:preview→ dist-preview/index.html (pilot önizlemesi: boş başlar, veriler tarayıcıda)
 //   npm run build:pilot  → dist-pilot/index.html  (sunucu modu, aynı alan adındaki /api/workspace)
 // Güvenlik politikası (CSP) yalnızca derlemede eklenir; geliştirme sunucusunu engellememesi için.
 const csp = (connect) =>
@@ -11,6 +12,7 @@ const csp = (connect) =>
 
 export default defineConfig(({ mode }) => {
   const pilot = mode === 'pilot';
+  const preview = mode === 'preview';
   return {
     plugins: [
       react(),
@@ -22,10 +24,10 @@ export default defineConfig(({ mode }) => {
           const meta = `<meta http-equiv="Content-Security-Policy" content="${csp(pilot ? "'self'" : "'none'")}" />`;
           return html
             .replace('<title>', `${meta}\n    <title>`)
-            .replace('İnternetsiz Tasarım Demosu', pilot ? 'Pilot' : 'İnternetsiz Tasarım Demosu');
+            .replace('İnternetsiz Tasarım Demosu', pilot ? 'Pilot' : preview ? 'Pilot Önizlemesi' : 'İnternetsiz Tasarım Demosu');
         },
       },
     ],
-    build: { outDir: pilot ? 'dist-pilot' : 'dist' },
+    build: { outDir: pilot ? 'dist-pilot' : preview ? 'dist-preview' : 'dist' },
   };
 });

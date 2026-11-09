@@ -35,6 +35,7 @@ export function ModalHost() {
     closeModal,
     createFromTemplate,
     demo,
+    preview,
     error,
     inputField,
     isScheduleValid,
@@ -97,7 +98,9 @@ export function ModalHost() {
                           : modal.type === 'guide'
                             ? 'Pusula nasıl kullanılır?'
                             : modal.type === 'resetDemo'
-                              ? 'Örnekleri başa al'
+                              ? preview
+                                ? 'Önizlemeyi sıfırla'
+                                : 'Örnekleri başa al'
                               : modal.type === 'templates'
                                 ? 'İş şablonları'
                                 : modal.type === 'template'
@@ -399,7 +402,7 @@ export function ModalHost() {
                   </button>
                 ))}
                 <>
-                  {demo && canWrite && (
+                  {demo && !preview && canWrite && (
                     <button
                       type="button"
                       className="button demo-conflict-trigger"
@@ -413,7 +416,9 @@ export function ModalHost() {
                 <div className="guide-note">
                   <ShieldCheckIcon size={17} />
                   <span>
-                    {demo
+                    {preview
+                      ? 'Bu önizleme pilotu denemek içindir. Veriler yalnızca bu tarayıcıda durur; kişiler aynı anda farklı cihazlardan bağlanamaz. Gerçek pilot sunucusunda herkes kendi Microsoft hesabıyla girer.'
+                      : demo
                       ? 'Bu dosya tasarımı denemek içindir. Rol değiştirme, aynı tarayıcıda örnek senaryo gösterir; birden fazla cihazı eşzamanlı bağlamaz.'
                       : 'Bu yayının gerçek veri ve çok kullanıcılı kurulum sınırlarını ekip yöneticisiyle netleştir.'}
                   </span>
@@ -422,8 +427,9 @@ export function ModalHost() {
             )}
             {modal.type === 'resetDemo' && (
               <p className="form-intro">
-                Yalnızca bu tasarım demosunda yaptığın değişiklikler silinir ve kurgusal örnek işler yeniden
-                yüklenir. Gerçek çalışma alanına işlem yapılmaz.
+                {preview
+                  ? 'Bu tarayıcıdaki önizleme verileri (ekipler, kişiler, işler, ekler) silinir ve kurulum ekranına dönülür.'
+                  : 'Yalnızca bu tasarım demosunda yaptığın değişiklikler silinir ve kurgusal örnek işler yeniden yüklenir. Gerçek çalışma alanına işlem yapılmaz.'}
               </p>
             )}
             {modal.type === 'templates' && (
@@ -1212,7 +1218,9 @@ export function ModalHost() {
                   : modal.type === 'complete'
                     ? 'Tamamla'
                     : modal.type === 'resetDemo'
-                      ? 'Örnekleri sıfırla'
+                      ? preview
+                        ? 'Sıfırla'
+                        : 'Örnekleri sıfırla'
                       : modal.type === 'task' && !workspace.tasks.some((task) => task.id === modal.item.id)
                         ? 'İşi oluştur'
                         : modal.type === 'member' && !modal.item.email

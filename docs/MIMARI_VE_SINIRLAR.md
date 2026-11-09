@@ -18,11 +18,12 @@
 | `tools/dev-api-server.mjs` | Pilot derlemesini yerelde örnek API ile çalıştırır | Yalnızca geliştirme; giriş ve yetki yok |
 | `tests/` | Birim testleri ve tarayıcı duman testi | CI'da ve yayından önce çalışır |
 
-## İki çalışma modu
+## Çalışma modları
 
-Arayüz kök bileşene verilen `demo` bayrağıyla iki modda çalışır; bayrak derleme modundan gelir (`src/main.jsx`):
+Arayüz kök bileşene verilen `demo` ve `preview` bayraklarıyla üç modda çalışır; bayraklar derleme modundan gelir (`src/main.jsx`):
 
 - **Tasarım demosu (`demo: true`, varsayılan):** Tarayıcının içinde sahte bir sunucu çalışır, veriler `localStorage` içinde (`pusula-offline-design-v5`) tutulur. CSP `connect-src 'none'` olduğu için sayfa hiçbir ağ isteği atamaz.
+- **Pilot önizlemesi (`preview: true`, `npm run build:preview` → `dist-preview/index.html`, Pages'te `/pilot-onizleme/`):** Tasarım demosuyla aynı tarayıcı içi sunucu, ama örnek veri yok. İlk ekranda yönetici ve çalışma alanı adı girilir. Veriler ayrı anahtarda (`pusula-pilot-onizleme-v1`) tutulur; rol menüsü yerine çalışma alanının kendi üyeleri listelenir.
 - **Sunucu modu (`demo: false`, `npm run build:pilot` → `dist-pilot/index.html`):** Arayüz aynı alan adındaki `/api/workspace` uç noktasıyla konuşur, CSP `connect-src 'self'` olur. 401 yanıtında giriş ekranı açılır ve giriş düğmesi `/auth/login?return_to=/` adresine gider. Sunucu: `server/` ([PILOT_KURULUM.md](PILOT_KURULUM.md)).
 
 ## `/api/workspace` sözleşmesi
@@ -34,8 +35,9 @@ Sözleşmenin başvuru uygulaması `src/demo/demoServer.js` içindeki `demoGet` 
 | İstek | Yanıt |
 |---|---|
 | `GET /api/workspace` | `{ workspaces: [{id, name, role}], user }`: kullanıcının üyesi olduğu çalışma alanları |
-| `GET /api/workspace?id=<alan>` | `{ state, revision, role, members, times, notifications, policy, mailConfigured }` |
-| `GET /api/workspace?id=<alan>&task=<iş>` | Yukarıdakine ek olarak `comments` ve `activities` (o işin yorumları ve geçmişi) |
+| `GET /api/workspace?id=<alan>` | `{ state, revision, role, members, times, notifications, policy, mailConfigured, fileCounts, maxFileBytes }` |
+| `GET /api/workspace?id=<alan>&task=<iş>` | Yukarıdakine ek olarak `comments`, `activities` ve `files` (o işin yorumları, geçmişi ve ek listesi) |
+| `GET /api/workspace?id=<alan>&file=<ek>` | `{ file: {id, task, name, type, size, author, created}, data }`: ekin içeriği (base64). İşi göremeyen ekini de alamaz |
 
 `state` çalışma alanının tamamıdır: `tasks`, `teams`, `projects`, `decisions`, `blockers`, `templates`, `workRules`. Kullanıcıya yalnızca görmeye yetkili olduğu işler döndürülmelidir. Arayüz 20 saniyede bir yeniden sorgular.
 
@@ -43,12 +45,14 @@ Sözleşmenin başvuru uygulaması `src/demo/demoServer.js` içindeki `demoGet` 
 
 | action | Gövde | Kural |
 |---|---|---|
-| `save` | `state`, `revision`, `reason` | `revision` sunucudakiyle aynı değilse **409** ("Kayıt değişti"); arayüz farkları gösterip kullanıcıya yeniden onaylatır. Sunucu durumu doğrular, rol yetkisini uygular, değişen olaylar için bildirim üretir, `revision` artırır |
+| `save` | `state`, `revision`, `reason` | `revision` sunucudakiyle aynı değilse **409** ("Kayıt değişti"); arayüz farkları gösterip kullanıcıya yeniden onaylatır. Sunucu durumu doğrular, rol yetkisini uygular, değişen olaylar için bildirim üretir, `revision` artırır. Tekrarlanan bir iş tamamlanınca sıradaki tekrarı sunucu açar (yanıttaki `state` içinde gelir); silinen işlerin ekleri silinir |
 | `comment` | `task`, `body`, `requestId` | `requestId` ile tekrar gönderime karşı korumalı |
 | `timer_start` / `timer_stop` / `manual_time` | `task`, (`minutes`, `note`) | Kişi başına tek çalışan sayaç; iş "devam ediyor" olmalı |
 | `member` | `email`, `name`, `department`, `role`, `originalEmail` | Yalnızca `owner` |
 | `policy` | `policy` | Yalnızca `owner` |
-| `preferences` | `mailEnabled`, `notifySelf` | Kişinin kendi tercihi |
+| `preferences` | `mailEnabled`, `notifySelf`, `digest` | Kişinin kendi tercihi (`digest`: sabah özeti) |
+| `attach` | `task`, `name`, `data` (base64) | Ekip üyesi ve yönetici. Tür dosya uzantısından belirlenir (resim, PDF, Office, metin, CSV); boyut sınırı sunucuda |
+| `detach` | `task`, `file` | Ekleyen kişi ya da yönetici |
 | `read` | `notification` | Bildirimi okundu işaretler |
 | `flush` | — | Bekleyen e-postaları gönderir; `{ configured, accepted }` |
 | `create` | `name` | Yeni çalışma alanı; oluşturan `owner` olur |
@@ -59,6 +63,6 @@ Roller: `owner` (arayüzde "Yönetici"), `editor` ("Ekip üyesi"), `viewer` ("G�
 
 - Tasarım demosunda veriler tek tarayıcıdadır; kullanıcılar arasında paylaşım yoktur. Rol menüsü kimlik doğrulama değildir.
 - E-posta gönderimi sunucu modunda Outlook ile yapılır (`docs/OUTLOOK_BILDIRIMLERI.md`); tasarım demosunda yalnızca uygulama içi bildirim vardır.
-- Dosya eki, tekrarlayan iş, @bahsetme ve Excel/CSV aktarımı yoktur.
+- @bahsetme yoktur. Ekler pilot sunucusunda veritabanında tutulur; virüs taraması yapılmaz. Tarayıcı sürümlerinde (demo, önizleme) ek sınırı 1 MB, tarayıcı depolama kotası birkaç MB'tır.
 - CSS `DM Sans` ve `Manrope` yazı tiplerini ister ama CSP font yüklemeyi kapattığı için sistem yazı tipi kullanılır.
 - Duman testi temel akışları doğrular; erişilebilirlik ve güvenlik testinin yerine geçmez.
