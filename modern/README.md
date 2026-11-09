@@ -37,3 +37,16 @@ Görev CRUD (düzenleme/oluşturma, durum değiştirme), kullanıcı ve ekip fil
 ## Yayın güvenliği
 
 Mevcut GitHub Pages demosu `/index.html` üzerinden korunur. Modern sürümün yayını ancak özellik eşleştirme ve testlerden sonra yapılmalıdır.
+
+## Genişletme (9 Kasım 2026)
+
+Modüler sürüme operasyon panosu, geciken işler ve haftalık plan, görev ayrıntıları, kontrol listesi, bekleme nedeni, termin değişiklik geçmişi, yorum, zaman kaydı, takip, ekip havuzundan üstlenme, şablondan iş oluşturma, çoklu seçim ve toplu başlatma eklendi. Bunların bir bölümü temel akış düzeyindedir; eski derlenmiş uygulamayla birebir özellik eşitliği iddiası yoktur.
+
+### Açık doğrulamalar
+
+- GitHub Actions test ve derleme sonucunun incelenmesi
+- Eski HTML'deki bütün kullanıcı akışlarının manuel envanteri ve birebir karşılaştırılması
+- Yetki, veri bütünlüğü, bozuk kayıt kurtarma ve sürükle-bırak uçtan uca testleri
+- Gerçek çok kullanıcılı sunucu, oturum, veri tabanı ve ağ güvenliği (henüz yok)
+
+**Üretim ortamında veya şirket verisiyle kullanmayın.**
