@@ -1,0 +1,4 @@
+import React from 'react';
+import { members } from '../data/demo.js';
+import { STATUSES } from '../services/taskRules.js';
+export function TaskBoard({tasks,onEdit,onStatus}){return <div className="board">{STATUSES.map(status=><section className="lane" key={status}><h2>{status} <small>{tasks.filter(t=>t.status===status).length}</small></h2>{tasks.filter(t=>t.status===status).map(t=><article key={t.id} className="task"><strong>{t.title}</strong><p>{members.find(m=>m.id===t.ownerId)?.name} · {t.team}</p><p>{t.due||'Termin yok'} · {t.priority}</p><div className="actions"><button className="secondary" onClick={()=>onEdit(t)}>Düzenle</button><select aria-label={t.title+' durum'} value={t.status} onChange={e=>onStatus(t,e.target.value)}>{STATUSES.map(s=><option key={s}>{s}</option>)}</select></div></article>)}</section>)}</div>}
