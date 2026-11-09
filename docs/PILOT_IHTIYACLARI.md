@@ -2,7 +2,7 @@
 
 **Hedef:** Pusula'yı 1–2 ekipte (örneğin Sevkiyat ve Stok Kontrol), 5–10 kişiyle, 3–4 hafta boyunca gerçek günlük işlerde denemek.
 
-**Kısa cevap:** Arayüz hazır. Çok kullanıcılı çalışma için eksik olan üç şey var: **sunucu (API ve veritabanı), şirket hesabıyla giriş ve şirket içinde barındırma**. Bunlara ek olarak BT/KVKK onayı ve pilot ekibin kurulumu gerekir.
+**Kısa cevap:** Yazılım tarafı hazır: arayüz, pilot sunucusu, Microsoft girişi, Outlook bildirimleri ve otomatik yedek. Kalanlar BT ve şirket tarafında: **uygulama kaydı, sunucu ve HTTPS, Outlook posta kutusu, KVKK onayı** ve pilot ekibin kurulumu. Kurulum adımları: [PILOT_KURULUM.md](PILOT_KURULUM.md).
 
 ## Mevcut durum
 
@@ -14,10 +14,9 @@
 | Yerel deneme sunucusu | ✅ `npm run dev:api` (yalnızca geliştirme; giriş ve kalıcı veri yok) |
 | Oturum (401) ve eşzamanlı düzenleme çakışması (409) ekranları | ✅ Arayüzde var |
 | API sözleşmesi | ✅ Belgelendi: [MIMARI_VE_SINIRLAR.md](MIMARI_VE_SINIRLAR.md) |
-| `/api/workspace` sunucusu ve veritabanı | ❌ Yok |
-| Şirket hesabıyla giriş (SSO) | ❌ Yok |
-| Barındırma, HTTPS, yedekleme | ❌ Yok |
-| Outlook e-posta bildirimi (atama, durum, yorum) | ✅ Kod hazır; BT kurulumu gerekli: [OUTLOOK_BILDIRIMLERI.md](OUTLOOK_BILDIRIMLERI.md) |
+| `/api/workspace` sunucusu ve veritabanı (SQLite) | ✅ `server/`, Docker imajı; kurulum: [PILOT_KURULUM.md](PILOT_KURULUM.md) |
+| Şirket hesabıyla giriş (Microsoft Entra ID) | ✅ Kod hazır; uygulama kaydı BT'den |
+| Barındırma, HTTPS, yedekleme | 🟡 Otomatik yedek hazır; sunucu, DNS, sertifika ve ters vekil BT'den |
 | BT güvenlik ve KVKK onayı | ❌ Alınmadı |
 
 ## 1. Pilot başlamadan zorunlu olanlar

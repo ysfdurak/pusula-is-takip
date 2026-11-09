@@ -7,7 +7,9 @@
 | `src/App.jsx` | Uygulama kabuğu ve ekran durumları | En büyük dosya; ekranlara bölünmesi sonraki adım |
 | `src/components/` | 17 arayüz bileşeni | Statü panosu, hızlı iş, arama, ekipler, portföy, çakışma penceresi… |
 | `src/shared/workspaceModel.js` | Veri şeması (zod) ve iş kuralları | Pilot sunucusu bu kuralları aynen uygulamalı |
-| `src/demo/demoServer.js` | Tarayıcı içi örnek sunucu | `/api/workspace` sözleşmesinin başvuru uygulaması |
+| `src/shared/workspaceService.js` | `/api/workspace` sözleşmesinin uygulaması | Depolamadan ve kullanıcıdan bağımsız; demo ve pilot sunucusu ortak kullanır |
+| `src/demo/demoServer.js` | Tarayıcı içi örnek sunucu | Örnek veri + localStorage + örnek kullanıcı seçimi |
+| `server/` | Pilot sunucusu | Entra ID girişi (OIDC + PKCE), oturum, SQLite, yedek, güvenlik başlıkları |
 | `src/lib/` | Pano istatistikleri, çakışma raporu, biçimlendirme | |
 | `src/styles.css` | Tüm stiller | |
 | `vite.config.js` | Tek dosyalı derleme, mod ve güvenlik politikası (CSP) | `--mode pilot` sunucu modu |
@@ -21,7 +23,7 @@
 Arayüz kök bileşene verilen `demo` bayrağıyla iki modda çalışır; bayrak derleme modundan gelir (`src/main.jsx`):
 
 - **Tasarım demosu (`demo: true`, varsayılan):** Tarayıcının içinde sahte bir sunucu çalışır, veriler `localStorage` içinde (`pusula-offline-design-v5`) tutulur. CSP `connect-src 'none'` olduğu için sayfa hiçbir ağ isteği atamaz.
-- **Sunucu modu (`demo: false`, `npm run build:pilot` → `dist-pilot/index.html`):** Arayüz aynı alan adındaki `/api/workspace` uç noktasıyla konuşur, CSP `connect-src 'self'` olur. 401 yanıtında giriş ekranı açılır ve giriş düğmesi `/auth/login?return_to=/` adresine gider. **Bu sunucu depoda yoktur.**
+- **Sunucu modu (`demo: false`, `npm run build:pilot` → `dist-pilot/index.html`):** Arayüz aynı alan adındaki `/api/workspace` uç noktasıyla konuşur, CSP `connect-src 'self'` olur. 401 yanıtında giriş ekranı açılır ve giriş düğmesi `/auth/login?return_to=/` adresine gider. Sunucu: `server/` ([PILOT_KURULUM.md](PILOT_KURULUM.md)).
 
 ## `/api/workspace` sözleşmesi
 

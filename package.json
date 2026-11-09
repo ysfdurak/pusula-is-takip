@@ -1,6 +1,6 @@
 {
   "name": "pusula-is-takip",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "private": true,
   "type": "module",
   "description": "Pusula: Türkçe iş ve ekip takip uygulaması (React + Vite)",
@@ -9,22 +9,25 @@
     "build": "vite build",
     "build:pilot": "vite build --mode pilot",
     "preview": "vite preview",
-    "test": "node --test tests/unit/*.test.js",
+    "test": "node --disable-warning=ExperimentalWarning --test tests/unit/*.test.js tests/server/*.test.js",
     "test:e2e": "node tests/e2e/smoke.mjs dist",
-    "dev:api": "node tools/dev-api-server.mjs"
+    "dev:api": "node tools/dev-api-server.mjs",
+    "start": "node --disable-warning=ExperimentalWarning server/index.js",
+    "backup": "node --disable-warning=ExperimentalWarning server/backup.js",
+    "start:dev": "npm run build:pilot && AUTH_MODE=dev PUSULA_ADMINS=deneme@sirket.test DATA_DIR=./tmp/pilot-data node --disable-warning=ExperimentalWarning server/index.js"
   },
   "dependencies": {
-    "lucide-react": "1.70.0",
-    "react": "19.2.6",
-    "react-dom": "19.2.6",
     "zod": "3.25.76"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^5.1.0",
+    "lucide-react": "1.70.0",
+    "react": "19.2.6",
+    "react-dom": "19.2.6",
     "vite": "^7.2.0",
     "vite-plugin-singlefile": "^2.3.0"
   },
   "engines": {
-    "node": ">=20.19.0"
+    "node": ">=22.13.0"
   }
 }

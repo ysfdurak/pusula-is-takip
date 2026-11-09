@@ -1,43 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import {
-  ArrowUpRightIcon,
-  BellIcon,
-  BriefcaseBusinessIcon,
-  CalendarDaysIcon,
-  CheckCheckIcon,
-  CheckIcon,
-  ChevronDownIcon,
-  ChevronRightIcon,
-  CircleQuestionMarkIcon,
-  ClipboardListIcon,
-  Clock3Icon,
-  CompassIcon,
-  CopyIcon,
-  DownloadIcon,
-  EllipsisIcon,
-  EyeIcon,
-  FlagIcon,
-  GitBranchIcon,
-  LayersIcon,
-  LoaderCircleIcon,
-  MailIcon,
-  MessageSquareIcon,
-  PauseIcon,
-  PencilIcon,
-  PlayIcon,
-  PlusIcon,
-  RefreshCwIcon,
-  RotateCcwClockIcon,
-  RotateCcwIcon,
-  SaveIcon,
-  SearchIcon,
-  Settings2Icon,
-  ShieldCheckIcon,
-  SlidersHorizontalIcon,
-  UserRoundIcon,
-  UsersIcon,
-  XIcon,
-} from 'lucide-react';
+import { ArrowUpRightIcon, BellIcon, BriefcaseBusinessIcon, CalendarDaysIcon, CheckCheckIcon, CheckIcon, ChevronDownIcon, ChevronRightIcon, CircleQuestionMarkIcon, ClipboardListIcon, Clock3Icon, CompassIcon, CopyIcon, DownloadIcon, EllipsisIcon, EyeIcon, FlagIcon, GitBranchIcon, LayersIcon, LoaderCircleIcon, LogOutIcon, MailIcon, MessageSquareIcon, PauseIcon, PencilIcon, PlayIcon, PlusIcon, RefreshCwIcon, RotateCcwClockIcon, RotateCcwIcon, SaveIcon, SearchIcon, Settings2Icon, ShieldCheckIcon, SlidersHorizontalIcon, UserRoundIcon, UsersIcon, XIcon } from 'lucide-react';
 import { Avatar } from './components/Avatar.jsx';
 import { CardAssigneeControl } from './components/CardAssigneeControl.jsx';
 import { ConflictDialog, fromLocalDateTimeInput } from './components/ConflictDialog.jsx';
@@ -1616,6 +1578,11 @@ export function App({ demo = false }) {
               <strong>{memberName(user) || 'Pusula'}</strong>
               <small>{ROLE_LABELS[role]}</small>
             </span>
+            {!demo && (
+              <a className="account-logout" href="/auth/logout" title="Oturumu kapat" aria-label="Oturumu kapat">
+                <LogOutIcon size={16} />
+              </a>
+            )}
           </div>
         </div>
       </aside>
