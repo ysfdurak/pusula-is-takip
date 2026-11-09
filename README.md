@@ -15,7 +15,7 @@ Dağınık iş takibi, belirsiz sorumluluklar, geciken görevlerin geç fark edi
 ## Çalıştırma
 `index.html` dosyasını güncel bir tarayıcıda açın. Bu dosya tek başına bir **tasarım demosudur**; gerçek çok kullanıcılı sunucu hizmeti veya güvenli kimlik doğrulama sağlamaz.
 
-> Not: Kaynak HTML dosyasının depoya eklenmesi ayrı bir yayın adımıdır. Dosya yüklenene kadar GitHub Pages demosu hazır kabul edilmemelidir.
+> Not: Kaynak HTML dosyası depoda `index.html` olarak bulunmaktadır. GitHub Pages bağlantısının çalışması ayrıca doğrulanmalıdır.
 
 ## Demo akışı
 1. Örnek çalışma alanını inceleyin.
