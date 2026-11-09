@@ -1,7 +1,8 @@
 // İş listesi: pano, liste, filtreler, toplu işlem. App.jsx'ten ayrıldı; değerleri AppContext üzerinden alır.
 import { CardAssigneeControl } from '../components/CardAssigneeControl.jsx';
 import { TaskBoard } from '../components/TaskBoard.jsx';
-import { formatDate, formatDuration, toDateTimeInput } from '../lib/format.js';
+import { formatDate, formatDuration, toDateTimeInput, todayKey } from '../lib/format.js';
+import { downloadBlob, safeFileName, tasksWorkbook } from '../lib/exportTasks.js';
 import { TASK_STATUS_LABELS } from '../lib/labels.js';
 import {
   ArrowUpRightIcon,
@@ -12,6 +13,7 @@ import {
   ChevronRightIcon,
   ClipboardListIcon,
   Clock3Icon,
+  FileSpreadsheetIcon,
   LayersIcon,
   PlayIcon,
   PlusIcon,
@@ -195,6 +197,21 @@ export function TaskListPage() {
                 {bulkMode ? 'Seçimi kapat' : 'Toplu işlem'}
               </button>
             )}
+            <button
+              className="button small-button"
+              disabled={!listedTasks.length}
+              title="Listede görünen işleri Excel dosyası olarak indir"
+              onClick={() => {
+                const name = workspaces.find((space) => space.id === workspaceId)?.name || 'Pusula';
+                downloadBlob(
+                  tasksWorkbook(listedTasks, { workspace, memberName, projectName, isLate, workspaceName: name }),
+                  safeFileName('pusula-' + name + '-' + todayKey()) + '.xlsx',
+                );
+              }}
+            >
+              <FileSpreadsheetIcon size={15} />
+              {" Excel'e aktar"}
+            </button>
             <label className="search-box">
               <SearchIcon size={16} />
               <input
