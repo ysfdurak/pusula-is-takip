@@ -1,6 +1,10 @@
 name: Publish Pusula React
 on:
   workflow_dispatch:
+  push:
+    paths:
+      - 'modern/**'
+      - '.github/workflows/publish-modern.yml'
 permissions:
   contents: read
   pages: write
