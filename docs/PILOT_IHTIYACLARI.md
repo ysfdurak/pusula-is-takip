@@ -17,7 +17,7 @@
 | `/api/workspace` sunucusu ve veritabanı | ❌ Yok |
 | Şirket hesabıyla giriş (SSO) | ❌ Yok |
 | Barındırma, HTTPS, yedekleme | ❌ Yok |
-| E-posta / Teams bildirimi | ❌ Yok (yalnızca uygulama içi) |
+| Outlook e-posta bildirimi (atama, durum, yorum) | ✅ Kod hazır; BT kurulumu gerekli: [OUTLOOK_BILDIRIMLERI.md](OUTLOOK_BILDIRIMLERI.md) |
 | BT güvenlik ve KVKK onayı | ❌ Alınmadı |
 
 ## 1. Pilot başlamadan zorunlu olanlar
@@ -56,7 +56,7 @@
 
 | İhtiyaç | Neden | Asgari çözüm |
 |---|---|---|
-| Bildirim (e-posta veya Teams) | Bildirim gelmezse kullanıcılar uygulamayı açmayı unutur | Sabah günlük özet e-postası: geciken, bugün teslim, sana atanan |
+| Günlük özet e-postası | Olay e-postalarına ek olarak sabah tek bakış | Geciken, bugün teslim, sana atanan işler |
 | Tekrarlayan işler | Vardiya işleri her gün yeniden açılıyor | Sunucuda zamanlanmış görevle şablondan iş üretmek |
 | Fotoğraf eki | Depoda kanıt çoğunlukla fotoğraf | İlk aşamada yorumda paylaşılan bağlantı; sonra dosya yükleme |
 | Telefondan kullanım | Sahada masaüstü yok | Mevcut mobil görünüm ve "Ana ekrana ekle" (PWA) |
@@ -110,6 +110,7 @@
 - [ ] `npm run build:pilot` çıktısının (`dist-pilot/index.html`) aynı alan adından sunulması
 - [ ] HTTPS ve günlük yedek
 - [ ] Boş çalışma alanı, gerçek üyeler, şablonlar
+- [ ] Outlook bildirimleri: ortak posta kutusu, uygulama kaydı, RBAC for Applications kısıtı ([OUTLOOK_BILDIRIMLERI.md](OUTLOOK_BILDIRIMLERI.md))
 - [ ] Günlük özet e-postası (önerilen)
 - [ ] Aydınlatma metni ve BT onayı
 - [ ] Pilot başlangıcında 2 kullanıcıyla eşzamanlı deneme: aynı işi iki kişi düzenlediğinde çakışma ekranı çıkıyor mu?

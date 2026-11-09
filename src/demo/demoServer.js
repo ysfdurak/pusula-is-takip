@@ -11,6 +11,13 @@ import {
   validateStructure,
   visibleStateFor,
 } from '../shared/workspaceModel.js';
+import { commentRecipients, mailStatus, statusRecipients } from '../shared/notificationRules.js';
+
+// E-posta modu: 'demo' (tarayıcı demosu, e-posta yok), 'off' (sunucu, bağlantı yok), 'live' (gönderim açık)
+let mailMode = 'demo';
+export function configureDemoMail(mode) {
+  mailMode = mode;
+}
 
 export const DEMO_USERS = [
   {
@@ -567,7 +574,7 @@ export function demoGet(workspaceId, taskId = '') {
       .filter((activity) => activity.workspace === workspaceId && activity.task === taskId)
       .sort((a, b) => b.created - a.created),
     policy: demoData.policies[workspaceId],
-    mailConfigured: false,
+    mailConfigured: mailMode === 'live',
   });
 }
 
@@ -671,24 +678,29 @@ export function demoPost(request) {
   if (membership.role === 'viewer') {
     throw Error('Görüntüleme rolünde değişiklik yapamazsın.');
   }
-  let notify = (task, i, a, body, addedAssignees) => {
-    for (let email of new Set(addedAssignees)) {
-      let s = demoData.members[request.id].find((member) => member.email === email && member.active);
-      if (!(!s || !canAccessTask(task, normalizeState(demoData.states[request.id]), email, s.role))) {
-        demoData.notifications.unshift({
-          id: newDemoId(),
-          workspace: request.id,
-          task: task.id,
-          recipient: email,
-          kind: i,
-          title: a,
-          body: body,
-          created: now,
-          mail: 'disabled',
-          detail: 'Örnek bildirim. Gerçek e-posta gönderilmez.',
-          read_at: null,
-        });
+  let notify = (task, kind, title, body, recipients, meta = {}) => {
+    const policy = demoData.policies[request.id];
+    for (let email of new Set(recipients.filter(Boolean))) {
+      let member = demoData.members[request.id].find((m) => m.email === email && m.active);
+      if (!member || !canAccessTask(task, normalizeState(demoData.states[request.id]), email, member.role)) {
+        continue;
       }
+      const mail = mailStatus({ mode: mailMode, kind, recipient: email, actor, member, policy, task });
+      demoData.notifications.unshift({
+        id: newDemoId(),
+        workspace: request.id,
+        task: task.id,
+        recipient: email,
+        actor,
+        kind,
+        title,
+        body,
+        meta,
+        created: now,
+        mail,
+        detail: mailMode === 'demo' ? 'Örnek bildirim. Gerçek e-posta gönderilmez.' : '',
+        read_at: null,
+      });
     }
   };
   if (request.action === 'save') {
@@ -794,7 +806,8 @@ export function demoPost(request) {
             task.status === 'done' ? 'completed' : 'status',
             (task.status === 'done' ? 'İş tamamlandı: ' : 'Durum değişti: ') + task.title,
             'Durum güncellendi.',
-            [task.createdBy, task.coordinator, ...task.assignees, ...task.watchers],
+            statusRecipients(task, merged, demoData.policies[request.id]),
+            { before: previousTask.status, after: task.status },
           )),
         task.status !== 'doing' || !task.trackTime)
       ) {
@@ -858,12 +871,16 @@ export function demoPost(request) {
         body: request.body,
         created: now,
       });
-      notify(targetTask, 'comment', 'Yeni yorum: ' + targetTask.title, request.body, [
-        targetTask.createdBy,
-        targetTask.coordinator,
-        ...targetTask.assignees,
-        ...targetTask.watchers,
-      ]);
+      const previousCommenters = demoData.comments
+        .filter((c) => c.workspace === request.id && c.task === targetTask.id && c.id !== request.requestId)
+        .map((c) => c.author);
+      notify(
+        targetTask,
+        'comment',
+        'Yeni yorum: ' + targetTask.title,
+        request.body,
+        commentRecipients(targetTask, previousCommenters),
+      );
     }
     persistDemoData();
     return {
@@ -933,4 +950,39 @@ export function demoPost(request) {
     };
   }
   throw Error('Bu işlem tasarım demosunda bulunmuyor.');
+}
+
+// ---------------------------------------------------------------------------
+// E-posta kuyruğu (pilot / geliştirme sunucusu). Tarayıcı demosunda kullanılmaz.
+
+/** Gönderilmeyi bekleyen bildirimler ve e-posta şablonu için gereken bağlam */
+export function pendingMail(limit = 50) {
+  const demoData = loadDemoData();
+  return demoData.notifications
+    .filter((n) => n.mail === 'queued')
+    .slice(0, limit)
+    .map((notification) => {
+      const state = normalizeState(demoData.states[notification.workspace]);
+      const members = demoData.members[notification.workspace] || [];
+      const nameOf = (email) => members.find((m) => m.email === email)?.name || email;
+      return {
+        notification,
+        workspace: demoData.workspaces.find((w) => w.id === notification.workspace),
+        task: state.tasks.find((t) => t.id === notification.task),
+        teams: state.teams,
+        recipientName: nameOf(notification.recipient),
+        actorName: notification.actor ? nameOf(notification.actor) : '',
+      };
+    });
+}
+
+/** Gönderim sonucunu bildirime işler: accepted | failed | queued (yeniden denenecek) */
+export function markMail(id, mail, detail = '') {
+  const demoData = loadDemoData();
+  const n = demoData.notifications.find((x) => x.id === id);
+  if (!n) return;
+  n.mail = mail;
+  n.detail = detail;
+  if (mail === 'queued' || mail === 'failed') n.mail_attempts = (n.mail_attempts || 0) + 1;
+  persistDemoData();
 }

@@ -59,6 +59,8 @@ export function NotificationGroups({ items, onRead, onOpen, name }) {
                     queued: 'sırada',
                     self: 'kendi işlemi',
                     muted: 'tercih kapalı',
+                    sending: 'gönderiliyor',
+                    failed: 'gönderilemedi',
                   }[e.mail] || e.mail}
                 </small>
               </article>

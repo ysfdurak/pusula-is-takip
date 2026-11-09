@@ -9,3 +9,4 @@ __pycache__/
 _site/
 dist/
 dist-pilot/
+tmp/
