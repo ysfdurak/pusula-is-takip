@@ -1,5 +1,6 @@
 // Tüm formlar ve pencereler (yeni iş, revizyon, engel, üye…). App.jsx'ten ayrıldı; değerleri AppContext üzerinden alır.
 import { DateShortcuts } from '../components/DateShortcuts.jsx';
+import { RECURRENCE_LABELS } from '../shared/recurrence.js';
 import { GlobalSearch } from '../components/GlobalSearch.jsx';
 import { PeoplePicker } from '../components/PeoplePicker.jsx';
 import { TaskRouting } from '../components/TaskRouting.jsx';
@@ -834,6 +835,29 @@ export function ModalHost() {
                         ? 'En fazla ' + workspace.workRules.maxDurationDays + ' takvim günü.'
                         : 'Terminsiz de kaydedebilirsin.'}
                     </small>
+                  </label>
+                  <label className="form-label">
+                    Tekrar
+                    <select
+                      name="recurrence"
+                      value={modal.item.recurrence || ''}
+                      onChange={(event) =>
+                        setModal({ ...modal, item: { ...modal.item, recurrence: event.target.value } })
+                      }
+                    >
+                      {Object.entries(RECURRENCE_LABELS).map(([value, label]) => (
+                        <option key={value} value={value}>
+                          {label}
+                        </option>
+                      ))}
+                    </select>
+                    {modal.item.recurrence && (
+                      <small>
+                        {modal.item.dueAt
+                          ? 'İş tamamlanınca bir sonraki tekrarı otomatik açılır.'
+                          : 'Tekrarlanan iş için termin seç.'}
+                      </small>
+                    )}
                   </label>
                 </div>
                 <DateShortcuts

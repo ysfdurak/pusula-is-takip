@@ -1,5 +1,6 @@
 // İş ayrıntısı çekmecesi. App.jsx'ten ayrıldı; değerleri AppContext üzerinden alır.
 import { Avatar } from '../components/Avatar.jsx';
+import { RECURRENCE_LABELS } from '../shared/recurrence.js';
 import { RevisionHistory } from '../components/RevisionHistory.jsx';
 import { trapFocus } from '../lib/focusTrap.js';
 import { formatDate, formatDateTime, formatDuration } from '../lib/format.js';
@@ -236,6 +237,11 @@ export function TaskDrawer() {
               </div>
             )}
           </div>
+          {selectedTask.recurrence && (
+            <p className="task-recurrence">
+              {'Tekrar: ' + RECURRENCE_LABELS[selectedTask.recurrence] + ' · tamamlanınca sonraki tekrar açılır.'}
+            </p>
+          )}
           {selectedTask.description && (
             <div className="task-description">
               <h3>Yapılacak iş</h3>

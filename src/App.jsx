@@ -1150,6 +1150,7 @@ export function App({ demo = false }) {
           project: r('project'),
           phase: r('phase'),
           priority: r('priority'),
+          recurrence: r('recurrence'),
           trackTime: form.get('trackTime') === 'on',
           notifyEmail: form.get('notifyEmail') === 'on',
           criteria: r('criteria'),

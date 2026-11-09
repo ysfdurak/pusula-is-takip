@@ -14,6 +14,7 @@ import {
   validateStructure,
   visibleStateFor,
 } from './workspaceModel.js';
+import { recurringCopy } from './recurrence.js';
 import { commentRecipients, mailStatus, statusRecipients } from './notificationRules.js';
 
 /**
@@ -266,6 +267,21 @@ export function createWorkspaceService({
       let error = validateStructure(merged) || validateSchedule(merged, current);
       if (error) {
         throw Error(error);
+      }
+      // Tekrarlanan iş tamamlanınca bir sonraki kopyası açılır (aynı iş için bir kez).
+      for (let task of [...merged.tasks]) {
+        let previous = current.tasks.find((e) => e.id === task.id);
+        if (
+          task.recurrence &&
+          task.dueAt &&
+          task.status === 'done' &&
+          previous &&
+          previous.status !== 'done' &&
+          !merged.tasks.some((other) => other.recurrenceOf === task.id) &&
+          merged.tasks.length < 2e3
+        ) {
+          merged.tasks.push(taskSchema.parse(recurringCopy(task, newId(), newId, now)));
+        }
       }
       for (let task of merged.tasks) {
         let previous = current.tasks.find((e) => e.id === task.id);

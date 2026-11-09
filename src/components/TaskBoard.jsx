@@ -10,6 +10,7 @@ import {
   RotateCcwIcon,
   UsersIcon,
 } from 'lucide-react';
+import { RECURRENCE_LABELS } from '../shared/recurrence.js';
 import { CardAssigneeControl } from './CardAssigneeControl.jsx';
 import { completionIssues, taskObstacles } from '../lib/taskViews.js';
 import { WAITING_REASON_LABELS, taskTeamIds, teamName } from '../shared/workspaceModel.js';
@@ -303,6 +304,7 @@ export function TaskBoard(e) {
                         <span>
                           {u(task)}
                           {l(task) ? ' · gecikti' : ''}
+                          {task.recurrence ? ' · ' + RECURRENCE_LABELS[task.recurrence].toLocaleLowerCase('tr') : ''}
                         </span>
                         {e.writable && l(task) && (
                           <button aria-label={task.title + ' terminini revize et'} onClick={() => e.onRevise(task)}>

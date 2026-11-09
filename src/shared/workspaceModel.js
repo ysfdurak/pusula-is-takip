@@ -61,6 +61,8 @@ export const taskSchema = z.object({
   createdAt: utcTimestamp.default(''),
   startedAt: utcTimestamp.default(''),
   completedAt: utcTimestamp.default(''),
+  recurrence: z.enum(['', 'daily', 'weekdays', 'weekly', 'monthly']).default(''),
+  recurrenceOf: z.string().max(100).default(''),
 });
 
 const templateSchema = z.object({
@@ -220,6 +222,9 @@ export function validateStructure(state) {
     }
     if (new Set(task.assignees).size !== task.assignees.length) {
       return 'Sorumlular tekrarlanamaz.';
+    }
+    if (task.recurrence && !task.dueAt) {
+      return 'Tekrarlanan iş için termin tarihi seçin.';
     }
     if (task.plannedStart && task.dueAt && task.plannedStart > task.dueAt) {
       return 'Bitiş zamanı başlangıçtan önce olamaz.';
@@ -510,6 +515,7 @@ export const FIELD_LABELS = {
   verified: 'Doğrulama',
   requireApproval: 'Kabul zorunluluğu',
   depends: 'Ön koşullar',
+  recurrence: 'Tekrar',
   trackTime: 'Süre takibi',
   notifyEmail: 'E-posta tercihi',
 };
