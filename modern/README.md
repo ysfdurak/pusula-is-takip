@@ -14,7 +14,7 @@ npm test
 npm run build
 ```
 
-Vite geliştirme adresi terminalde gösterilir. Üretilen statik dosyalar `modern/dist/` altındadır. Kök `index.html` GitHub Pages demosu değişmez.
+Vite geliştirme adresi terminalde gösterilir. Üretilen statik dosyalar `modern/dist/` altındadır ve GitHub Pages'te `/modern/` adresinde yayınlanır; sitenin kökü tasarım demosudur.
 
 ## Kaynak düzeni
 
@@ -36,7 +36,7 @@ Görev CRUD (düzenleme/oluşturma, durum değiştirme), kullanıcı ve ekip fil
 
 ## Yayın güvenliği
 
-Mevcut GitHub Pages demosu `/index.html` üzerinden korunur. Modern sürümün yayını ancak özellik eşleştirme ve testlerden sonra yapılmalıdır.
+Tasarım demosu sitenin kökünde (`/`), bu prototip `/modern/` altında yayınlanır. İkisi de `.github/workflows/publish-pages.yml` içinde testler ve tarayıcı duman testi geçince yayına alınır. Prototip özellik eşitliğine ulaşmadan kök adrese taşınmamalıdır.
 
 ## Genişletme (9 Kasım 2026)
 

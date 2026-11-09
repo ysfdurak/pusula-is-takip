@@ -1,13 +1,14 @@
 {
   "name": "pusula-is-takip",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "type": "module",
-  "description": "Pusula static design demo with reproducible packaging of recovered compiled assets",
+  "description": "Pusula iş ve ekip takip: tek dosyalı tasarım demosu, pilot sunucu modu derlemesi ve modüler React prototipi",
   "scripts": {
     "build": "node scripts/build.mjs",
     "check": "node scripts/check.mjs",
-    "test": "npm run check"
+    "test": "npm run check",
+    "build:pilot": "node scripts/build.mjs --pilot"
   },
   "engines": {
     "node": ">=20.11.0"

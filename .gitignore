@@ -6,3 +6,6 @@ node_modules/
 !.env.example
 *.log
 __pycache__/
+_site/
+modern/dist/
+pilot/
