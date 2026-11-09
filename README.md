@@ -35,3 +35,17 @@ Dağınık iş takibi, belirsiz sorumluluklar, geciken görevlerin geç fark edi
 
 ## Durum
 Portföy V1 — yayın hazırlığı. Tarayıcı uçtan uca testleri henüz doğrulanmamıştır.
+
+## Düzenlenebilir React prototipi
+
+Yeni, modüler React/Vite kaynak kodu [modern/](modern/) dizinindedir. Bu **yeniden oluşturulmuş V1 prototipidir**, özgün 540 KB derlenmiş uygulamanın birebir kaynak kurtarması değildir. Mevcut GitHub Pages demosu korunur.
+
+```bash
+cd modern
+npm install
+npm run dev
+npm test
+npm run build
+```
+
+[Modern sürüm kapsamı ve eksikleri](modern/README.md)
