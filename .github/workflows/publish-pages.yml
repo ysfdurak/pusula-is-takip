@@ -1,0 +1,60 @@
+name: Publish Pages
+# Kök tasarım demosu "/" adresinde, modüler React sürümü "/modern/" altında yayınlanır.
+# Yayın yalnızca statik kontroller, birim testleri, derleme ve tarayıcı duman testi geçerse yapılır.
+# Not: Repo ayarlarında Settings > Pages > Source = "GitHub Actions" olmalıdır.
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages
+  cancel-in-progress: false
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Static checks
+        run: |
+          python tests/check_static.py
+          npm run check
+          npm run build:pilot
+      - name: Modern unit tests and build
+        working-directory: modern
+        run: |
+          npm install --no-audit --no-fund
+          npm test
+          npm run build
+      - name: Assemble site
+        run: |
+          mkdir -p _site/modern
+          cp index.html _site/index.html
+          cp -r modern/dist/. _site/modern/
+          touch _site/.nojekyll
+      - name: Browser smoke test
+        run: |
+          npm install --no-audit --no-fund --no-save playwright@1
+          npx playwright install --with-deps chromium
+          node tests/e2e/smoke.mjs _site
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

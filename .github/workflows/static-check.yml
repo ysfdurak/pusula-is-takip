@@ -1,5 +1,8 @@
 name: Static and build checks
-on: [push, pull_request]
+on:
+  pull_request:
+  push:
+    branches-ignore: [main]
 jobs:
   check:
     runs-on: ubuntu-latest
@@ -13,3 +16,16 @@ jobs:
           node-version: '22'
       - run: python tests/check_static.py
       - run: npm run check
+      - run: npm run build:pilot
+      - name: Modern build
+        working-directory: modern
+        run: |
+          npm install --no-audit --no-fund
+          npm test
+          npm run build
+      - name: Browser smoke test
+        run: |
+          mkdir -p _site/modern && cp index.html _site/ && cp -r modern/dist/. _site/modern/
+          npm install --no-audit --no-fund --no-save playwright@1
+          npx playwright install --with-deps chromium
+          node tests/e2e/smoke.mjs _site

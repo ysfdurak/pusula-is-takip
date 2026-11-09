@@ -1,51 +1,87 @@
 # Pusula | İş ve Ekip Takip Sistemi
 
-Pusula, ekiplerin işlerini, sorumluluklarını, terminlerini ve operasyonel engellerini tek bir görünümde takip etmeyi amaçlayan Türkçe bir iş takip uygulaması prototipidir.
+Pusula, operasyon ekiplerinin işlerini, sorumlularını, terminlerini ve işi durduran engelleri tek ekranda izlemesi için tasarlanmış Türkçe bir iş takip uygulamasıdır. Depo, sevkiyat ve stok kontrol gibi vardiyalı ekipler düşünülerek hazırlandı.
+
+**Canlı demo:** https://ysfdurak.github.io/pusula-is-takip/ · **React prototipi:** https://ysfdurak.github.io/pusula-is-takip/modern/
+
+> Tasarım demosudur. Veriler sentetiktir ve yalnızca sizin tarayıcınızda saklanır. Gerçek şirket verisi girmeyin.
+
+![Benim panom](docs/img/benim-panom.png)
 
 ## Ne çözer?
-Dağınık iş takibi, belirsiz sorumluluklar, geciken görevlerin geç fark edilmesi ve ekipler arası koordinasyon eksikliği.
 
-## Kapsam
-- Benim işlerim ve ekip görünümü
-- Görev oluşturma, sorumlu atama, durum ve termin takibi
-- Proje, karar ve engel kayıtları
-- İş şablonları, kontrol listeleri ve bildirim arayüzü
-- Yerel tasarım demosu
+Operasyon ekiplerinde işler WhatsApp, e-posta ve Excel arasında dağılır. Kimin neyi üstlendiği belirsizleşir, geciken iş ancak iş işten geçince fark edilir. Pusula bunun için:
 
-## Çalıştırma
-`index.html` dosyasını güncel bir tarayıcıda açın. Bu dosya tek başına bir **tasarım demosudur**; gerçek çok kullanıcılı sunucu hizmeti veya güvenli kimlik doğrulama sağlamaz.
+- **Herkese kendi gündemini** gösterir: bugün neye öncelik vereceğini, geciken ve bugün teslim olan işleri.
+- **Ekip liderine tek bakışta durumu** verir: açık, geciken ve sahipsiz işler, 7 günlük teslim takvimi.
+- **İlk termini kaybetmez:** termin revize edilse bile ilk hedef tarih ve her değişikliğin gerekçesi saklanır. "İlk termine göre zamanında tamamlanan" ile "güncel termine göre" oranı ayrı ölçülür.
+- **Engeli görünür kılar:** işi durduran konu, çözüm sorumlusuyla birlikte işin üstünde durur.
 
-> Not: Kaynak HTML dosyası depoda `index.html` olarak bulunmaktadır. GitHub Pages bağlantısının çalışması ayrıca doğrulanmalıdır.
+## Özellikler
 
-## Demo akışı
-1. Örnek çalışma alanını inceleyin.
-2. Benim İşlerim ve ekip panolarını karşılaştırın.
-3. Örnek görevin durumunu ve terminini değiştirin.
-4. Karar, engel ve bildirim görünümlerini inceleyin.
+| Alan | Neler var |
+|---|---|
+| Panolar | Benim panom, Ekip panosu, 7 günlük plan, ekip havuzu, ortak işler, takip edilenler |
+| İş | Hızlı ekleme (yaz + Enter), şablondan iş, bireysel / ortak iş, tek veya çoklu sorumlu, öncelik, termin ve revizyon gerekçesi, kontrol listesi, onay (doğrulama) adımı, süre takibi |
+| Görünümler | Statü panosu (sürükle-bırak kanban), liste, toplu işlem, arama (Ctrl/⌘ K), filtreler |
+| Kayıtlar | Projeler, engeller, kararlar, yorumlar, işlem geçmişi |
+| Ekip | Birden fazla ekip, kişi rehberi, roller (yönetici, ekip üyesi, görüntüleyici) |
+| Bildirim | Uygulama içi bildirimler, bildirim kuralları (e-posta gönderimi bağlı değil) |
+| Veri | JSON dışa aktarma, örnek verileri sıfırlama |
 
-## Belgeler
-- [Ürün tanıtımı](docs/URUN_TANITIMI.md)
-- [Demo senaryoları](docs/DEMO_SENARYOLARI.md)
-- [Mimari ve sınırlar](docs/MIMARI_VE_SINIRLAR.md)
-- [Portföy açıklaması](docs/PORTFOY_METNI.md)
-- [Yayın kontrol listesi](docs/YAYIN_KONTROL.md)
+<p>
+<img src="docs/img/is-listesi-pano.png" width="49%" alt="Statü panosu">
+<img src="docs/img/is-ayrintisi.png" width="49%" alt="İş ayrıntısı">
+</p>
+<p><img src="docs/img/ekip-panosu.png" width="49%" alt="Ekip panosu"> <img src="docs/img/mobil.png" width="20%" alt="Telefon görünümü"></p>
 
-## Gizlilik ve olgunluk
-Örnekler sentetiktir. Kurumsal veri, gerçek kişi bilgileri veya üretim sistemi erişimleri kullanılmamalıdır. Bu çalışma prototip/portföy gösterimidir; üretim kullanımı için yetkilendirme, sunucu, veri güvenliği ve kapsamlı test gerekir.
+## 5 dakikalık demo
 
-## Durum
-Portföy V1 — yayın hazırlığı. Tarayıcı uçtan uca testleri henüz doğrulanmamıştır.
+1. **Benim panom:** Sağ üstteki "Denediğin rol" menüsünden Deniz Yılmaz (yönetici) ile başla. Hızlı iş kutusuna bir iş yazıp Enter'a bas.
+2. **Ekip panosu:** 2 geciken işi ve "İlk planı da takip et" kutusunu gör. Termini iki kez revize edilmiş *Eksik koli bildirimlerini tamamla* işini aç.
+3. **İş listesi → Pano:** Bir kartı sürükleyerek statüsünü değiştir. *Vardiya kapanış raporunu doğrula* işini açıp tamamlanmadan önce doğrulama beklediğini gör.
+4. **Rol değiştir:** Selin Aydın (görüntüleyici) ile aynı ekranlara bak; düzenleme hakları kapanır.
 
-## Düzenlenebilir React prototipi
+Ayrıntılı senaryolar: [docs/DEMO_SENARYOLARI.md](docs/DEMO_SENARYOLARI.md)
 
-Yeni, modüler React/Vite kaynak kodu [modern/](modern/) dizinindedir. Bu **yeniden oluşturulmuş V1 prototipidir**, özgün 540 KB derlenmiş uygulamanın birebir kaynak kurtarması değildir. Mevcut GitHub Pages demosu korunur.
+## Depodaki iki sürüm
+
+| | Tasarım demosu (kök `index.html`) | Modüler React prototipi (`modern/`) |
+|---|---|---|
+| Durum | Tam özellikli arayüz, ana demo | Yeniden yazım, temel akışlar |
+| Kaynak | Derlenmiş paket (`src/app.bundle.js`) + düzenlenebilir CSS | Okunabilir JSX ve iş kuralları, birim testli |
+| Yayın | `/` | `/modern/` |
+
+Derlenmiş paketin özgün React kaynağı mevcut değildir; ayrıntı [docs/KAYNAK_KOD_DURUMU.md](docs/KAYNAK_KOD_DURUMU.md).
+
+## Çalıştırma ve geliştirme
 
 ```bash
-cd modern
-npm install
-npm run dev
-npm test
-npm run build
+# Tasarım demosu: index.html dosyasını tarayıcıda açmanız yeterli.
+npm run build          # src/ → index.html
+npm run check          # index.html kaynakla uyumlu mu?
+npm run build:pilot    # sunucu moduna alınmış arayüz → pilot/index.html
+
+# React prototipi
+cd modern && npm install && npm test && npm run dev
 ```
 
-[Modern sürüm kapsamı ve eksikleri](modern/README.md)
+`main` dalına her gönderimde GitHub Actions statik kontrolleri, birim testlerini, derlemeyi ve tarayıcı duman testini (`tests/e2e/smoke.mjs`) çalıştırır; hepsi geçerse GitHub Pages güncellenir.
+
+## Şirket içi pilot
+
+Arayüz bir sunucuyla çalışmaya hazırdır (`/api/workspace`, oturum ve çakışma ekranları paketin içinde), ancak sunucu, giriş ve veritabanı bu depoda yoktur. Birkaç kullanıcıyla deneme için gerekenler: [docs/PILOT_IHTIYACLARI.md](docs/PILOT_IHTIYACLARI.md)
+
+## Belgeler
+
+- [Demo senaryoları](docs/DEMO_SENARYOLARI.md)
+- [Mimari, API sözleşmesi ve sınırlar](docs/MIMARI_VE_SINIRLAR.md)
+- [Pilot ihtiyaçları](docs/PILOT_IHTIYACLARI.md)
+- [Kaynak kodun durumu](docs/KAYNAK_KOD_DURUMU.md)
+- [Yayın kontrol listesi](docs/YAYIN_KONTROL.md)
+- [React prototipi](modern/README.md)
+
+## Portföy notu
+
+**Gösterilen yetkinlikler:** operasyon süreç analizi, iş kuralı tasarımı (sorumluluk, termin revizyonu, onay, engel), kullanıcı akışları, prototipleme, test senaryosu ve yayın otomasyonu.
+**Kapsam sınırı:** Portföy demosudur; çok kullanıcılı canlı kurumsal kullanım için sunucu, kimlik doğrulama ve güvenlik çalışması gerekir.

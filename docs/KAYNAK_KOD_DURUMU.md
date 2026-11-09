@@ -22,6 +22,10 @@ npm run check
 
 Ardından `index.html` dosyasını tarayıcıda açın. GitHub Pages aynı dosyayı yayınlar.
 
+## Pilot derlemesi
+
+`npm run build:pilot`, paketteki kök bileşeni `demo:!1` ile başlatır, giriş bağlantısını `/auth/login` adresine çevirir ve CSP'yi `connect-src 'self'` yapar. Çıktı `pilot/index.html` dosyasıdır ve depoya eklenmez. Paket değişirse betik açık bir hatayla durur.
+
 ## Geliştirme kuralı
 
 `index.html` doğrudan düzenlenmez. CSS değişiklikleri `src/styles.css` içinde yapılabilir. JavaScript dosyası derlenmiş olduğu için üzerinde değişiklik yapmak kırılgan ve risklidir; React kaynaklarını yeniden oluşturma işi ayrı bir geliştirme aşamasıdır.

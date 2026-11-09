@@ -1,5 +1,7 @@
 export const STATUS = ['Başlanmadı','Devam','Tamam','İptal'];
 export const PRIORITY = ['Düşük','Orta','Yüksek'];
+export const ROLE_LABELS = {admin:'Yönetici',manager:'Ekip yöneticisi',member:'Ekip üyesi',viewer:'Görüntüleyici'};
+export const roleLabel = (role) => ROLE_LABELS[role] || role;
 export const id = () => globalThis.crypto?.randomUUID?.() || 'id-'+Date.now()+'-'+Math.random().toString(36).slice(2);
 export const now = () => new Date().toISOString();
 export function member(ws,id){return ws.members.find(m=>m.id===id);}
