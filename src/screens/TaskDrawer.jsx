@@ -1,5 +1,6 @@
 // İş ayrıntısı çekmecesi. App.jsx'ten ayrıldı; değerleri AppContext üzerinden alır.
 import { Avatar } from '../components/Avatar.jsx';
+import { TaskAttachments } from '../components/TaskAttachments.jsx';
 import { RECURRENCE_LABELS } from '../shared/recurrence.js';
 import { RevisionHistory } from '../components/RevisionHistory.jsx';
 import { trapFocus } from '../lib/focusTrap.js';
@@ -35,6 +36,12 @@ import { useApp } from '../AppContext.js';
 
 export function TaskDrawer() {
   const {
+    attachFiles,
+    maxFileBytes,
+    openAttachment,
+    removeAttachment,
+    role,
+    taskFiles,
     activities,
     avatarStack,
     busy,
@@ -453,6 +460,19 @@ export function TaskDrawer() {
               </p>
             )}
           </section>
+          <TaskAttachments
+            files={taskFiles}
+            writable={canWrite}
+            user={user}
+            isOwner={role === 'owner'}
+            busy={busy}
+            maxFileBytes={maxFileBytes}
+            name={memberName}
+            timeLabel={formatDateTime}
+            onAdd={attachFiles}
+            onOpen={openAttachment}
+            onRemove={removeAttachment}
+          />
           <div className="discussion">
             <div className="discussion-tabs">
               <button

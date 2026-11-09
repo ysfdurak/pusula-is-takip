@@ -5,7 +5,7 @@ import { processOutbox } from './mail/outbox.js';
 import { randomToken } from './auth.js';
 import { randomUUID } from 'node:crypto';
 
-const MAX_BODY = 2 * 1024 * 1024;
+const MAX_BODY = 8 * 1024 * 1024; // 5 MB ek dosya base64 ile ~6,7 MB eder
 const COOKIE = 'pusula_sid';
 
 const escapeHtml = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
@@ -29,6 +29,8 @@ export function createApp({ config, store, auth, html, mailer = null, log = () =
     mailMode: () => (mailer ? 'live' : 'off'),
     profileFor: (email) => ({ email, name: names.get(email) || email.split('@')[0], department: '' }),
     canCreateWorkspace: (email) => admins.has(email),
+    blobs: store.blobs,
+    maxFileBytes: config.maxFileMb * 1024 * 1024,
   });
 
   bootstrap();
@@ -272,7 +274,7 @@ ${link ? `<p><a href="${escapeHtml(link.href)}" style="color:#2c6549;font-weight
       }
       try {
         if (req.method === 'GET') {
-          return json(res, 200, service.get(email, url.searchParams.get('id') || '', url.searchParams.get('task') || ''));
+          return json(res, 200, service.get(email, url.searchParams.get('id') || '', url.searchParams.get('task') || '', url.searchParams.get('file') || ''));
         }
         if (req.method !== 'POST') return json(res, 405, { error: 'Yöntem desteklenmiyor.' });
         // Başka sitelerden gelen istekleri reddet (CSRF): kaynak bilgisi varsa uygulama adresiyle aynı olmalı.
@@ -291,8 +293,8 @@ ${link ? `<p><a href="${escapeHtml(link.href)}" style="color:#2c6549;font-weight
           return json(res, 200, { configured: !!mailer, accepted: r.accepted || 0 });
         }
         const result = service.post(email, body);
-        if (['save', 'member', 'policy', 'create'].includes(body.action)) {
-          store.audit(email, body.action, body.action === 'member' ? `${body.email} · ${body.role}` : body.reason || body.name || '');
+        if (['save', 'member', 'policy', 'create', 'attach', 'detach'].includes(body.action)) {
+          store.audit(email, body.action, body.action === 'member' ? `${body.email} · ${body.role}` : body.action === 'detach' ? body.file : body.reason || body.name || '');
         }
         flushMail();
         return json(res, 200, result);

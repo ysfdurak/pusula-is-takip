@@ -471,6 +471,7 @@ export function setDemoActor(email) {
 }
 
 export function resetDemoData() {
+  clearDemoFiles();
   demoCache = createDemoData();
   persistDemoData();
 }
@@ -514,16 +515,53 @@ export function createDemoConflict(workspaceId) {
   };
 }
 
+// Ek dosyalar tarayıcıda ayrı anahtarlarda tutulur; tarayıcı kotası küçük olduğu için sınır 1 MB.
+const FILE_PREFIX = 'pusula-file-';
+const memoryFiles = new Map();
+const demoBlobs = {
+  put(id, data) {
+    try {
+      localStorage.setItem(FILE_PREFIX + id, data);
+    } catch {
+      if (typeof localStorage > 'u') return memoryFiles.set(id, data);
+      throw Error('Tarayıcı depolama alanı doldu. Önce bazı ekleri sil.');
+    }
+  },
+  get(id) {
+    try {
+      return localStorage.getItem(FILE_PREFIX + id) ?? memoryFiles.get(id) ?? null;
+    } catch {
+      return memoryFiles.get(id) ?? null;
+    }
+  },
+  remove(id) {
+    memoryFiles.delete(id);
+    try {
+      localStorage.removeItem(FILE_PREFIX + id);
+    } catch {}
+  },
+};
+
+function clearDemoFiles() {
+  memoryFiles.clear();
+  try {
+    for (let key of Object.keys(localStorage)) if (key.startsWith(FILE_PREFIX)) localStorage.removeItem(key);
+  } catch {}
+}
+
 const service = createWorkspaceService({
   load: loadDemoData,
   persist: persistDemoData,
+  blobs: demoBlobs,
+  maxFileBytes: 1024 * 1024,
   newId: newDemoId,
   mailMode: () => mailMode,
   profileFor: (email) => DEMO_USERS.find((e) => e.email === email),
   accessError: 'Bu örnek çalışma alanında erişimin yok.',
 });
 
-export const demoGet = (workspaceId, taskId = '') => service.get(loadDemoData().actor, workspaceId, taskId);
+export const demoGet = (workspaceId, taskId = '', fileId = '') =>
+  service.get(loadDemoData().actor, workspaceId, taskId, fileId);
 export const demoPost = (request) => service.post(loadDemoData().actor, request);
 export const pendingMail = (limit) => service.pendingMail(limit);
 export const markMail = (id, mail, detail) => service.markMail(id, mail, detail);

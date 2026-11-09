@@ -62,6 +62,7 @@ export function loadConfig(env = process.env) {
     backupKeep: Number(env.BACKUP_KEEP || 14),
     sessionHours: Number(env.SESSION_HOURS || 10),
     sessionIdleMinutes: Number(env.SESSION_IDLE_MINUTES || 120),
+    maxFileMb: Math.min(Math.max(Number(env.MAX_FILE_MB || 5), 1), 5),
     htmlFile: resolve(env.PUSULA_HTML || new URL('../dist-pilot/index.html', import.meta.url).pathname),
   };
 }

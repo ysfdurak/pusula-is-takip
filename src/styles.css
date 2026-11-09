@@ -15,3 +15,17 @@
 .select-all-assignees{margin:-4px 0 8px}
 .form-due{display:block}
 .task-recurrence{margin:0 0 12px;font-size:13px;color:#617d4b}
+.attachments{border-top:1px solid var(--line);margin:0 0 22px;padding-top:18px}
+.attachments-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:10px}
+.attachments-head h3{color:#697a55;font-size:11px;font-weight:500;margin:0;display:flex;align-items:center;gap:6px}
+.attachments-head h3 b{background:#f0f6e5;border-radius:4px;padding:2px 5px;font-size:10px;font-weight:400}
+.attachments ul{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.attachments li{display:flex;align-items:center;gap:6px}
+.attachment-open{flex:1;min-width:0;display:flex;align-items:center;gap:10px;text-align:left;background:#fafcf6;border:1px solid #e7eddd;border-radius:7px;padding:9px 11px;color:#617d4b}
+.attachment-open:hover{border-color:#bad29e}
+.attachment-open>span{flex:1;min-width:0}
+.attachment-open strong{display:block;font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.attachment-open small{display:block;color:#687a4e;font-size:10px;margin-top:2px}
+.attachment-confirm{display:flex;gap:10px;padding:0 4px}
+.text-button.danger{color:#a14b32;font-weight:600}
+.attachments-empty{color:#687a4e;font-size:11px;margin:0}

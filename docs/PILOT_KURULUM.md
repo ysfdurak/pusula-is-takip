@@ -46,6 +46,7 @@ Sunucuya iletilecekler: Dizin (kiracı) kimliği, Uygulama (istemci) kimliği ve
 | `ENTRA_TENANT_ID`, `ENTRA_CLIENT_ID`, `ENTRA_CLIENT_SECRET` | Evet | 1. adımdan |
 | `SESSION_HOURS` | Hayır | En uzun oturum süresi (varsayılan: 10 saat) |
 | `SESSION_IDLE_MINUTES` | Hayır | Bu kadar dakika işlem yapılmayan oturum kapanır (varsayılan: 120) |
+| `MAX_FILE_MB` | Hayır | İşe eklenen dosyanın azami boyutu, MB (varsayılan ve üst sınır: 5) |
 | `MAIL_MODE`, `MAIL_SENDER`, `MAIL_ALLOWED_DOMAINS` | Hayır | E-posta için. Aynı uygulama kaydı kullanılır |
 | `DATA_DIR`, `BACKUP_KEEP` | Hayır | Docker'da `/data`; tutulacak yedek sayısı (varsayılan: 14) |
 

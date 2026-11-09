@@ -44,6 +44,8 @@ import {
 import { applyConflictChoices, buildConflictReport } from './lib/conflicts.js';
 import { buildDashboardStats, dueTime } from './lib/dashboardStats.js';
 import { formatDateTime, fromDateTimeInput, newId, toDateTimeInput, todayKey } from './lib/format.js';
+import { prepareUpload } from './lib/upload.js';
+import { formatBytes } from './components/TaskAttachments.jsx';
 import { NAV_ITEMS, ROLE_LABELS, TASK_STATUS_LABELS } from './lib/labels.js';
 import {
   DEFAULT_FOCUS_SETTINGS,
@@ -96,6 +98,9 @@ export function App({ demo = false }) {
   let [modal, setModal] = useState(null);
   let [openTaskId, setOpenTaskId] = useState('');
   let [comments, setComments] = useState([]);
+  let [taskFiles, setTaskFiles] = useState([]);
+  let [fileCounts, setFileCounts] = useState({});
+  let [maxFileBytes, setMaxFileBytes] = useState(1048576);
   let [activities, setActivities] = useState([]);
   let [detailsLoading, setDetailsLoading] = useState(false);
   let [commentDraft, setCommentDraft] = useState('');
@@ -315,13 +320,18 @@ export function App({ demo = false }) {
   }
   let myNotifications = notifications.filter((notification) => notification.recipient === user);
   let unreadCount = myNotifications.filter((notification) => !notification.read_at).length;
-  async function fetchWorkspace(t, n = '') {
+  async function fetchWorkspace(t, n = '', f = '') {
     if (demo) {
-      return demoGet(t, n);
+      return demoGet(t, n, f);
     }
     let task = await fetch(
       '/api/workspace' +
-        (t ? '?id=' + encodeURIComponent(t) + (n ? '&task=' + encodeURIComponent(n) : '') : ''),
+        (t
+          ? '?id=' +
+            encodeURIComponent(t) +
+            (n ? '&task=' + encodeURIComponent(n) : '') +
+            (f ? '&file=' + encodeURIComponent(f) : '')
+          : ''),
     );
     let i = await task.json();
     if (task.status === 401) {
@@ -353,6 +363,8 @@ export function App({ demo = false }) {
       setNotifications(nextWorkspace.notifications || []);
       setNotifyPolicy(nextWorkspace.policy || DEFAULT_NOTIFY_POLICY);
       setMailConfigured(!!nextWorkspace.mailConfigured);
+      setFileCounts(nextWorkspace.fileCounts || {});
+      setMaxFileBytes(nextWorkspace.maxFileBytes || 1048576);
     }
   }
   async function refresh(e = workspaceId) {
@@ -487,6 +499,8 @@ export function App({ demo = false }) {
       if (detailsRequestSeq.current === n) {
         setComments(nextWorkspace.comments || []);
         setActivities(nextWorkspace.activities || []);
+        setTaskFiles(nextWorkspace.files || []);
+        setFileCounts(nextWorkspace.fileCounts || {});
       }
     } catch (err) {
       if (detailsRequestSeq.current === n) {
@@ -507,6 +521,7 @@ export function App({ demo = false }) {
     setOpenTaskId(e);
     setComments([]);
     setActivities([]);
+    setTaskFiles([]);
     setCommentDraft('');
     commentRequestId.current = '';
     setDetailTab('comments');
@@ -532,6 +547,68 @@ export function App({ demo = false }) {
             })
           : structuredClone(t),
     });
+  }
+  async function attachFiles(list) {
+    setBusy(true);
+    setError('');
+    let added = 0;
+    try {
+      for (let file of list) {
+        let prepared = await prepareUpload(file);
+        if (prepared.size > maxFileBytes) {
+          throw Error(file.name + ': dosya en fazla ' + formatBytes(maxFileBytes) + ' olabilir.');
+        }
+        await postAction({
+          action: 'attach',
+          id: workspaceId,
+          task: openTaskId,
+          name: prepared.name,
+          data: prepared.data,
+        });
+        added++;
+      }
+      setToast(added === 1 ? 'Dosya eklendi' : added + ' dosya eklendi');
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setBusy(false);
+      if (openTaskId) {
+        loadTaskDetails(openTaskId);
+      }
+    }
+  }
+  async function openAttachment(file) {
+    try {
+      let result = await fetchWorkspace(workspaceId, '', file.id);
+      let bytes = Uint8Array.from(atob(result.data), (c) => c.charCodeAt(0));
+      let url = URL.createObjectURL(new Blob([bytes], { type: result.file.type }));
+      let link = document.createElement('a');
+      link.href = url;
+      link.download = result.file.name;
+      if (result.file.type.startsWith('image/')) {
+        link.removeAttribute('download');
+        link.target = '_blank';
+        link.rel = 'noopener';
+      }
+      document.body.append(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 60e3);
+    } catch (err) {
+      setError(err.message);
+    }
+  }
+  async function removeAttachment(file) {
+    setBusy(true);
+    try {
+      await postAction({ action: 'detach', id: workspaceId, task: openTaskId, file: file.id });
+      setToast('Dosya silindi');
+      loadTaskDetails(openTaskId);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setBusy(false);
+    }
   }
   function startDemoConflict() {
     try {
@@ -1467,6 +1544,12 @@ export function App({ demo = false }) {
     </span>
   );
   const appContext = {
+    attachFiles,
+    fileCounts,
+    maxFileBytes,
+    openAttachment,
+    removeAttachment,
+    taskFiles,
     activeMembers,
     activities,
     assignableMembers,

@@ -186,6 +186,51 @@ test('kalıcılık: sunucu yeniden başlayınca veriler ve oturum korunur; yedek
   await s2.close();
 });
 
+test('ek dosya: üye ekler, erişimi olmayan göremez, tür ve boyut sınırı, silinen işin eki de silinir', async () => {
+  const s = await start({ env: { MAX_FILE_MB: '1' } });
+  const admin = (await s.login('deniz@sirket.test')).cookie;
+  const id = (await s.api(admin)).body.workspaces[0].id;
+  for (const [email, role] of [['ece@sirket.test', 'editor'], ['mert@sirket.test', 'editor']]) {
+    await s.api(admin, { method: 'POST', body: { action: 'member', id, email, name: email.split('@')[0], department: '', role, active: true } });
+  }
+  const ece = (await s.login('ece@sirket.test')).cookie;
+  const mert = (await s.login('mert@sirket.test')).cookie;
+  const w = await s.api(admin, { query: `?id=${id}` });
+  const next = structuredClone(w.body.state);
+  next.teams.push({ id: 'depo', name: 'Depo', members: ['deniz@sirket.test', 'ece@sirket.test'], leads: ['deniz@sirket.test'] });
+  next.tasks.push({ id: 'f1', teamId: 'depo', title: 'Fotoğraflı iş', status: 'todo', assignees: ['ece@sirket.test'], createdBy: 'deniz@sirket.test' });
+  const savedTask = await s.api(admin, { method: 'POST', body: { action: 'save', id, revision: w.body.revision, state: next, reason: '' } });
+  assert.equal(savedTask.status, 200, JSON.stringify(savedTask.body));
+
+  const png = Buffer.from('89504e470d0a1a0a', 'hex').toString('base64');
+  const added = await s.api(ece, { method: 'POST', body: { action: 'attach', id, task: 'f1', name: 'raf.png', data: png } });
+  assert.equal(added.status, 200, JSON.stringify(added.body));
+  assert.equal(added.body.file.type, 'image/png');
+  const bad = await s.api(ece, { method: 'POST', body: { action: 'attach', id, task: 'f1', name: 'x.html', data: png } });
+  assert.equal(bad.status, 400);
+  const big = await s.api(ece, { method: 'POST', body: { action: 'attach', id, task: 'f1', name: 'b.pdf', data: Buffer.alloc(1024 * 1024 + 10).toString('base64') } });
+  assert.match(big.body.error, /en fazla 1 MB/);
+
+  const detail = await s.api(ece, { query: `?id=${id}&task=f1` });
+  assert.equal(detail.body.files.length, 1);
+  assert.equal(detail.body.fileCounts.f1, 1);
+  const fileId = detail.body.files[0].id;
+  const got = await s.api(ece, { query: `?id=${id}&file=${fileId}` });
+  assert.equal(got.body.data, png);
+  const denied = await s.api(mert, { query: `?id=${id}&file=${fileId}` });
+  assert.equal(denied.status, 403, 'işi göremeyen eki de alamaz');
+  assert.ok(!JSON.stringify(denied.body).includes(png));
+  const notOwner = await s.api(mert, { method: 'POST', body: { action: 'detach', id, task: 'f1', file: fileId } });
+  assert.notEqual(notOwner.status, 200);
+
+  const w2 = await s.api(admin, { query: `?id=${id}` });
+  const without = structuredClone(w2.body.state);
+  without.tasks = without.tasks.filter((t) => t.id !== 'f1');
+  await s.api(admin, { method: 'POST', body: { action: 'save', id, revision: w2.body.revision, state: without, reason: '' } });
+  assert.equal(s.store.db.prepare('SELECT COUNT(*) AS n FROM blobs').get().n, 0);
+  await s.close();
+});
+
 test('e-posta: durum değişince ilgiliye Outlook üzerinden gider, işlemi yapana gitmez', async () => {
   const sent = [];
   const s = await start({ mailer: { name: 'Outlook', send: async (m) => { sent.push(m); return { accepted: true }; } } });

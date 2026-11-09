@@ -44,6 +44,11 @@ try {
   check(await d.isVisible(`text=${title}`), 'İş sayfa yenilendikten sonra korunuyor');
   await d.click('text=Eksik koli bildirimlerini tamamla');
   check(await d.isVisible('.task-drawer'), 'İş ayrıntısı açılıyor');
+  await d.setInputFiles('input[aria-label="Eklenecek dosyalar"]', { name: 'raf-fotografi.png', mimeType: 'image/png', buffer: Buffer.from('89504e470d0a1a0a', 'hex') });
+  await d.waitForSelector('.attachment-open:has-text("raf-fotografi.png")', { timeout: 5000 });
+  const [download] = await Promise.all([d.waitForEvent('popup', { timeout: 5000 }).catch(() => null), d.click('.attachment-open:has-text("raf-fotografi.png")')]);
+  check(!!download, 'İşe fotoğraf eklenip açılabiliyor');
+  await download?.close();
   await d.keyboard.press('Escape');
   for (const name of ['Ekip panosu', 'Ekipler', 'Bildirimler']) {
     await d.click(`.sidebar nav button:has-text("${name}")`);
