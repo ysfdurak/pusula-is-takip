@@ -1818,6 +1818,10 @@ export function App({ demo = false, preview = false }) {
                       {preview
                         ? 'Boş başlar, örnek veri yok · Veriler yalnızca bu tarayıcıda · Gerçek pilotta Microsoft hesabıyla girilir'
                         : 'Örnek veriler · Gerçek şirket verisi girmeyin · Ortak canlı kullanım değildir'}
+                      {' · '}
+                      <a className="banner-switch" href={preview ? '../' : 'pilot-onizleme/'}>
+                        {preview ? 'Örnek verili demoya geç' : 'Boş pilot önizlemesine geç'}
+                      </a>
                     </small>
                   </span>
                 </div>

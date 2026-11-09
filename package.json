@@ -1,6 +1,6 @@
 {
   "name": "pusula-is-takip",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "private": true,
   "type": "module",
   "description": "Pusula: Türkçe iş ve ekip takip uygulaması (React + Vite)",
@@ -18,7 +18,7 @@
     "start:dev": "npm run build:pilot && AUTH_MODE=dev PUSULA_ADMINS=deneme@sirket.test DATA_DIR=./tmp/pilot-data node --disable-warning=ExperimentalWarning server/index.js"
   },
   "dependencies": {
-    "zod": "3.25.76"
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^5.1.0",

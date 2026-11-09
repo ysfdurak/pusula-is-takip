@@ -8,6 +8,17 @@ Pusula, operasyon ekiplerinin işlerini, sorumlularını, terminlerini ve işi d
 > İkisi de tarayıcıda çalışır; veriler yalnızca sizin tarayıcınızda saklanır, sunucuya gitmez. Gerçek şirket verisi girmeyin.
 > Demo kurgusal bir depo ekibiyle açılır. Pilot önizlemesi şirket pilotundaki gibi boş açılır: yönetici sizsiniz, ekipleri ve kişileri siz kurarsınız, "Kullanıcı olarak dene" ile ekip üyesinin gözünden bakarsınız.
 
+### Telefondan denemek
+
+Telefon kamerasıyla okutun; uygulama tarayıcıda açılır, kurulum gerekmez. Paylaşmak için bağlantıyı da gönderebilirsiniz.
+
+| Pilot önizlemesi (boş başlar) | Demo (örnek verilerle) |
+|:---:|:---:|
+| <img src="docs/img/qr-pilot-onizleme.png" width="160" alt="Pilot önizlemesi QR kodu"> | <img src="docs/img/qr-demo.png" width="160" alt="Demo QR kodu"> |
+| [ysfdurak.github.io/pusula-is-takip/pilot-onizleme/](https://ysfdurak.github.io/pusula-is-takip/pilot-onizleme/) | [ysfdurak.github.io/pusula-is-takip/](https://ysfdurak.github.io/pusula-is-takip/) |
+
+İpucu: Telefonda tarayıcı menüsünden "Ana ekrana ekle" ile kısayol oluşturulabilir. Önizlemede veriler o telefonun tarayıcısında kalır; bilgisayardaki önizlemeyle paylaşılmaz. Ekip olarak birlikte denemek için pilot sunucusu gerekir.
+
 ![Benim panom](docs/img/benim-panom.png)
 
 ## Ne çözer?
@@ -92,7 +103,13 @@ Pilot sunucusu hazır: Microsoft hesabıyla giriş, SQLite veritabanı, Outlook 
 - [Kaynak kodun durumu](docs/KAYNAK_KOD_DURUMU.md)
 - [Yayın kontrol listesi](docs/YAYIN_KONTROL.md)
 
+## Proje durumu (Kasım 2026)
+
+**Portföy sürümü tamamlandı (0.7.0).** Açık iş, açık PR ve bilinen güvenlik açığı yok (`npm audit`: 0).
+
+Şirket pilotu için yazılım hazır; kalan adımlar şirket tarafında: BT'nin sağlayacağı sunucu ve HTTPS, Microsoft girişi ve Outlook'un gerçek şirket hesabında denenmesi, BT güvenlik değerlendirmesi ve KVKK onayı, iPhone ve Android'de gerçek cihaz denemesi. Ayrıntı: [docs/PILOT_IHTIYACLARI.md](docs/PILOT_IHTIYACLARI.md).
+
 ## Portföy notu
 
 **Gösterilen yetkinlikler:** operasyon süreç analizi, iş kuralı tasarımı (sorumluluk, termin revizyonu, onay, engel), kullanıcı akışları, prototipleme, test senaryosu ve yayın otomasyonu.
-**Kapsam sınırı:** Portföy demosudur; çok kullanıcılı canlı kurumsal kullanım için sunucu, kimlik doğrulama ve güvenlik çalışması gerekir.
+**Kapsam sınırı:** GitHub Pages'teki sürümler tarayıcıda çalışan demolardır. Çok kullanıcılı şirket kullanımı için pilot sunucusu (`server/`) şirket altyapısında kurulmalıdır.

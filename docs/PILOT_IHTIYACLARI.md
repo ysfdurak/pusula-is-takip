@@ -58,7 +58,7 @@
 | İhtiyaç | Neden | Asgari çözüm |
 |---|---|---|
 | Telefona fotoğraf yükleme denemesi | Depoda kanıt çoğunlukla fotoğraf | Ekler hazır; pilotun ilk haftasında şirket telefonlarıyla deneyin |
-| Telefondan kullanım | Sahada masaüstü yok | Mevcut mobil görünüm ve "Ana ekrana ekle" (PWA) |
+| Telefondan kullanım | Sahada masaüstü yok | Mobil görünüm hazır; README'deki QR koduyla açılır, "Ana ekrana ekle" ile kısayol. Gerçek iPhone ve Android denemesi pilotun ilk haftasında |
 | Eğitim | Ekranda çok seçenek var | 30 dakikalık tanıtım ve tek sayfalık rehber: hızlı iş ekle, statü değiştir, engel bildir |
 
 **Arayüz sadeleştirmeleri** (Bekleme ve Engel'in birleştirilmesi, kanban kartlarının sadeleşmesi, yeni iş formunun kısalması) 0.7.0'da yapıldı. Sonraki sadeleştirmeler pilot geri bildirimiyle önceliklendirilmeli.
