@@ -1,7 +1,7 @@
 name: Publish Pages
-# Kök tasarım demosu "/" adresinde, modüler React sürümü "/modern/" altında yayınlanır.
-# Yayın yalnızca statik kontroller, birim testleri, derleme ve tarayıcı duman testi geçerse yapılır.
-# Not: Repo ayarlarında Settings > Pages > Source = "GitHub Actions" olmalıdır.
+# Uygulama main dalındaki kaynaktan derlenir ve GitHub Pages'te yayınlanır.
+# Yayın yalnızca birim testleri, derleme ve tarayıcı duman testi geçerse yapılır.
+# Repo ayarı: Settings > Pages > Source = "GitHub Actions".
 on:
   workflow_dispatch:
   push:
@@ -21,31 +21,25 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+          cache: npm
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - name: Static checks
-        run: |
-          python tests/check_static.py
-          npm run check
-          npm run build:pilot
-      - name: Modern unit tests and build
-        working-directory: modern
-        run: |
-          npm install --no-audit --no-fund
-          npm test
-          npm run build
-      - name: Assemble site
-        run: |
-          mkdir -p _site/modern
-          cp index.html _site/index.html
-          cp -r modern/dist/. _site/modern/
-          touch _site/.nojekyll
+      - run: npm ci --no-audit --no-fund
+      - run: python tests/check_static.py
+      - run: npm test
+      - run: npm run build
+      - run: npm run build:pilot
       - name: Browser smoke test
         run: |
-          npm install --no-audit --no-fund --no-save playwright@1
+          npm install --no-save --no-audit --no-fund playwright@1
           npx playwright install --with-deps chromium
-          node tests/e2e/smoke.mjs _site
+          npm run test:e2e
+      - name: Assemble site
+        run: |
+          mkdir -p _site
+          cp dist/index.html _site/index.html
+          touch _site/.nojekyll
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site

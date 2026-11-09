@@ -7,7 +7,8 @@
 - [x] Mobil ve masaüstü ekran görüntüleri alındı (`docs/img/`)
 - [x] Yayın yalnızca testler geçince yapılıyor (`.github/workflows/publish-pages.yml`)
 - [ ] GitHub Pages ayarı: Settings → Pages → Source = **GitHub Actions** (dal tabanlı yayın kapatılmalı)
-- [ ] Canlı adreslerin (`/` ve `/modern/`) tarayıcıda açıldığı doğrulandı
+- [x] Eski derlenmiş paket kaldırıldı; uygulama okunabilir kaynaktan derleniyor (eşitlik testi: `docs/KAYNAK_KOD_DURUMU.md`)
+- [ ] Canlı adresin tarayıcıda açıldığı doğrulandı
 - [ ] Portföy ana sayfasına ve LinkedIn'e bağlantı eklendi
 
 Tamamlanmayan maddeler doğrulanmış gibi sunulmamalıdır.

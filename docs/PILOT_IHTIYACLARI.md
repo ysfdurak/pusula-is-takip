@@ -9,7 +9,9 @@
 | Gereken | Durum |
 |---|---|
 | Arayüz (panolar, iş, engel, proje, roller, bildirim ekranı) | ✅ Hazır |
-| Sunucu moduna alınmış arayüz | ✅ `npm run build:pilot` → `pilot/index.html` |
+| Sunucu moduna alınmış arayüz | ✅ `npm run build:pilot` → `dist-pilot/index.html` |
+| Okunabilir kaynak ve iş kuralları | ✅ `src/shared/workspaceModel.js`, `src/demo/demoServer.js` (birim testli) |
+| Yerel deneme sunucusu | ✅ `npm run dev:api` (yalnızca geliştirme; giriş ve kalıcı veri yok) |
 | Oturum (401) ve eşzamanlı düzenleme çakışması (409) ekranları | ✅ Arayüzde var |
 | API sözleşmesi | ✅ Belgelendi: [MIMARI_VE_SINIRLAR.md](MIMARI_VE_SINIRLAR.md) |
 | `/api/workspace` sunucusu ve veritabanı | ❌ Yok |
@@ -26,7 +28,7 @@
 - **Doğrulama ve yetki sunucuda yapılmalı.** Görüntüleyici hiçbir şeyi değiştiremez, yalnızca yönetici üye ve kural düzenler, kullanıcı yalnızca yetkili olduğu işleri görür. Tarayıcıdaki kontroller güvenlik sağlamaz.
 - `save` işleminde `revision` kontrolü (iyimser kilit) ve uyuşmazlıkta 409.
 - Her değişiklikte işlem geçmişi kaydı ve ilgili kişilere bildirim.
-- Başvuru kaynağı: tarayıcı içi sahte sunucu bu kuralların tamamını içeriyor, ancak derlenmiş kod olduğu için okunarak yeniden yazılmalı.
+- Başvuru kaynağı: `src/demo/demoServer.js` (`demoPost`) bu kuralların tamamını uyguluyor ve `src/shared/workspaceModel.js` fonksiyonlarını kullanıyor. Sunucu bu modülü doğrudan kullanabilir; yapılması gereken kalıcı veritabanı, oturumdan gelen kullanıcı ve e-posta gönderimi eklemek.
 
 ### 1.2 Giriş (kimlik doğrulama)
 - Şirketin kullandığı sağlayıcıyla tek oturum açma (SSO): **Microsoft Entra ID** (Office 365 kullanılıyorsa) veya **Google Workspace**, OpenID Connect ile.
@@ -60,7 +62,7 @@
 | Telefondan kullanım | Sahada masaüstü yok | Mevcut mobil görünüm ve "Ana ekrana ekle" (PWA) |
 | Eğitim | Ekranda çok seçenek var | 30 dakikalık tanıtım ve tek sayfalık rehber: hızlı iş ekle, statü değiştir, engel bildir |
 
-**Arayüz sadeleştirmeleri** (Bekleme ve Engel'in birleştirilmesi, kanban kartlarının sadeleşmesi, yeni iş formunun kısalması) derlenmiş pakette pahalı ve riskli. Pilotta arayüz olduğu gibi kullanılmalı, geri bildirim toplanmalı ve kalıcı ürüne geçişte bu değişiklikler `modern/` kaynağında yapılmalı.
+**Arayüz sadeleştirmeleri** (Bekleme ve Engel'in birleştirilmesi, kanban kartlarının sadeleşmesi, yeni iş formunun kısalması) artık kaynak kodda yapılabilir. Pilot öncesinde yapılabilir ya da pilottan gelen geri bildirimle önceliklendirilebilir.
 
 ## 3. Önerilen pilot planı
 
@@ -84,9 +86,7 @@
 
 ## 5. Senin vermen gereken kararlar
 
-1. **Hangi sürümle pilot?**
-   - *Önerilen:* Derlenmiş arayüz ve yeni sunucu. En hızlı yol, tüm özellikler hazır. Dezavantajı: arayüzde hata çıkarsa düzeltmek zor.
-   - *Alternatif:* `modern/` prototipini tamamlamak. Sürdürülebilir, ama özellik açığı büyük ve pilot haftalarca gecikir.
+1. Arayüz sadeleştirmeleri pilottan önce mi, pilot geri bildirimiyle mi yapılacak?
 2. Barındırma yeri (iç ağ mı, şirket bulutu mu) ve SSO sağlayıcısı (Microsoft veya Google).
 3. Pilot ekip(ler) ve pilot süresi.
 4. Pilot bittiğinde verilerin silinmesi mi taşınması mı.
@@ -95,7 +95,7 @@
 
 | Risk | Etki | Önlem |
 |---|---|---|
-| Derlenmiş arayüzde hata | Düzeltme yavaş | Pilot öncesi duman testi; kritik akışların elle denenmesi |
+| Arayüzde hata | Pilot aksar | Birim ve duman testleri CI'da; kritik akışların pilot öncesi elle denenmesi |
 | Tüm alanın tek kayıtta tutulması | Eşzamanlı düzenlemede 409 | 5–10 kişide kabul edilebilir; çakışma sayısını izle |
 | Bildirim olmaması | Kullanım düşer | Günlük özet e-postası |
 | Sunucuda eksik yetki kontrolü | Veri sızıntısı | Yetki kurallarına sunucu testleri; BT incelemesi |
@@ -107,7 +107,7 @@
 - [ ] Sunucu tarafında şema doğrulama ve rol yetkisi; görüntüleyici için yazma reddi testleri
 - [ ] `revision` kontrolü ve 409
 - [ ] SSO girişi, oturum çerezi, 401 davranışı
-- [ ] `npm run build:pilot` çıktısının aynı alan adından sunulması
+- [ ] `npm run build:pilot` çıktısının (`dist-pilot/index.html`) aynı alan adından sunulması
 - [ ] HTTPS ve günlük yedek
 - [ ] Boş çalışma alanı, gerçek üyeler, şablonlar
 - [ ] Günlük özet e-postası (önerilen)

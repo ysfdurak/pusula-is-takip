@@ -4,23 +4,26 @@
 
 | Parça | Ne | Not |
 |---|---|---|
-| `src/app.bundle.js` | Derlenmiş React 19 arayüzü | Özgün JSX kaynağı yok; değiştirmek kırılgandır |
-| `src/styles.css` | Arayüzün CSS'i | Düzenlenebilir |
-| `src/index.template.html` | HTML kabuğu ve güvenlik politikası (CSP) | |
-| `scripts/build.mjs` | Üç parçayı tek `index.html` dosyasında birleştirir | `--pilot` ile sunucu modunda `pilot/index.html` üretir |
-| `modern/` | Ayrı, okunabilir React/Vite prototipi | Veri modeli tasarım demosundan farklıdır (aşağıda) |
-| `tests/e2e/smoke.mjs` | Tarayıcı duman testi | Yayından önce CI'da çalışır |
+| `src/App.jsx` | Uygulama kabuğu ve ekran durumları | En büyük dosya; ekranlara bölünmesi sonraki adım |
+| `src/components/` | 17 arayüz bileşeni | Statü panosu, hızlı iş, arama, ekipler, portföy, çakışma penceresi… |
+| `src/shared/workspaceModel.js` | Veri şeması (zod) ve iş kuralları | Pilot sunucusu bu kuralları aynen uygulamalı |
+| `src/demo/demoServer.js` | Tarayıcı içi örnek sunucu | `/api/workspace` sözleşmesinin başvuru uygulaması |
+| `src/lib/` | Pano istatistikleri, çakışma raporu, biçimlendirme | |
+| `src/styles.css` | Tüm stiller | |
+| `vite.config.js` | Tek dosyalı derleme, mod ve güvenlik politikası (CSP) | `--mode pilot` sunucu modu |
+| `tools/dev-api-server.mjs` | Pilot derlemesini yerelde örnek API ile çalıştırır | Yalnızca geliştirme; giriş ve yetki yok |
+| `tests/` | Birim testleri ve tarayıcı duman testi | CI'da ve yayından önce çalışır |
 
 ## İki çalışma modu
 
-Arayüz kök bileşene verilen `demo` bayrağıyla iki modda çalışır:
+Arayüz kök bileşene verilen `demo` bayrağıyla iki modda çalışır; bayrak derleme modundan gelir (`src/main.jsx`):
 
 - **Tasarım demosu (`demo: true`, varsayılan):** Tarayıcının içinde sahte bir sunucu çalışır, veriler `localStorage` içinde (`pusula-offline-design-v5`) tutulur. CSP `connect-src 'none'` olduğu için sayfa hiçbir ağ isteği atamaz.
-- **Sunucu modu (`demo: false`, `npm run build:pilot`):** Arayüz aynı alan adındaki `/api/workspace` uç noktasıyla konuşur, CSP `connect-src 'self'` olur. 401 yanıtında giriş ekranı açılır ve giriş düğmesi `/auth/login?return_to=/` adresine gider. **Bu sunucu depoda yoktur.**
+- **Sunucu modu (`demo: false`, `npm run build:pilot` → `dist-pilot/index.html`):** Arayüz aynı alan adındaki `/api/workspace` uç noktasıyla konuşur, CSP `connect-src 'self'` olur. 401 yanıtında giriş ekranı açılır ve giriş düğmesi `/auth/login?return_to=/` adresine gider. **Bu sunucu depoda yoktur.**
 
 ## `/api/workspace` sözleşmesi
 
-Sözleşme, derlenmiş paketteki istemci çağrılarından ve tarayıcı içi sahte sunucudan çıkarılmıştır. Sunucu yazılırken bu davranış referans alınmalıdır.
+Sözleşmenin başvuru uygulaması `src/demo/demoServer.js` içindeki `demoGet` ve `demoPost` fonksiyonlarıdır; iş kuralları `src/shared/workspaceModel.js` içindedir ve birim testleriyle korunur (`tests/unit/`). Pilot sunucusu bu davranışı referans almalıdır.
 
 ### GET
 
@@ -47,10 +50,6 @@ Sözleşme, derlenmiş paketteki istemci çağrılarından ve tarayıcı içi sa
 | `create` | `name` | Yeni çalışma alanı; oluşturan `owner` olur |
 
 Roller: `owner` (arayüzde "Yönetici"), `editor` ("Ekip üyesi"), `viewer` ("Görüntüleyici"; hiçbir değişiklik yapamaz). Hata yanıtları `{ error: "Türkçe mesaj" }` biçimindedir ve arayüzde aynen gösterilir.
-
-## Modüler React prototipiyle ilişki
-
-`modern/` farklı bir veri modeli kullanır: statüler Türkçe metin (`Devam`), roller `admin/manager/member`, termin yalnızca tarih. Bu yüzden `modern/src/services` altındaki kurallar yukarıdaki sözleşmeyle doğrudan uyumlu değildir; sunucu tarafında yeniden kullanılmadan önce eşleştirilmesi gerekir.
 
 ## Sınırlar
 

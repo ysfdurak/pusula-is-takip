@@ -1,16 +1,30 @@
 {
   "name": "pusula-is-takip",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "private": true,
   "type": "module",
-  "description": "Pusula iş ve ekip takip: tek dosyalı tasarım demosu, pilot sunucu modu derlemesi ve modüler React prototipi",
+  "description": "Pusula: Türkçe iş ve ekip takip uygulaması (React + Vite)",
   "scripts": {
-    "build": "node scripts/build.mjs",
-    "check": "node scripts/check.mjs",
-    "test": "npm run check",
-    "build:pilot": "node scripts/build.mjs --pilot"
+    "dev": "vite",
+    "build": "vite build",
+    "build:pilot": "vite build --mode pilot",
+    "preview": "vite preview",
+    "test": "node --test tests/unit/*.test.js",
+    "test:e2e": "node tests/e2e/smoke.mjs dist",
+    "dev:api": "node tools/dev-api-server.mjs"
+  },
+  "dependencies": {
+    "lucide-react": "1.70.0",
+    "react": "19.2.6",
+    "react-dom": "19.2.6",
+    "zod": "3.25.76"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^5.1.0",
+    "vite": "^7.2.0",
+    "vite-plugin-singlefile": "^2.3.0"
   },
   "engines": {
-    "node": ">=20.11.0"
+    "node": ">=20.19.0"
   }
 }

@@ -1,4 +1,4 @@
-name: Static and build checks
+name: Tests and build
 on:
   pull_request:
   push:
@@ -8,24 +8,24 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: python tests/check_static.py
-      - run: npm run check
-      - run: npm run build:pilot
-      - name: Modern build
-        working-directory: modern
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: npm ci --no-audit --no-fund
+      - name: Documentation check
+        run: python tests/check_static.py
+      - name: Unit tests
+        run: npm test
+      - name: Build (demo and pilot)
         run: |
-          npm install --no-audit --no-fund
-          npm test
           npm run build
+          npm run build:pilot
       - name: Browser smoke test
         run: |
-          mkdir -p _site/modern && cp index.html _site/ && cp -r modern/dist/. _site/modern/
-          npm install --no-audit --no-fund --no-save playwright@1
+          npm install --no-save --no-audit --no-fund playwright@1
           npx playwright install --with-deps chromium
-          node tests/e2e/smoke.mjs _site
+          npm run test:e2e
