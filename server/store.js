@@ -6,8 +6,8 @@ import { createHash, randomBytes } from 'node:crypto';
 import { mkdirSync, readdirSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 
-const OBJECT_COLLECTIONS = ['members', 'states', 'revisions', 'policies'];
-const ARRAY_COLLECTIONS = ['workspaces', 'notifications', 'comments', 'activities', 'times'];
+const OBJECT_COLLECTIONS = ['members', 'states', 'revisions', 'policies', 'digests'];
+const ARRAY_COLLECTIONS = ['workspaces', 'notifications', 'comments', 'activities', 'times', 'files'];
 
 export function openStore(file) {
   const db = new DatabaseSync(file);
@@ -18,6 +18,7 @@ export function openStore(file) {
     CREATE TABLE IF NOT EXISTS documents (name TEXT PRIMARY KEY, json TEXT NOT NULL, updated INTEGER NOT NULL);
     CREATE TABLE IF NOT EXISTS sessions (id TEXT PRIMARY KEY, email TEXT NOT NULL, name TEXT, created INTEGER NOT NULL, expires INTEGER NOT NULL, last_seen INTEGER NOT NULL DEFAULT 0);
     CREATE TABLE IF NOT EXISTS login_states (state TEXT PRIMARY KEY, nonce TEXT NOT NULL, verifier TEXT NOT NULL, return_to TEXT, created INTEGER NOT NULL);
+    CREATE TABLE IF NOT EXISTS blobs (id TEXT PRIMARY KEY, data BLOB NOT NULL, created INTEGER NOT NULL);
     CREATE TABLE IF NOT EXISTS audit (id INTEGER PRIMARY KEY AUTOINCREMENT, at INTEGER NOT NULL, email TEXT, action TEXT NOT NULL, detail TEXT);
   `);
 
@@ -55,6 +56,20 @@ export function openStore(file) {
       throw err;
     }
   }
+
+  // Ek dosya içerikleri ayrı tabloda, ikili (BLOB) olarak tutulur
+  const blobs = {
+    put(id, base64) {
+      db.prepare('INSERT OR REPLACE INTO blobs (id, data, created) VALUES (?, ?, ?)').run(id, Buffer.from(base64, 'base64'), Date.now());
+    },
+    get(id) {
+      const row = db.prepare('SELECT data FROM blobs WHERE id = ?').get(id);
+      return row ? Buffer.from(row.data).toString('base64') : null;
+    },
+    remove(id) {
+      db.prepare('DELETE FROM blobs WHERE id = ?').run(id);
+    },
+  };
 
   const token = () => randomBytes(32).toString('base64url');
   // Oturum kimliği veritabanında ve yedeklerde açık tutulmaz; yalnızca SHA-256 özeti saklanır.
@@ -119,5 +134,5 @@ export function openStore(file) {
     return target;
   }
 
-  return { load: () => data, persist, sessions, loginStates, audit, backup, close: () => db.close(), db };
+  return { load: () => data, persist, blobs, sessions, loginStates, audit, backup, close: () => db.close(), db };
 }

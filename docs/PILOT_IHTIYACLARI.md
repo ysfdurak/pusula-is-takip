@@ -9,6 +9,8 @@
 | Gereken | Durum |
 |---|---|
 | Arayüz (panolar, iş, engel, proje, roller, bildirim ekranı) | ✅ Hazır |
+| Tekrarlanan iş, fotoğraf/dosya eki, Excel'e aktarma, sabah özeti e-postası | ✅ Hazır (0.7.0) |
+| Sunucusuz deneme | ✅ [Pilot önizlemesi](https://ysfdurak.github.io/pusula-is-takip/pilot-onizleme/): boş başlar, veriler tarayıcıda |
 | Sunucu moduna alınmış arayüz | ✅ `npm run build:pilot` → `dist-pilot/index.html` |
 | Okunabilir kaynak ve iş kuralları | ✅ `src/shared/workspaceModel.js`, `src/demo/demoServer.js` (birim testli) |
 | Yerel deneme sunucusu | ✅ `npm run dev:api` (yalnızca geliştirme; giriş ve kalıcı veri yok) |
@@ -55,13 +57,13 @@
 
 | İhtiyaç | Neden | Asgari çözüm |
 |---|---|---|
-| Günlük özet e-postası | Olay e-postalarına ek olarak sabah tek bakış | Geciken, bugün teslim, sana atanan işler |
-| Tekrarlayan işler | Vardiya işleri her gün yeniden açılıyor | Sunucuda zamanlanmış görevle şablondan iş üretmek |
-| Fotoğraf eki | Depoda kanıt çoğunlukla fotoğraf | İlk aşamada yorumda paylaşılan bağlantı; sonra dosya yükleme |
+| Telefona fotoğraf yükleme denemesi | Depoda kanıt çoğunlukla fotoğraf | Ekler hazır; pilotun ilk haftasında şirket telefonlarıyla deneyin |
 | Telefondan kullanım | Sahada masaüstü yok | Mevcut mobil görünüm ve "Ana ekrana ekle" (PWA) |
 | Eğitim | Ekranda çok seçenek var | 30 dakikalık tanıtım ve tek sayfalık rehber: hızlı iş ekle, statü değiştir, engel bildir |
 
-**Arayüz sadeleştirmeleri** (Bekleme ve Engel'in birleştirilmesi, kanban kartlarının sadeleşmesi, yeni iş formunun kısalması) artık kaynak kodda yapılabilir. Pilot öncesinde yapılabilir ya da pilottan gelen geri bildirimle önceliklendirilebilir.
+**Arayüz sadeleştirmeleri** (Bekleme ve Engel'in birleştirilmesi, kanban kartlarının sadeleşmesi, yeni iş formunun kısalması) 0.7.0'da yapıldı. Sonraki sadeleştirmeler pilot geri bildirimiyle önceliklendirilmeli.
+
+**Bağımsız güvenlik testi:** Kod içinde güvenlik incelemesi yapıldı, ancak bağımsız bir sızma testi yapılmadı. Microsoft girişi ve Outlook gönderimi gerçek bir şirket kiracısında henüz denenmedi; testler sahte Microsoft uç noktasıyla çalışıyor. Pilotun 0. haftasında BT ile birlikte bir deneme girişi ve deneme e-postası yapılmalı.
 
 ## 3. Önerilen pilot planı
 

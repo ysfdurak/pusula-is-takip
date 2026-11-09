@@ -10,6 +10,7 @@ import {
   RotateCcwIcon,
   UsersIcon,
 } from 'lucide-react';
+import { RECURRENCE_LABELS } from '../shared/recurrence.js';
 import { CardAssigneeControl } from './CardAssigneeControl.jsx';
 import { completionIssues, taskObstacles } from '../lib/taskViews.js';
 import { WAITING_REASON_LABELS, taskTeamIds, teamName } from '../shared/workspaceModel.js';
@@ -171,7 +172,7 @@ export function TaskBoard(e) {
                           e.busy ||
                           t.button !== 0 ||
                           t.pointerType === 'touch' ||
-                          t.target.closest('button,select,input')
+                          t.target.closest('button,select,input,textarea,summary,details,a')
                         )) {
                           t.preventDefault();
                           t.currentTarget.setPointerCapture(t.pointerId);
@@ -254,19 +255,12 @@ export function TaskBoard(e) {
                         </button>
                       )}
                       {task.requireApproval && !task.verified && task.status !== 'done' && (
-                        <span className="card-approval">Kapanış doğrulaması gerekiyor</span>
+                        <span className="card-approval">Doğrulama gerekli</span>
                       )}
-                      {task.description && <p className="card-description">{task.description}</p>}
                       <div className="card-team-tags">
                         {taskTeamIds(task).map((t) => (
                           <span key={t}>{teamName(t, e.state)}</span>
                         ))}
-                        {task.coordinator && (
-                          <small>
-                            {'Koordinatör: '}
-                            {e.name(task.coordinator)}
-                          </small>
-                        )}
                       </div>
                       {task.waitingReason && (
                         <button
@@ -310,23 +304,18 @@ export function TaskBoard(e) {
                         <span>
                           {u(task)}
                           {l(task) ? ' · gecikti' : ''}
+                          {task.recurrence ? ' · ' + RECURRENCE_LABELS[task.recurrence].toLocaleLowerCase('tr') : ''}
                         </span>
-                        {e.writable && (
-                          <button
-                            aria-label={task.title + ' terminini revize et'}
-                            onClick={() => e.onRevise(task)}
-                          >
-                            {l(task) ? 'Revize et' : 'Tarih'}
+                        {e.writable && l(task) && (
+                          <button aria-label={task.title + ' terminini revize et'} onClick={() => e.onRevise(task)}>
+                            Revize et
                           </button>
                         )}
                       </div>
                       {task.revisionCount > 0 && (
                         <button className="card-revisions" onClick={() => e.onOpen(task.id)}>
                           <RotateCcwClockIcon size={12} />
-                          {task.revisionCount}
-                          {' revizyon · '}
-                          {task.dueRevisionCount}
-                          {' termin değişikliği'}
+                          {task.dueRevisionCount > 0 ? task.dueRevisionCount + ' kez ertelendi' : task.revisionCount + ' revizyon'}
                         </button>
                       )}
                       {e.writable &&
@@ -368,27 +357,35 @@ export function TaskBoard(e) {
                               : 'Yeniden aç'}
                         </button>
                       )}
-                      <select
-                        className="card-status-menu"
-                        aria-label={task.title + ' statüsünü değiştir'}
-                        value={task.status}
-                        disabled={!e.writable || e.busy}
-                        onChange={(event) => e.onStatus(task, event.target.value)}
-                      >
-                        {Object.entries(STATUS_LABELS).map(([e, t]) => (
-                          <option value={e} key={e}>
-                            {t}
-                          </option>
-                        ))}
-                      </select>
-                      {e.writable && !task.waitingReason && !['done', 'cancelled'].includes(task.status) && (
-                        <button
-                          className="text-button card-wait-action"
-                          disabled={e.busy}
-                          onClick={() => e.onWait(task)}
-                        >
-                          Bekleme bildir
-                        </button>
+                      {e.writable && (
+                        <details className="card-more">
+                          <summary aria-label={task.title + ' için diğer işlemler'}>⋯ Diğer</summary>
+                          <div>
+                            <select
+                              className="card-status-menu"
+                              aria-label={task.title + ' statüsünü değiştir'}
+                              value={task.status}
+                              disabled={e.busy}
+                              onChange={(event) => e.onStatus(task, event.target.value)}
+                            >
+                              {Object.entries(STATUS_LABELS).map(([e, t]) => (
+                                <option value={e} key={e}>
+                                  {t}
+                                </option>
+                              ))}
+                            </select>
+                            {!l(task) && (
+                              <button className="text-button" disabled={e.busy} onClick={() => e.onRevise(task)}>
+                                Termini değiştir
+                              </button>
+                            )}
+                            {!['done', 'cancelled'].includes(task.status) && (
+                              <button className="text-button card-wait-action" disabled={e.busy} onClick={() => e.onWait(task)}>
+                                Engel / bekleme bildir
+                              </button>
+                            )}
+                          </div>
+                        </details>
                       )}
                     </article>
                   );

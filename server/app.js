@@ -2,10 +2,11 @@
 import { createWorkspaceService } from '../src/shared/workspaceService.js';
 import { DEFAULT_NOTIFY_POLICY, EMPTY_STATE } from '../src/shared/workspaceModel.js';
 import { processOutbox } from './mail/outbox.js';
+import { runDigest } from './mail/digest.js';
 import { randomToken } from './auth.js';
 import { randomUUID } from 'node:crypto';
 
-const MAX_BODY = 2 * 1024 * 1024;
+const MAX_BODY = 8 * 1024 * 1024; // 5 MB ek dosya base64 ile ~6,7 MB eder
 const COOKIE = 'pusula_sid';
 
 const escapeHtml = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
@@ -29,6 +30,8 @@ export function createApp({ config, store, auth, html, mailer = null, log = () =
     mailMode: () => (mailer ? 'live' : 'off'),
     profileFor: (email) => ({ email, name: names.get(email) || email.split('@')[0], department: '' }),
     canCreateWorkspace: (email) => admins.has(email),
+    blobs: store.blobs,
+    maxFileBytes: config.maxFileMb * 1024 * 1024,
   });
 
   bootstrap();
@@ -107,6 +110,23 @@ export function createApp({ config, store, auth, html, mailer = null, log = () =
       .catch((err) => {
         log(`E-posta kuyruğu hatası: ${err.message}`);
         return { accepted: 0, failed: 0, retry: 0 };
+      });
+    return sending;
+  }
+
+  /** Sabah özeti; aynı gün aynı kişiye ikinci kez gitmez (sunucu saatlik/5 dakikalık çağırır) */
+  function sendDigest(now = Date.now()) {
+    if (!mailer || config.digestHour === null) return Promise.resolve({ sent: 0, skipped: 0, failed: 0 });
+    sending = sending
+      .catch(() => {})
+      .then(() => runDigest({ load: store.load, persist: store.persist, mailer, appUrl: config.appUrl, hour: config.digestHour, allowedDomains: config.mailAllowedDomains, now, log }))
+      .then((r) => {
+        if (r.sent || r.failed) log(`Sabah özeti: ${r.sent} gönderildi, ${r.failed} başarısız`);
+        return r;
+      })
+      .catch((err) => {
+        log(`Sabah özeti hatası: ${err.message}`);
+        return { sent: 0, skipped: 0, failed: 0 };
       });
     return sending;
   }
@@ -272,7 +292,7 @@ ${link ? `<p><a href="${escapeHtml(link.href)}" style="color:#2c6549;font-weight
       }
       try {
         if (req.method === 'GET') {
-          return json(res, 200, service.get(email, url.searchParams.get('id') || '', url.searchParams.get('task') || ''));
+          return json(res, 200, service.get(email, url.searchParams.get('id') || '', url.searchParams.get('task') || '', url.searchParams.get('file') || ''));
         }
         if (req.method !== 'POST') return json(res, 405, { error: 'Yöntem desteklenmiyor.' });
         // Başka sitelerden gelen istekleri reddet (CSRF): kaynak bilgisi varsa uygulama adresiyle aynı olmalı.
@@ -291,8 +311,8 @@ ${link ? `<p><a href="${escapeHtml(link.href)}" style="color:#2c6549;font-weight
           return json(res, 200, { configured: !!mailer, accepted: r.accepted || 0 });
         }
         const result = service.post(email, body);
-        if (['save', 'member', 'policy', 'create'].includes(body.action)) {
-          store.audit(email, body.action, body.action === 'member' ? `${body.email} · ${body.role}` : body.reason || body.name || '');
+        if (['save', 'member', 'policy', 'create', 'attach', 'detach'].includes(body.action)) {
+          store.audit(email, body.action, body.action === 'member' ? `${body.email} · ${body.role}` : body.action === 'detach' ? body.file : body.reason || body.name || '');
         }
         flushMail();
         return json(res, 200, result);
@@ -325,6 +345,7 @@ ${link ? `<p><a href="${escapeHtml(link.href)}" style="color:#2c6549;font-weight
         if (!res.headersSent) json(res, 500, { error: 'Sunucu hatası.' });
       }),
     flushMail,
+    sendDigest,
     service,
   };
 }

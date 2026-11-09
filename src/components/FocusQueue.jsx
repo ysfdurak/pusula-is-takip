@@ -72,7 +72,7 @@ export function FocusQueue({
             <div className="focus-queue-end">
               {writable && !task.waitingReason && !['done', 'cancelled'].includes(task.status) && (
                 <button className="text-button" disabled={busy} onClick={() => onWait(task)}>
-                  Bekleme bildir
+                  Engel / bekleme
                 </button>
               )}
               <span className="focus-date">

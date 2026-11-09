@@ -8,6 +8,7 @@ required = [
     "docs/PILOT_IHTIYACLARI.md",
     "docs/img/benim-panom.png",
     "tests/e2e/smoke.mjs",
+    "tests/e2e/preview.mjs",
     "docs/KAYNAK_KOD_DURUMU.md",
     "docs/OUTLOOK_BILDIRIMLERI.md",
     "docs/PILOT_KURULUM.md",

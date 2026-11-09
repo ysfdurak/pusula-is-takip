@@ -14,7 +14,31 @@ import {
   validateStructure,
   visibleStateFor,
 } from './workspaceModel.js';
+import { recurringCopy } from './recurrence.js';
 import { commentRecipients, mailStatus, statusRecipients } from './notificationRules.js';
+
+/** İzin verilen ek dosya türleri: tür, dosya uzantısından belirlenir (istemcinin bildirdiğine güvenilmez). */
+export const FILE_TYPES = {
+  png: 'image/png',
+  jpg: 'image/jpeg',
+  jpeg: 'image/jpeg',
+  webp: 'image/webp',
+  gif: 'image/gif',
+  pdf: 'application/pdf',
+  txt: 'text/plain',
+  csv: 'text/csv',
+  doc: 'application/msword',
+  docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  xls: 'application/vnd.ms-excel',
+  xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  ppt: 'application/vnd.ms-powerpoint',
+  pptx: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+};
+
+export function memoryBlobs() {
+  const map = new Map();
+  return { put: (id, data) => map.set(id, data), get: (id) => map.get(id) ?? null, remove: (id) => map.delete(id) };
+}
 
 /**
  * @param {object} o
@@ -25,6 +49,8 @@ import { commentRecipients, mailStatus, statusRecipients } from './notificationR
  * @param {(email: string) => object} [o.profileFor]   yeni çalışma alanı sahibinin üye kaydı
  * @param {(email: string) => boolean} [o.canCreateWorkspace]
  * @param {string} [o.accessError]
+ * @param {{put(id: string, base64: string): void, get(id: string): string|null, remove(id: string): void}} [o.blobs]  ek dosya içerikleri
+ * @param {number} [o.maxFileBytes]
  */
 export function createWorkspaceService({
   load,
@@ -34,6 +60,8 @@ export function createWorkspaceService({
   profileFor = (email) => ({ email, name: email.split('@')[0], department: '' }),
   canCreateWorkspace = () => true,
   accessError = 'Bu çalışma alanına erişimin yok.',
+  blobs = memoryBlobs(),
+  maxFileBytes = 5 * 1024 * 1024,
 }) {
   function requireMember(demoData, actor, workspaceId) {
     let found = demoData.members[workspaceId]?.find((member) => member.email === actor && member.active);
@@ -43,8 +71,9 @@ export function createWorkspaceService({
     return found;
   }
 
-  function get(actor, workspaceId, taskId = '') {
+  function get(actor, workspaceId, taskId = '', fileId = '') {
     let demoData = load();
+    demoData.files ||= [];
     let spaces = demoData.workspaces
       .filter((space) =>
         demoData.members[space.id]?.some((member) => member.email === actor && member.active),
@@ -64,6 +93,14 @@ export function createWorkspaceService({
     let taskIds = new Set(visible.tasks.map((task) => task.id));
     if (taskId && !taskIds.has(taskId)) {
       throw Error('Bu işe erişimin yok.');
+    }
+    if (fileId) {
+      let file = demoData.files.find((f) => f.id === fileId && f.workspace === workspaceId);
+      let data = file && taskIds.has(file.task) ? blobs.get(file.id) : null;
+      if (!data) {
+        throw Error('Dosya bulunamadı ya da erişimin yok.');
+      }
+      return { file: structuredClone(file), data };
     }
     return structuredClone({
       workspaces: spaces,
@@ -87,6 +124,17 @@ export function createWorkspaceService({
       activities: demoData.activities
         .filter((activity) => activity.workspace === workspaceId && activity.task === taskId)
         .sort((a, b) => b.created - a.created),
+      files: taskId
+        ? demoData.files.filter((f) => f.workspace === workspaceId && f.task === taskId).sort((a, b) => b.created - a.created)
+        : [],
+      fileCounts: Object.fromEntries(
+        Object.entries(
+          demoData.files
+            .filter((f) => f.workspace === workspaceId && taskIds.has(f.task))
+            .reduce((acc, f) => ((acc[f.task] = (acc[f.task] || 0) + 1), acc), {}),
+        ),
+      ),
+      maxFileBytes,
       policy: demoData.policies[workspaceId],
       mailConfigured: mailMode() === 'live',
     });
@@ -94,6 +142,7 @@ export function createWorkspaceService({
 
   function post(actor, request) {
     let demoData = load();
+    demoData.files ||= [];
     let now = Date.now();
     if (request.action === 'create') {
       if (!canCreateWorkspace(actor)) {
@@ -143,6 +192,9 @@ export function createWorkspaceService({
     if (request.action === 'preferences') {
       membership.mail_enabled = +!!request.mailEnabled;
       membership.notify_self = +!!request.notifySelf;
+      if (typeof request.digest === 'boolean') {
+        membership.digest_enabled = +request.digest;
+      }
       persist();
       return {
         ok: true,
@@ -267,6 +319,21 @@ export function createWorkspaceService({
       if (error) {
         throw Error(error);
       }
+      // Tekrarlanan iş tamamlanınca bir sonraki kopyası açılır (aynı iş için bir kez).
+      for (let task of [...merged.tasks]) {
+        let previous = current.tasks.find((e) => e.id === task.id);
+        if (
+          task.recurrence &&
+          task.dueAt &&
+          task.status === 'done' &&
+          previous &&
+          previous.status !== 'done' &&
+          !merged.tasks.some((other) => other.recurrenceOf === task.id) &&
+          merged.tasks.length < 2e3
+        ) {
+          merged.tasks.push(taskSchema.parse(recurringCopy(task, newId(), newId, now)));
+        }
+      }
       for (let task of merged.tasks) {
         let previous = current.tasks.find((e) => e.id === task.id);
         if (previous && (previous.dueAt !== task.dueAt || previous.date !== task.date) && !reason) {
@@ -382,6 +449,12 @@ export function createWorkspaceService({
       }
       demoData.states[request.id] = merged;
       demoData.revisions[request.id]++;
+      // Silinen işlerin ek dosyaları da silinir
+      let remaining = new Set(merged.tasks.map((task) => task.id));
+      for (let file of demoData.files.filter((f) => f.workspace === request.id && !remaining.has(f.task))) {
+        blobs.remove(file.id);
+      }
+      demoData.files = demoData.files.filter((f) => f.workspace !== request.id || remaining.has(f.task));
       persist();
       return structuredClone({
         ok: true,
@@ -427,6 +500,77 @@ export function createWorkspaceService({
       return {
         ok: true,
       };
+    }
+    if (request.action === 'attach') {
+      let name = String(request.name || '').trim().replace(/[\\/\u0000-\u001f]/g, '_');
+      let ext = name.includes('.') ? name.split('.').pop().toLowerCase() : '';
+      let type = FILE_TYPES[ext];
+      if (!name || name.length > 150) {
+        throw Error('Dosya adı 1–150 karakter olmalı.');
+      }
+      if (!type) {
+        throw Error('Bu dosya türü eklenemez. Resim, PDF, Office, metin veya CSV dosyası seç.');
+      }
+      let data = String(request.data || '');
+      if (!/^[A-Za-z0-9+/]*={0,2}$/.test(data) || !data) {
+        throw Error('Dosya okunamadı.');
+      }
+      let size = Math.floor((data.length * 3) / 4) - (data.endsWith('==') ? 2 : data.endsWith('=') ? 1 : 0);
+      if (size > maxFileBytes) {
+        throw Error('Dosya en fazla ' + Math.round(maxFileBytes / 1048576) + ' MB olabilir.');
+      }
+      if (demoData.files.filter((f) => f.workspace === request.id && f.task === targetTask.id).length >= 20) {
+        throw Error('Bir işe en fazla 20 dosya eklenebilir.');
+      }
+      let file = {
+        id: newId(),
+        workspace: request.id,
+        task: targetTask.id,
+        name,
+        type,
+        size,
+        author: actor,
+        created: now,
+      };
+      blobs.put(file.id, data);
+      demoData.files.unshift(file);
+      demoData.activities.unshift({
+        id: newId(),
+        workspace: request.id,
+        task: targetTask.id,
+        actor,
+        kind: 'file',
+        before: '',
+        after: 'Dosya eklendi: ' + name,
+        created: now,
+      });
+      persist();
+      return { ok: true, file };
+    }
+    if (request.action === 'detach') {
+      let file = demoData.files.find(
+        (f) => f.id === request.file && f.workspace === request.id && f.task === targetTask.id,
+      );
+      if (!file) {
+        throw Error('Dosya bulunamadı.');
+      }
+      if (file.author !== actor && membership.role !== 'owner') {
+        throw Error('Dosyayı yalnızca ekleyen kişi ya da yönetici silebilir.');
+      }
+      demoData.files = demoData.files.filter((f) => f !== file);
+      blobs.remove(file.id);
+      demoData.activities.unshift({
+        id: newId(),
+        workspace: request.id,
+        task: targetTask.id,
+        actor,
+        kind: 'file',
+        before: file.name,
+        after: 'Dosya silindi: ' + file.name,
+        created: now,
+      });
+      persist();
+      return { ok: true };
     }
     if (['timer_start', 'timer_stop', 'manual_time'].includes(request.action)) {
       if (!targetTask.trackTime) {

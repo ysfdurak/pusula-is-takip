@@ -3,3 +3,35 @@
 /* Sunucu modunda oturumu kapat bağlantısı */
 .account-logout{margin-left:auto;display:grid;place-items:center;width:30px;height:30px;border-radius:8px;color:#d9e6c8}
 .account-logout:hover,.account-logout:focus-visible{background:rgba(255,255,255,.12);color:#fff}
+
+/* Kanban kartı: ikincil işlemler "Diğer" menüsünde */
+.card-more{margin-top:6px}
+.card-more>summary{list-style:none;cursor:pointer;display:inline-flex;align-items:center;gap:4px;padding:4px 8px;border-radius:6px;color:#4c6052;font-size:12px;font-weight:600}
+.card-more>summary::-webkit-details-marker{display:none}
+.card-more>summary:hover,.card-more>summary:focus-visible{background:#eef2e8}
+.card-more[open]>div{display:grid;gap:6px;margin-top:6px;padding:8px;border:1px solid #e3e8dd;border-radius:8px;background:#fafbf8}
+.card-more .card-status-menu{width:100%}
+.card-more .text-button{justify-self:start}
+.select-all-assignees{margin:-4px 0 8px}
+.form-due{display:block}
+.task-recurrence{margin:0 0 12px;font-size:13px;color:#617d4b}
+.attachments{border-top:1px solid var(--line);margin:0 0 22px;padding-top:18px}
+.attachments-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:10px}
+.attachments-head h3{color:#697a55;font-size:11px;font-weight:500;margin:0;display:flex;align-items:center;gap:6px}
+.attachments-head h3 b{background:#f0f6e5;border-radius:4px;padding:2px 5px;font-size:10px;font-weight:400}
+.attachments ul{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.attachments li{display:flex;align-items:center;gap:6px}
+.attachment-open{flex:1;min-width:0;display:flex;align-items:center;gap:10px;text-align:left;background:#fafcf6;border:1px solid #e7eddd;border-radius:7px;padding:9px 11px;color:#617d4b}
+.attachment-open:hover{border-color:#bad29e}
+.attachment-open>span{flex:1;min-width:0}
+.attachment-open strong{display:block;font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.attachment-open small{display:block;color:#687a4e;font-size:10px;margin-top:2px}
+.attachment-confirm{display:flex;gap:10px;padding:0 4px}
+.text-button.danger{color:#a14b32;font-weight:600}
+.attachments-empty{color:#687a4e;font-size:11px;margin:0}
+.preview-setup{max-width:520px}
+.preview-setup h1{font-size:34px;margin:20px 0 14px}
+.preview-form{text-align:left;background:#fff;border:1px solid var(--line);border-radius:10px;padding:24px;margin-top:10px}
+.preview-form .button{width:100%}
+.preview-note{display:flex;gap:8px;align-items:flex-start;justify-content:center;font-size:12px!important;margin-top:18px}
+.design-banner.preview{background:#eef3fa;border-color:#d5e0ee}

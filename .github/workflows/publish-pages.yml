@@ -1,5 +1,7 @@
 name: Publish Pages
-# Uygulama main dalındaki kaynaktan derlenir ve GitHub Pages'te yayınlanır.
+# Uygulama main dalındaki kaynaktan derlenir ve GitHub Pages'te yayınlanır:
+#   /                 tasarım demosu (örnek verilerle)
+#   /pilot-onizleme/  pilot önizlemesi (boş başlar, veriler tarayıcıda)
 # Yayın yalnızca birim testleri, derleme ve tarayıcı duman testi geçerse yapılır.
 # Repo ayarı: Settings > Pages > Source = "GitHub Actions".
 on:
@@ -30,6 +32,7 @@ jobs:
       - run: npm test
       - run: npm run build
       - run: npm run build:pilot
+      - run: npm run build:preview
       - name: Browser smoke test
         run: |
           npm install --no-save --no-audit --no-fund playwright@1
@@ -40,6 +43,8 @@ jobs:
         run: |
           mkdir -p _site
           cp dist/index.html _site/index.html
+          mkdir -p _site/pilot-onizleme
+          cp dist-preview/index.html _site/pilot-onizleme/index.html
           touch _site/.nojekyll
       - uses: actions/upload-pages-artifact@v3
         with:

@@ -69,3 +69,40 @@ ${row('Durum', STATUS[task.status] || task.status)}${row('Ekip', teamName)}${row
 </table></td></tr></table></body></html>`;
   return { to: notification.recipient, subject, html };
 }
+
+/** Sabah özeti e-postası (src/shared/digest.js çıktısından) */
+export function buildDigestEmail({ workspace, member, overdue, today, week, pool, teams = [] }, appUrl) {
+  const total = overdue.length + today.length + week.length;
+  const subject = `[Pusula] Günün özeti: ${[
+    overdue.length && `${overdue.length} geciken`,
+    today.length && `${today.length} bugün`,
+    week.length && `${week.length} bu hafta`,
+    pool.length && `${pool.length} sorumlu bekliyor`,
+  ]
+    .filter(Boolean)
+    .join(', ')}`;
+  const teamOf = (task) => teams.find((t) => t.id === task.teamId)?.name || 'Genel işler';
+  const section = (title, color, tasks) =>
+    tasks.length
+      ? `<tr><td style="padding:12px 24px 4px;font-weight:bold;color:${color}">${escapeHtml(title)} (${tasks.length})</td></tr>` +
+        tasks
+          .slice(0, 15)
+          .map(
+            (task) =>
+              `<tr><td style="padding:4px 24px"><a href="${escapeHtml(taskLink(appUrl, workspace.id, task.id))}" style="color:#243c33;font-weight:bold;text-decoration:none">${escapeHtml(task.title)}</a><br><span style="color:#5f6b62;font-size:12px">${escapeHtml(formatDue(task))} · ${escapeHtml(teamOf(task))} · ${escapeHtml(STATUS[task.status] || task.status)}</span></td></tr>`,
+          )
+          .join('') +
+        (tasks.length > 15 ? `<tr><td style="padding:4px 24px;color:#5f6b62;font-size:12px">ve ${tasks.length - 15} iş daha</td></tr>` : '')
+      : '';
+  const html = `<!doctype html><html lang="tr"><head><meta charset="utf-8"><title>${escapeHtml(subject)}</title></head>
+<body style="margin:0;background:#f7f8f4;font-family:Segoe UI,Arial,sans-serif;font-size:14px">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f7f8f4;padding:24px 0"><tr><td align="center">
+<table role="presentation" width="560" cellpadding="0" cellspacing="0" style="background:#ffffff;border:1px solid #e6eae1;border-radius:8px">
+<tr><td style="padding:16px 24px;background:#193d33;color:#f6f8ed;font-weight:bold;border-radius:8px 8px 0 0">pusula. <span style="font-weight:normal;color:#bbd78d">${escapeHtml(workspace.name)}</span></td></tr>
+<tr><td style="padding:20px 24px 4px;color:#243c33">Günaydın ${escapeHtml(member.name || member.email)},<br><br>${total ? `Sana atanmış ${total} işin termini yakın ya da geçti.` : 'Bugün sana atanmış termini yakın iş yok.'}</td></tr>
+${section('Geciken', '#a14b32', overdue)}${section('Bugün', '#2c6549', today)}${section('Bu hafta', '#5f6b62', week)}${section('Ekip havuzunda sorumlu bekleyen', '#7a6b40', pool)}
+<tr><td style="padding:20px 24px 24px"><a href="${escapeHtml(appUrl)}" style="display:inline-block;background:#2c6549;color:#ffffff;text-decoration:none;padding:10px 18px;border-radius:6px;font-weight:bold">Pusula'yı aç</a></td></tr>
+<tr><td style="padding:12px 24px;border-top:1px solid #e6eae1;color:#7d877f;font-size:12px">Sabah özetini Pusula → Ayarlar → "Sabah özeti" ile kapatabilirsin.</td></tr>
+</table></td></tr></table></body></html>`;
+  return { to: member.email, subject, html };
+}

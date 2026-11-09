@@ -20,9 +20,10 @@ jobs:
         run: python tests/check_static.py
       - name: Unit tests
         run: npm test
-      - name: Build (demo and pilot)
+      - name: Build (demo, pilot preview and pilot)
         run: |
           npm run build
+          npm run build:preview
           npm run build:pilot
       - name: Browser smoke test
         run: |

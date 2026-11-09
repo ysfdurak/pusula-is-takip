@@ -1,4 +1,5 @@
 import { RotateCcwClockIcon } from 'lucide-react';
+import { RECURRENCE_LABELS } from '../shared/recurrence.js';
 
 const HISTORY_VALUE_LABELS = {
   todo: 'Başlanmadı',
@@ -27,6 +28,8 @@ export function RevisionHistory({ activities, name, timeLabel, teamName: r }) {
           ? timeLabel(String(e))
           : i === 'teamId'
             ? r(String(e))
+            : i === 'recurrence'
+              ? RECURRENCE_LABELS[String(e)] || String(e)
             : i === 'coordinator'
               ? name(String(e))
               : i === 'waitingReason'
