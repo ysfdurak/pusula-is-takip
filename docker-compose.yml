@@ -1,0 +1,14 @@
+# Pusula pilot sunucusu: docker compose up -d
+# Önce .env.example dosyasını .env olarak kopyalayıp doldurun. HTTPS, önündeki ters vekil (IIS, nginx, Azure) ile sağlanır.
+services:
+  pusula:
+    build: .
+    image: pusula:0.6.0
+    env_file: .env
+    ports:
+      - "127.0.0.1:8080:8080"
+    volumes:
+      - pusula-data:/data
+    restart: unless-stopped
+volumes:
+  pusula-data: {}

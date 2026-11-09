@@ -54,7 +54,9 @@ npm run dev            # geliştirme sunucusu
 npm test               # iş kuralı birim testleri
 npm run build          # dist/index.html  → tasarım demosu
 npm run build:pilot    # dist-pilot/index.html → sunucu modu (/api/workspace)
-npm run dev:api        # pilot derlemesini yerelde örnek API ile çalıştırır; e-postalar tmp/mail-preview/ (yalnızca geliştirme)
+npm run dev:api        # pilot derlemesini örnek verilerle çalıştırır; e-postalar tmp/mail-preview/ (yalnızca geliştirme)
+npm run start:dev      # pilot sunucusu: SQLite + geliştirme girişi, boş çalışma alanı (yalnızca geliştirme)
+npm start              # pilot sunucusu (üretim): .env.example ve docs/PILOT_KURULUM.md
 ```
 
 | Klasör | İçerik |
@@ -64,6 +66,7 @@ npm run dev:api        # pilot derlemesini yerelde örnek API ile çalıştırı
 | `src/shared/workspaceModel.js` | Veri şeması (zod) ve iş kuralları: görünürlük, yetki, termin, revizyon |
 | `src/demo/demoServer.js` | Tarayıcı içi örnek sunucu; `/api/workspace` sözleşmesinin başvuru uygulaması |
 | `src/lib/` | Pano istatistikleri, çakışma raporu, tarih biçimleri, etiketler |
+| `server/` | Pilot sunucusu: Microsoft girişi, oturum, SQLite, yedek, API ([kurulum](docs/PILOT_KURULUM.md)) |
 | `server/mail/` | Outlook (Microsoft Graph) e-posta bildirimleri: gönderici, şablon, kuyruk |
 | `tests/` | Birim testleri ve tarayıcı duman testi |
 
@@ -73,12 +76,13 @@ npm run dev:api        # pilot derlemesini yerelde örnek API ile çalıştırı
 
 ## Şirket içi pilot
 
-Arayüz bir sunucuyla çalışmaya hazırdır (`/api/workspace`, oturum ve çakışma ekranları uygulamada var) ve sunucunun uygulaması gereken kurallar `src/shared/` ile `src/demo/` altında okunabilir durumda. Gerçek sunucu, şirket hesabıyla giriş ve veritabanı ise henüz yok. Birkaç kullanıcıyla deneme için gerekenler: [docs/PILOT_IHTIYACLARI.md](docs/PILOT_IHTIYACLARI.md)
+Pilot sunucusu hazır: Microsoft hesabıyla giriş, SQLite veritabanı, Outlook bildirimleri, otomatik yedek ve Docker imajı. BT kurulumu: [docs/PILOT_KURULUM.md](docs/PILOT_KURULUM.md). Şirket tarafında kalanlar (BT, KVKK, pilot planı): [docs/PILOT_IHTIYACLARI.md](docs/PILOT_IHTIYACLARI.md)
 
 ## Belgeler
 
 - [Demo senaryoları](docs/DEMO_SENARYOLARI.md)
 - [Mimari, API sözleşmesi ve sınırlar](docs/MIMARI_VE_SINIRLAR.md)
+- [Pilot sunucusu kurulumu (BT)](docs/PILOT_KURULUM.md)
 - [Pilot ihtiyaçları](docs/PILOT_IHTIYACLARI.md)
 - [Outlook e-posta bildirimleri ve BT kurulumu](docs/OUTLOOK_BILDIRIMLERI.md)
 - [Kaynak kodun durumu](docs/KAYNAK_KOD_DURUMU.md)

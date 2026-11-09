@@ -1,0 +1,12 @@
+.git
+.github
+node_modules
+dist
+dist-pilot
+tmp
+data
+docs
+tools
+tests
+*.md
+.env

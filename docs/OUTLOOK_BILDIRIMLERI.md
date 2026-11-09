@@ -42,6 +42,8 @@ SMTP ve şifreyle gönderim kullanılmaz. Microsoft bu yöntemi (SMTP AUTH Basic
 
 ### 2. Entra ID uygulama kaydı
 
+Pilot sunucusunun giriş için kullandığı "Pusula" uygulama kaydı burada da kullanılabilir ([PILOT_KURULUM.md](PILOT_KURULUM.md), 1. adım).
+
 - **Ad:** Pusula E-posta
 - **Kimlik bilgisi:** Pilot için süreli bir istemci gizli anahtarı (client secret) yeterlidir. Kalıcı kullanımda sertifika önerilir.
 - **İzin: Entra'da Graph `Mail.Send` izni VERİLMEMELİ.** Verilirse uygulama herkesin adına gönderebilir ve aşağıdaki kısıtlama işe yaramaz. Yetki 3. adımda yalnızca Exchange üzerinden tanımlanır.
@@ -77,9 +79,7 @@ Gizli anahtar koda veya GitHub'a yazılmaz; sunucunun ortam değişkenlerinde ya
 | Değişken | Örnek |
 |---|---|
 | `MAIL_MODE` | `outlook` |
-| `GRAPH_TENANT_ID` | Dizin (kiracı) kimliği |
-| `GRAPH_CLIENT_ID` | Uygulama (istemci) kimliği |
-| `GRAPH_CLIENT_SECRET` | Gizli anahtar |
+| `ENTRA_TENANT_ID`, `ENTRA_CLIENT_ID`, `ENTRA_CLIENT_SECRET` | Giriş için kullanılan uygulama kaydı e-posta için de kullanılır ([PILOT_KURULUM.md](PILOT_KURULUM.md)). Ayrı bir kayıt istenirse `GRAPH_TENANT_ID`, `GRAPH_CLIENT_ID`, `GRAPH_CLIENT_SECRET` verilir |
 | `MAIL_SENDER` | `pusula@sirketiniz.com.tr` |
 | `MAIL_ALLOWED_DOMAINS` | `sirketiniz.com.tr`: şirket dışına e-posta gitmesini engeller |
 | `APP_URL` | `https://pusula.sirketiniz.com.tr/`: e-postadaki bağlantının adresi |

@@ -35,6 +35,7 @@ jobs:
           npm install --no-save --no-audit --no-fund playwright@1
           npx playwright install --with-deps chromium
           npm run test:e2e
+          node tests/e2e/pilot.mjs
       - name: Assemble site
         run: |
           mkdir -p _site

@@ -29,3 +29,24 @@ jobs:
           npm install --no-save --no-audit --no-fund playwright@1
           npx playwright install --with-deps chromium
           npm run test:e2e
+          node tests/e2e/pilot.mjs
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build image
+        run: docker build -t pusula:ci .
+      - name: Container smoke test
+        run: |
+          docker run -d --name pusula -p 8080:8080 \
+            -e APP_URL=https://pusula.example.test/ -e PUSULA_ADMINS=admin@example.test \
+            -e ENTRA_TENANT_ID=tenant -e ENTRA_CLIENT_ID=client -e ENTRA_CLIENT_SECRET=secret pusula:ci
+          for i in $(seq 1 30); do curl -fs http://127.0.0.1:8080/healthz && break; sleep 1; done
+          curl -fs http://127.0.0.1:8080/healthz
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8080/api/workspace)" = "401"
+          curl -s -o /dev/null -w '%{redirect_url}' http://127.0.0.1:8080/auth/login | grep -q 'https://login.microsoftonline.com/tenant/'
+          docker exec pusula ls /data/pusula.db /data/backups
+          docker inspect --format '{{.Config.User}}' pusula | grep -q node
+      - name: Logs
+        if: always()
+        run: docker logs pusula || true
