@@ -1,5 +1,10 @@
 # Değişiklik geçmişi
 
+## 0.7.1 — 2026-11-09
+- **Güvenlik:** zod 3 → 4.6.7 (GHSA-mrhx-c7xc-m3w5, büyük koleksiyon doğrulamasında bellek tüketimi). Yükseltme öncesi ve sonrası 248 rastgele etkileşim durumunda karşılaştırıldı, fark yok. `npm audit`: 0 açık.
+- **Telefon:** README'ye demo ve pilot önizlemesi için QR kodları. Demo ile önizleme arasında banttan tek dokunuşla geçiş.
+- **Proje durumu:** Portföy sürümü tamamlandı; pilot için kalan adımlar şirket tarafında.
+
 ## 0.7.0 — 2026-11-09
 - **Pilot önizlemesi (`/pilot-onizleme/`):** Demodan ayrı, örnek veri olmadan boş başlayan sürüm. İlk ekranda yönetici (adın, e-postan) ve çalışma alanı adı girilir; ekipler ve kişiler yönetici tarafından kurulur. "Kullanıcı olarak dene" ile eklenen kişilerin gözünden bakılır. Veriler yalnızca o tarayıcıda, demodan ayrı tutulur; tek tıkla sıfırlanır.
 - **Tekrarlanan işler:** Her gün, hafta içi, her hafta, her ay. İş tamamlanınca sıradaki tekrar aynı sorumlularla, sıfırlanmış kontrol listesiyle ve bir sonraki terminle açılır; kaçırılan tekrarlar atlanır. Termin zorunlu.
