@@ -218,12 +218,29 @@ export function createTaskCommands(service, { newId, now = () => Date.now() }) {
       };
     },
 
-    createTask(actor, { calismaAlani, baslik, aciklama = '', ekipId = '', sorumlular = [], termin = '', oncelik = 'normal', projeId = '' }) {
+    /** Kullanıcının çalışma alanları; her birinin ekip ve proje adlarıyla (iş açarken gerekir). */
+    listWorkspaces(actor) {
+      return service.get(actor, '').workspaces.map((w) => {
+        const { state } = service.get(actor, w.id);
+        return {
+          id: w.id,
+          ad: w.name,
+          rol: w.role,
+          ekipler: state.teams.filter((t) => t.active).map((t) => ({ id: t.id, ad: t.name })),
+          projeler: state.projects.map((p) => ({ id: p.id, ad: p.name })),
+        };
+      });
+    },
+
+    /** `ekip` ve `proje` adı ya da kimliği olabilir. */
+    createTask(actor, { calismaAlani, baslik, aciklama = '', ekip = '', sorumlular = [], termin = '', oncelik = 'normal', proje = '' }) {
       const snap = snapshot(actor, calismaAlani);
       if (!String(baslik || '').trim()) throw Error('İşin adını yaz.');
       if (!PRIORITIES.includes(oncelik)) throw Error('Öncelik şunlardan biri olmalı: ' + PRIORITIES.join(', '));
-      if (ekipId && !snap.state.teams.some((team) => team.id === ekipId)) throw Error('Ekip bulunamadı.');
-      if (projeId && !snap.state.projects.some((p) => p.id === projeId)) throw Error('Proje bulunamadı.');
+      const ekipId = ekip ? snap.state.teams.find((t) => t.id === ekip || t.name === ekip)?.id : '';
+      if (ekip && !ekipId) throw Error('Ekip bulunamadı: ' + ekip);
+      const projeId = proje ? snap.state.projects.find((p) => p.id === proje || p.name === proje)?.id : '';
+      if (proje && !projeId) throw Error('Proje bulunamadı: ' + proje);
       const assignees = normalizeAssignees(sorumlular, snap, actor);
       const id = newId();
       const next = structuredClone(snap.state);

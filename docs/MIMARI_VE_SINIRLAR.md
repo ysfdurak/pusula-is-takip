@@ -10,13 +10,27 @@
 | `src/shared/workspaceService.js` | `/api/workspace` sözleşmesinin uygulaması | Depolamadan ve kullanıcıdan bağımsız; demo ve pilot sunucusu ortak kullanır |
 | `src/demo/demoServer.js` | Tarayıcı içi örnek sunucu | Örnek veri + localStorage + örnek kullanıcı seçimi |
 | `server/` | Pilot sunucusu | Entra ID girişi (OIDC + PKCE), oturum, SQLite, yedek, güvenlik başlıkları |
-| `src/lib/` | Pano istatistikleri, çakışma raporu, biçimlendirme | |
+| `src/shared/taskCommands.js` | İnce servis katmanı: tek iş, tek değişiklik komutları | Kural yazmaz; `save` üzerinden kaydeder. MCP kapısı bunu kullanır |
+| `src/shared/taskRules.js`, `dashboardStats.js`, `projectStats.js` | Tamamlama kuralları, ekip panosu ve proje sağlığı hesapları | Saf fonksiyonlar; arayüz ve MCP aynı hesabı kullanır |
+| `server/mcp.js` | MCP kapısı (`/mcp`) | Varsayılan kapalı; ayrıntı [MCP.md](MCP.md) |
+| `src/lib/` | Çakışma raporu, biçimlendirme, arayüze özel görünümler | Taşınan hesaplar için eski yollar yeniden dışa aktarır |
 | `src/styles.css` | Tüm stiller | |
 | `vite.config.js` | Tek dosyalı derleme, mod ve güvenlik politikası (CSP) | `--mode pilot` sunucu modu |
 | `src/shared/notificationRules.js` | Bildirim alıcıları ve e-posta durumu | Jira benzeri kurallar |
 | `server/mail/` | Outlook göndericisi (Graph), şablon, gönderim kuyruğu | Yalnızca sunucuda çalışır; tarayıcı paketine girmez |
 | `tools/dev-api-server.mjs` | Pilot derlemesini yerelde örnek API ile çalıştırır | Yalnızca geliştirme; giriş ve yetki yok |
 | `tests/` | Birim testleri ve tarayıcı duman testi | CI'da ve yayından önce çalışır |
+
+## İkili yapı: tek çekirdek, iki kapı
+
+```
+                 ┌─ web kapısı  /api/workspace  (oturum çerezi)  → React arayüzü
+çekirdek ────────┤
+(workspaceService,└─ MCP kapısı  /mcp            (erişim anahtarı) → Claude ve diğer MCP istemcileri
+ kurallar, veri)      └─ ince servis katmanı (taskCommands) → aynı `save`
+```
+
+İş kuralları yalnızca çekirdekte yaşar. Kapılar kimliği belirler ve isteği çekirdeğe iletir; kural kopyalamaz. Bu yüzden ekip panosunda görünen sayı ile Claude'un söylediği sayı aynıdır.
 
 ## Çalışma modları
 

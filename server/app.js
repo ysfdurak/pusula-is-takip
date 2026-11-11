@@ -4,7 +4,8 @@ import { DEFAULT_NOTIFY_POLICY, EMPTY_STATE } from '../src/shared/workspaceModel
 import { processOutbox } from './mail/outbox.js';
 import { runDigest } from './mail/digest.js';
 import { randomToken } from './auth.js';
-import { randomUUID } from 'node:crypto';
+import { createHash, randomUUID, timingSafeEqual } from 'node:crypto';
+import { createMcpHandler } from './mcp.js';
 
 const MAX_BODY = 8 * 1024 * 1024; // 5 MB ek dosya base64 ile ~6,7 MB eder
 const COOKIE = 'pusula_sid';
@@ -36,6 +37,26 @@ export function createApp({ config, store, auth, html, mailer = null, log = () =
 
   bootstrap();
   syncAdmins();
+
+  // MCP kapısı: aynı servisi (aynı kurallar, aynı veri) kullanır; yalnızca kimlik doğrulama farklıdır.
+  const mcp = config.mcpEnabled
+    ? createMcpHandler({
+        service,
+        newId: randomUUID,
+        audit: (email, action, detail) => store.audit(email, action, detail),
+        afterWrite: () => flushMail(),
+        log,
+      })
+    : null;
+  // Anahtarlar özetleriyle (SHA-256) sabit sürede karşılaştırılır: zamanlama ile tahmin edilemez.
+  const digestOf = (value) => createHash('sha256').update(value).digest();
+  const mcpKeys = [...(config.mcpTokens || new Map())].map(([token, email]) => ({ hash: digestOf(token), email }));
+  function mcpUser(req) {
+    const m = String(req.headers.authorization || '').match(/^Bearer\s+(\S+)$/i);
+    if (!m) return null;
+    const hash = digestOf(m[1]);
+    return mcpKeys.find((k) => timingSafeEqual(k.hash, hash))?.email || null;
+  }
 
   /** İlk kurulum: hiç çalışma alanı yoksa yöneticiler için bir tane oluşturulur. */
   function bootstrap() {
@@ -326,6 +347,32 @@ ${link ? `<p><a href="${escapeHtml(link.href)}" style="color:#2c6549;font-weight
         const message = err.message;
         const status = message.includes('Kayıt değişti') ? 409 : /erişimin yok|yalnızca|Görüntüleme rolünde/.test(message) ? 403 : 400;
         return json(res, status, { error: message });
+      }
+    }
+
+    // MCP kapısı
+    if (path === '/mcp') {
+      if (!mcp) return json(res, 404, { error: 'MCP kapısı bu kurulumda kapalı.' });
+      // Tarayıcıdan gelen istekler yalnızca uygulamanın kendi adresinden kabul edilir (DNS rebinding'e karşı).
+      const origin = req.headers.origin;
+      if (origin && origin !== appOrigin) return json(res, 403, { error: 'İstek kaynağı reddedildi.' });
+      const email = mcpUser(req);
+      if (!email) {
+        res.setHeader('WWW-Authenticate', 'Bearer');
+        return json(res, 401, { error: 'Geçerli bir MCP erişim anahtarı gerekli.' });
+      }
+      if (!admins.has(email) && !isMember(email)) return json(res, 403, { error: 'Pusula erişimin kaldırılmış.' });
+      // Durumsuz (stateless) çalışır: yalnızca POST. Sunucudan istemciye akış (GET) ve oturum kapatma (DELETE) yok.
+      if (req.method !== 'POST') {
+        res.setHeader('Allow', 'POST');
+        return json(res, 405, { error: 'Yöntem desteklenmiyor.' });
+      }
+      try {
+        const body = await readJson(req);
+        return await mcp.handle(req, res, email, body);
+      } catch (err) {
+        if (err.status) return json(res, err.status, { error: err.message });
+        throw err;
       }
     }
 

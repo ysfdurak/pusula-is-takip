@@ -41,6 +41,22 @@ export function loadConfig(env = process.env) {
   };
   if (mailMode === 'outlook' && !graph.sender) errors.push('MAIL_SENDER eksik.');
 
+  // MCP kapısı (/mcp): varsayılan KAPALI. Şirket verisinin yapay zekâ araçlarına bağlanmaması gereken
+  // kurulumlarda kapalı bırakılır. Kimlik şimdilik kişisel erişim anahtarıyla doğrulanır:
+  // MCP_TOKENS="eposta:anahtar,eposta2:anahtar2" (anahtar en az 32 karakter; üretmek için: openssl rand -hex 32)
+  const mcpEnabled = env.MCP_ENABLED === 'true';
+  const mcpTokens = new Map();
+  for (const pair of String(env.MCP_TOKENS || '').split(',').map((x) => x.trim()).filter(Boolean)) {
+    const at = pair.lastIndexOf(':');
+    const email = pair.slice(0, at).trim().toLowerCase();
+    const token = pair.slice(at + 1).trim();
+    if (at < 1 || !email.includes('@')) errors.push('MCP_TOKENS biçimi "eposta:anahtar" olmalı.');
+    else if (token.length < 32) errors.push(`MCP_TOKENS: ${email} için anahtar en az 32 karakter olmalı.`);
+    else if ([...mcpTokens.values()].includes(email) || mcpTokens.has(token)) errors.push('MCP_TOKENS: her kişi ve anahtar bir kez yazılmalı.');
+    else mcpTokens.set(token, email);
+  }
+  if (mcpEnabled && !mcpTokens.size) errors.push('MCP_ENABLED=true iken en az bir MCP_TOKENS kaydı gerekli.');
+
   const admins = list(env.PUSULA_ADMINS);
   const dataDir = resolve(env.DATA_DIR || './data');
   return {
@@ -55,6 +71,8 @@ export function loadConfig(env = process.env) {
     graph,
     mailAllowedDomains: list(env.MAIL_ALLOWED_DOMAINS),
     admins,
+    mcpEnabled,
+    mcpTokens,
     workspaceName: env.PUSULA_WORKSPACE_NAME || 'Pusula',
     dataDir,
     dbFile: join(dataDir, 'pusula.db'),

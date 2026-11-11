@@ -15,9 +15,11 @@
     "dev:api": "node tools/dev-api-server.mjs",
     "start": "node --disable-warning=ExperimentalWarning server/index.js",
     "backup": "node --disable-warning=ExperimentalWarning server/backup.js",
-    "start:dev": "npm run build:pilot && AUTH_MODE=dev PUSULA_ADMINS=deneme@sirket.test DATA_DIR=./tmp/pilot-data node --disable-warning=ExperimentalWarning server/index.js"
+    "start:dev": "npm run build:pilot && AUTH_MODE=dev PUSULA_ADMINS=deneme@sirket.test DATA_DIR=./tmp/pilot-data node --disable-warning=ExperimentalWarning server/index.js",
+    "start:mcp-dev": "npm run build:pilot && AUTH_MODE=dev PUSULA_ADMINS=deneme@sirket.test DATA_DIR=./tmp/pilot-data MCP_ENABLED=true MCP_TOKENS=deneme@sirket.test:gelistirme-anahtari-yalnizca-yerel-deneme node --disable-warning=ExperimentalWarning server/index.js"
   },
   "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.2",
     "zod": "^4.6.7"
   },
   "devDependencies": {
