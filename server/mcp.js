@@ -79,7 +79,9 @@ const TOOLS = [
   }, WRITE, (c, actor, a) => c.addComment(actor, a)],
 ];
 
-export const MCP_TOOL_NAMES = [...TOOLS.map(([name]) => name), 'panom'];
+export const MCP_TOOL_NAMES = [...TOOLS.map(([name]) => name), 'panom', 'geri_bildirim_gonder'];
+/** Yalnızca Pusula yöneticisine (PUSULA_ADMINS) görünen araçlar */
+export const ADMIN_TOOL_NAMES = ['kullanim_istatistikleri'];
 
 /**
  * @param {object} o
@@ -89,8 +91,13 @@ export const MCP_TOOL_NAMES = [...TOOLS.map(([name]) => name), 'panom'];
  * @param {() => void} o.afterWrite   yazma araçlarından sonra (ör. e-posta kuyruğunu gönder)
  * @param {(msg: string) => void} o.log
  * @param {string|null} [o.boardHtml]  derlenmiş "Benim panom" sayfası (dist-mcp-app/panom.html)
+ * @param {(email: string) => boolean} [o.isAdmin]
+ * @param {(email: string, tool: string) => void} [o.onTool]    kullanım ölçümü (yalnızca demo ziyaretçileri yazılır)
+ * @param {(email: string, input: object) => object} [o.feedback]
+ * @param {() => object} [o.stats]                                yönetici için kullanım özeti
  */
-export function createMcpHandler({ service, newId, audit, afterWrite = () => {}, log = () => {}, boardHtml = null }) {
+export function createMcpHandler({ service, newId, audit, afterWrite = () => {}, log = () => {}, boardHtml = null,
+  isAdmin = () => false, onTool = () => {}, feedback = null, stats = null }) {
   const commands = createTaskCommands(service, { newId });
 
   /** Her istek için yeni sunucu: kimlik isteğe bağlıdır, istekler arasında durum tutulmaz (stateless). */
@@ -103,6 +110,7 @@ export function createMcpHandler({ service, newId, audit, afterWrite = () => {},
       server.registerTool(name, { description, inputSchema, annotations }, async (args) => {
         try {
           const result = run(commands, actor, args);
+          onTool(actor, name);
           if (!annotations.readOnlyHint) {
             audit(actor, 'mcp:' + name, args.isId || args.baslik || '');
             afterWrite();
@@ -119,6 +127,7 @@ export function createMcpHandler({ service, newId, audit, afterWrite = () => {},
       });
     }
     registerBoard(server, actor);
+    registerExtras(server, actor);
     return server;
   }
 
@@ -164,6 +173,47 @@ export function createMcpHandler({ service, newId, audit, afterWrite = () => {},
         },
       ],
     }));
+  }
+
+  /** Geri bildirim (herkes) ve kullanım özeti (yalnızca yönetici). */
+  function registerExtras(server, actor) {
+    const reply = (fn) => {
+      try {
+        return { content: [{ type: 'text', text: JSON.stringify(fn(), null, 2) }] };
+      } catch (err) {
+        if (err instanceof Error && err.constructor === Error) return { isError: true, content: [{ type: 'text', text: err.message }] };
+        log(`MCP hatası: ${err?.stack || err}`);
+        return { isError: true, content: [{ type: 'text', text: 'İstek işlenemedi.' }] };
+      }
+    };
+    if (feedback) {
+      server.registerTool(
+        'geri_bildirim_gonder',
+        {
+          description:
+            "Kullanıcının Pusula hakkındaki görüşünü uygulamanın geliştiricisine iletir. Yalnızca kullanıcı açıkça geri bildirim vermek istediğinde ve onun sözleriyle kullan; kendin yorum ekleme. E-posta yalnızca kullanıcı 'bana dönebilirsiniz' derse paylaşılır (iletisim: true).",
+          inputSchema: {
+            metin: z.string().max(2000).describe('Kullanıcının kendi sözleri'),
+            puan: z.number().int().min(1).max(5).optional().describe('Kullanıcı bir puan verdiyse 1-5'),
+            iletisim: z.boolean().optional().describe('Kullanıcı e-postayla dönülmesini isterse true'),
+          },
+          annotations: WRITE,
+        },
+        async (args) => reply(() => (onTool(actor, 'geri_bildirim_gonder'), feedback(actor, { message: args.metin, rating: args.puan, contact: args.iletisim === true, screen: 'claude' }))),
+      );
+    }
+    if (stats && isAdmin(actor)) {
+      server.registerTool(
+        'kullanim_istatistikleri',
+        {
+          description:
+            'Yalnızca Pusula yöneticisi için: ziyaretçi demo alanlarının kullanım özeti. Kaç kişi denedi, kaçı geri döndü, hangi özellikleri web ve Claude üzerinden kullandılar, huni ve geri bildirimler (puan ve metin).',
+          inputSchema: {},
+          annotations: READ,
+        },
+        async () => reply(() => stats()),
+      );
+    }
   }
 
   /** /mcp isteğini işler. `actor` kimliği doğrulanmış kullanıcının e-postasıdır. */

@@ -35,6 +35,8 @@ Tarayıcı ──(oturum çerezi)──▶ /api/workspace ───────�
 | `kontrol_maddesi_isaretle` | Kontrol listesi maddesi | Yazma |
 | `yorum_ekle` | Yorum; ilgililere bildirim | Yazma |
 
+| `geri_bildirim_gonder` | Kullanıcının görüşünü geliştiriciye iletir (e-posta yalnızca izinle) | Yazma |
+| `kullanim_istatistikleri` | **Yalnızca yönetici:** demo kullanım özeti (aşağıda) | Okuma |
 | `panom` | **MCP App:** Claude'un içinde açılan etkileşimli pano (aşağıda) | Okuma + arayüz |
 
 **Bilerek MCP'ye açılmayanlar:** üye ve rol yönetimi, çalışma kuralları, iş silme, ek dosya. Yanlış anlaşılmanın bedeli yüksek olan bu işlemler yalnızca web arayüzünden yapılır.

@@ -117,6 +117,22 @@ Portföy ziyaretçisi Google ile girdiğinde **kendine ait** bir çalışma alan
 
 Ziyaretçinin e-posta adresi giriş ve güvenlik kaydı (audit) için tutulur. Kişisel sitende kısa bir gizlilik notu (hangi veri, ne kadar süre, ne için) bulundurman iyi olur.
 
+### Kullanım ölçümü ve geri bildirim
+
+`https://pusula.ysfdurak.com/yonetim/istatistik` (yalnızca `PUSULA_ADMINS`): kaç ziyaretçi, kaçı farklı günde geri döndü, kaçı Claude'dan kullandı, günlük grafik, huni (giriş → iş oluşturma → durum değiştirme → Claude → geri bildirim), hangi ekranları ve özellikleri web ve Claude üzerinden kullandılar, geri bildirimler ve ortalama puan. `?gun=90` ile dönem değişir; `istatistik.json` aynı veriyi JSON verir. Claude'a "demoyu kaç kişi denedi?" diye de sorabilirsin (`kullanim_istatistikleri` aracı, yalnızca yöneticide).
+
+| Karar | Neden |
+|---|---|
+| Google Analytics yok, ölçüm sunucuda | Arayüzün güvenlik politikası dış scripti kapatır; üçüncü taraf çerezi ve çerez onayı gerekmez; veri başka şirkete gitmez; Claude içindeki kullanım da aynı yerde ölçülür |
+| Yalnızca demo ziyaretçileri ölçülür | Şirket kurulumunda (`DEMO_MODE=false`) hiçbir olay yazılmaz: çalışan takibi yapılmaz |
+| Kişi takma kimlikle (sunucuya özel gizli anahtarla HMAC) | Olaylarda e-posta yok; demo alanı silindikten sonra sayılar kalır ama kimin olduğu çıkarılamaz |
+| İçerik yazılmaz | "İş oluşturdu" kaydedilir, işin adı kaydedilmez |
+| İş olayları sunucuda üretilir | Arayüz yalnızca ekran adlarını bildirebilir; "iş oluşturdu" gibi olayları uyduramaz |
+| Olaylar ve geri bildirim `ANALYTICS_RETENTION_DAYS` (varsayılan 180) gün sonra silinir | Veri süresiz tutulmaz |
+| Geri bildirimde e-posta yalnızca "bana dönebilirsiniz" işaretlenirse | Kişi açıkça izin vermedikçe geri bildirim anonimdir |
+
+Geri bildirim düğmesi kenar çubuğunda ve **Ayarlar**'da (telefonda) durur; şirket kurulumunda da çalışır ama orada ölçüm yapılmaz. Gizlilik notuna şunu ekle: "Demo kullanımı takma kimlikle, içerik olmadan ve 180 gün süreyle ölçülür; üçüncü taraf analitik aracı ve çerezi kullanılmaz." Kişisel sitenin sayfa ziyaretleri için çerezsiz ve ücretsiz **Cloudflare Web Analytics** kullanılabilir (Cloudflare → Analytics & Logs → Web Analytics).
+
 ## 6. Claude'a bağla
 
 1. Claude → **Ayarlar → Bağlayıcılar (Connectors) → Özel bağlayıcı ekle**.

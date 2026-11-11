@@ -37,7 +37,7 @@ app.cleanupDemo(); // açılışta süresi dolmuş demo alanları
 const timers = [
   setInterval(() => app.flushMail(), 30_000),
   setInterval(() => app.sendDigest(), 5 * 60_000),
-  setInterval(() => (store.sessions.purge(), app.purgeOAuth(), app.cleanupDemo()), 3600e3),
+  setInterval(() => (store.sessions.purge(), app.purgeOAuth(), app.cleanupDemo(), app.purgeAnalytics()), 3600e3),
   setInterval(() => {
     try {
       log(`Yedek alındı: ${store.backup(config.backupDir, config.backupKeep)}`);

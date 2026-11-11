@@ -10,7 +10,7 @@ import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/
 import { loadConfig } from '../../server/config.js';
 import { openStore } from '../../server/store.js';
 import { createApp } from '../../server/app.js';
-import { MCP_TOOL_NAMES } from '../../server/mcp.js';
+import { ADMIN_TOOL_NAMES, MCP_TOOL_NAMES } from '../../server/mcp.js';
 
 const ADMIN = 'deniz@sirket.test';
 const ECE = 'ece@sirket.test';
@@ -69,7 +69,7 @@ test('araç listesi ve yetki: üye olmayan anahtar sahibi reddedilir', async () 
   const { base } = await start();
   const admin = await connect(base, ADMIN_KEY);
   const { tools } = await admin.listTools();
-  assert.deepEqual(tools.map((t) => t.name).sort(), [...MCP_TOOL_NAMES].sort());
+  assert.deepEqual(tools.map((t) => t.name).sort(), [...MCP_TOOL_NAMES, ...ADMIN_TOOL_NAMES].sort());
   assert.equal(tools.find((t) => t.name === 'gundemim').annotations.readOnlyHint, true);
   assert.equal(tools.find((t) => t.name === 'is_olustur').annotations.readOnlyHint, false);
   // Ece'nin anahtarı var ama henüz Pusula üyesi değil

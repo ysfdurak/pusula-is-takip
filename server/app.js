@@ -8,6 +8,7 @@ import { createHash, randomUUID, timingSafeEqual } from 'node:crypto';
 import { createMcpHandler } from './mcp.js';
 import { createOAuthServer } from './oauth.js';
 import { createDemoSandboxes } from './demo.js';
+import { createAnalytics } from './analytics.js';
 
 const MAX_BODY = 8 * 1024 * 1024; // 5 MB ek dosya base64 ile ~6,7 MB eder
 const COOKIE = 'pusula_sid';
@@ -41,6 +42,14 @@ export function createApp({ config, store, auth, html, mailer = null, log = () =
   // Ziyaretçi demo alanları (DEMO_MODE=true): üye olmayan kişi girince kendine ait örnek verili alan açılır
   const demo = config.demoMode ? createDemoSandboxes({ store, ttlDays: config.demoTtlDays, max: config.demoMax, log }) : null;
 
+  // Kullanım ölçümü (yalnızca demo ziyaretçileri, takma kimlikle) ve geri bildirim (herkes)
+  const analytics = createAnalytics({
+    db: store.db,
+    shouldTrack: (email) => !!demo && !admins.has(email) && !!demo.sandboxOf(email),
+    retentionDays: config.analyticsRetentionDays,
+  });
+  const eventBudget = new Map(); // kişi başı günlük olay sınırı (arayüzden gelen olaylar)
+
   bootstrap();
   syncAdmins();
 
@@ -53,6 +62,10 @@ export function createApp({ config, store, auth, html, mailer = null, log = () =
         afterWrite: () => flushMail(),
         log,
         boardHtml,
+        isAdmin: (email) => admins.has(email),
+        onTool: (email, tool) => analytics.track(email, 'claude:' + tool, 'claude'),
+        feedback: (email, input) => analytics.addFeedback(email, { ...input, channel: 'claude' }),
+        stats: () => analytics.summary(),
       })
     : null;
   // Anahtarlar özetleriyle (SHA-256) sabit sürede karşılaştırılır: zamanlama ile tahmin edilemez.
@@ -67,7 +80,10 @@ export function createApp({ config, store, auth, html, mailer = null, log = () =
         session: (req) => store.sessions.get(cookieValue(req), config.sessionIdleMinutes),
         isAllowed: (email) => admins.has(email) || isMember(email),
         http: { headers: (...a) => headers(...a), json: (...a) => json(...a), page: (...a) => page(...a), redirect: (...a) => redirect(...a), readBody: (...a) => readBody(...a) },
-        audit: (email, action, detail) => store.audit(email, action, detail),
+        audit: (email, action, detail) => {
+          store.audit(email, action, detail);
+          if (action === 'oauth_grant') analytics.track(email, 'oturum:claude_baglandi', 'claude');
+        },
       })
     : null;
 
@@ -265,6 +281,7 @@ ${link ? `<p><a href="${escapeHtml(link.href)}" style="color:#2c6549;font-weight
     }
     const id = store.sessions.create(user.email, user.name, config.sessionHours);
     store.audit(user.email, 'login');
+    analytics.track(user.email, 'oturum:giris');
     const cookies = [sessionCookie(id, config.sessionHours * 3600), loginCookie('', 0)];
     if (!welcome) return redirect(res, `${basePath}${safeReturn(returnTo)}`, cookies);
     // İlk demo girişi: ne olduğunu ve verinin ne zaman silineceğini açıkça söyle
@@ -289,6 +306,7 @@ ${link ? `<p><a href="${escapeHtml(link.href)}" style="color:#2c6549;font-weight
     if (!demo) return denyNonMember(res, user.email);
     try {
       demo.create(user);
+      analytics.track(user.email, 'oturum:demo_acildi');
     } catch (err) {
       if (err.code === 'full') return page(res, 503, 'Demo şu an dolu', 'Aynı anda açık demo alanı sınırına ulaşıldı. Birkaç gün sonra yeniden dene.');
       throw err;
@@ -397,7 +415,12 @@ ${link ? `<p><a href="${escapeHtml(link.href)}" style="color:#2c6549;font-weight
         }
         const demoError = body.action === 'member' ? demo?.memberError(body.id, body.email) : null;
         if (demoError) return json(res, 400, { error: demoError });
+        const activitiesBefore = store.load().activities.length;
         const result = service.post(email, body);
+        // Ölçüm: kaydın ürettiği yeni geçmiş kayıtlarının türü (oluşturma, durum, düzenleme, engel); içerik yazılmaz
+        if (body.action === 'save') {
+          for (const a of store.load().activities.slice(0, store.load().activities.length - activitiesBefore)) analytics.track(email, 'is:' + a.kind);
+        } else if (['comment', 'attach'].includes(body.action)) analytics.track(email, 'is:' + body.action);
         if (['save', 'member', 'policy', 'create', 'attach', 'detach'].includes(body.action)) {
           store.audit(email, body.action, body.action === 'member' ? `${body.email} · ${body.role}` : body.action === 'detach' ? body.file : body.reason || body.name || '');
         }
@@ -414,6 +437,44 @@ ${link ? `<p><a href="${escapeHtml(link.href)}" style="color:#2c6549;font-weight
         const status = message.includes('Kayıt değişti') ? 409 : /erişimin yok|yalnızca|Görüntüleme rolünde/.test(message) ? 403 : 400;
         return json(res, status, { error: message });
       }
+    }
+
+    // Arayüzden ölçüm olayı ve geri bildirim
+    if ((path === '/api/event' || path === '/api/feedback') && req.method === 'POST') {
+      const session = store.sessions.get(cookieValue(req), config.sessionIdleMinutes);
+      if (!session) return json(res, 401, { error: 'Oturum açman gerekiyor.' });
+      const origin = req.headers.origin;
+      if (!origin || origin !== appOrigin) return json(res, 403, { error: 'İstek kaynağı reddedildi.' });
+      try {
+        const body = await readJson(req);
+        if (path === '/api/feedback') {
+          return json(res, 200, analytics.addFeedback(session.email, { rating: body.rating, message: body.message, screen: body.screen, contact: body.contact === true }));
+        }
+        const name = String(body.name || '');
+        if (!/^(ekran|gorunum):[a-z]{1,24}$|^is:excel$/.test(name)) return json(res, 400, { error: 'Bilinmeyen olay.' });
+        const today = new Date().toISOString().slice(0, 10);
+        const budget = eventBudget.get(session.email);
+        if (budget?.day === today && budget.count >= 500) return json(res, 429, { error: 'Çok fazla olay.' });
+        eventBudget.set(session.email, { day: today, count: budget?.day === today ? budget.count + 1 : 1 });
+        return json(res, 200, { tracked: analytics.track(session.email, name) });
+      } catch (err) {
+        if (err.status) return json(res, err.status, { error: err.message });
+        if (err instanceof Error && err.constructor === Error) return json(res, 400, { error: err.message });
+        throw err;
+      }
+    }
+
+    // Yönetici: kullanım ve geri bildirim özeti
+    if ((path === '/yonetim/istatistik' || path === '/yonetim/istatistik.json') && req.method === 'GET') {
+      const session = store.sessions.get(cookieValue(req), config.sessionIdleMinutes);
+      if (!session) return redirect(res, `${basePath}/auth/login?return_to=${encodeURIComponent(path)}`);
+      if (!admins.has(session.email)) return page(res, 403, 'Yetki yok', 'Bu sayfayı yalnızca Pusula yöneticisi (PUSULA_ADMINS) görebilir.');
+      const days = Math.min(Math.max(Number(url.searchParams.get('gun')) || 30, 1), 365);
+      const summary = analytics.summary({ days });
+      if (path.endsWith('.json')) return json(res, 200, summary);
+      headers(res, { 'Content-Type': 'text/html; charset=utf-8', 'Content-Security-Policy': "default-src 'none'; style-src 'unsafe-inline'; frame-ancestors 'none'" });
+      res.statusCode = 200;
+      return res.end(analytics.renderPage(summary, basePath));
     }
 
     // MCP kapısı
@@ -463,6 +524,8 @@ ${link ? `<p><a href="${escapeHtml(link.href)}" style="color:#2c6549;font-weight
     sendDigest,
     purgeOAuth: () => oauth?.purge(),
     cleanupDemo: (now) => demo?.cleanup(now) || 0,
+    purgeAnalytics: () => analytics.purge(),
+    analytics,
     service,
   };
 }

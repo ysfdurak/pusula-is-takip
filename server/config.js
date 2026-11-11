@@ -90,6 +90,8 @@ export function loadConfig(env = process.env) {
     mcpTokens,
     demoMode,
     demoTtlDays: Math.min(Math.max(Number(env.DEMO_TTL_DAYS) || 7, 1), 30),
+    // Kullanım ölçümü yalnızca demo ziyaretçileri için; olaylar bu kadar gün tutulur
+    analyticsRetentionDays: Math.min(Math.max(Number(env.ANALYTICS_RETENTION_DAYS) || 180, 7), 730),
     demoMax: Math.min(Math.max(Number(env.DEMO_MAX_SANDBOXES) || 300, 1), 5000),
     workspaceName: env.PUSULA_WORKSPACE_NAME || 'Pusula',
     dataDir,

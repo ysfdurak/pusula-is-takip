@@ -9,11 +9,13 @@ import {
   SlidersHorizontalIcon,
 } from 'lucide-react';
 import { useApp } from '../AppContext.js';
+import { FeedbackButton } from '../components/FeedbackButton.jsx';
 
 export function SettingsPage() {
   const {
     busy,
     currentMember,
+    demo,
     exportRecords,
     mailConfigured,
     notifyPolicy,
@@ -39,6 +41,13 @@ export function SettingsPage() {
         </div>
       </div>
       <div className="settings-grid">
+        {!demo && (
+          <section className="settings-card">
+            <h2>{'Geri bildirim'}</h2>
+            <p>Neyi beğendin, ne eksik, nerede takıldın? Görüşün Pusula'yı geliştirirken doğrudan kullanılır.</p>
+            <FeedbackButton className="button" label=" Geri bildirim gönder" screen="settings" />
+          </section>
+        )}
         <section className="settings-card">
           <h2>
             <CalendarDaysIcon size={19} />
