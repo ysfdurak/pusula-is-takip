@@ -11,7 +11,10 @@
 // Böylece yetki, termin, bildirim ve geçmiş kuralları tek yerde (workspaceService) kalır.
 //
 // MCP araçları ve ileride başka kapılar (ör. REST API) bu komutları çağırır.
-import { completionIssues } from './taskRules.js';
+import { completionIssues, taskObstacles } from './taskRules.js';
+import { agendaFor } from './digest.js';
+import { buildDashboardStats } from './dashboardStats.js';
+import { projectSummaries } from './projectStats.js';
 
 const STATUSES = ['todo', 'doing', 'done', 'cancelled'];
 const PRIORITIES = ['low', 'normal', 'high', 'urgent'];
@@ -126,6 +129,78 @@ export function createTaskCommands(service, { newId, now = () => Date.now() }) {
       if (geciken) summaries = summaries.filter((s) => s.geciken);
       summaries.sort((a, b) => (a.termin || '9999').localeCompare(b.termin || '9999'));
       return { toplam: summaries.length, isler: summaries.slice(0, Math.min(Math.max(1, limit), 200)) };
+    },
+
+    /** Kişinin gündemi: sabah özeti e-postasıyla aynı hesap (agendaFor). */
+    myAgenda(actor, { calismaAlani } = {}) {
+      const snap = snapshot(actor, calismaAlani);
+      const agenda = agendaFor(snap.state, { email: actor, role: snap.role }, now());
+      const list = (tasks) => tasks.map((task) => summarizeTask(task, snap.state, now()));
+      return {
+        geciken: list(agenda.overdue),
+        bugun: list(agenda.today),
+        buHafta: list(agenda.week),
+        sorumluBekleyenEkipIsleri: list(agenda.pool),
+      };
+    },
+
+    /** Ekip panosundaki sayılar: arayüzle aynı hesap (buildDashboardStats). Ekip verilmezse tüm görünen işler. */
+    teamStatus(actor, { calismaAlani, ekip } = {}) {
+      const snap = snapshot(actor, calismaAlani);
+      let state = snap.state;
+      if (ekip) {
+        const team = state.teams.find((x) => x.id === ekip || x.name === ekip);
+        if (!team) throw Error('Ekip bulunamadı: ' + ekip);
+        state = { ...state, tasks: state.tasks.filter((task) => task.teamId === team.id || task.relatedTeamIds.includes(team.id)) };
+      }
+      const t = now();
+      const stats = buildDashboardStats(state, snap.members, snap.times, t, 7, snap.state.tasks);
+      const top = (tasks) => tasks.slice(0, 10).map((task) => summarizeTask(task, snap.state, t));
+      const rate = (part, all) => (all.length ? Math.round((part.length / all.length) * 100) : null);
+      return {
+        acik: stats.open.length,
+        geciken: top(stats.late),
+        gecikenSayisi: stats.late.length,
+        sorumluBekleyen: top(stats.unassigned),
+        engelli: top(stats.blocked),
+        onayBekleyen: top(stats.review),
+        terminsiz: stats.undated.length,
+        son7GundeTamamlanan: stats.completed.length,
+        zamanindaOrani: rate(stats.onTime, stats.datedCompleted),
+        ilkTermineGoreZamanindaOrani: rate(stats.originalOnTime, stats.originalDated),
+        isYuku: stats.workload.map((m) => ({ kisi: m.name || m.email, eposta: m.email, acikIs: m.count, geciken: m.late })),
+        onumuzdeki7Gun: stats.upcoming.map((day) => ({ gun: day.date, isSayisi: day.tasks.length })),
+      };
+    },
+
+    /** Açık engeller ve bitmemiş ön koşullar yüzünden duran işler. */
+    listBlockers(actor, { calismaAlani } = {}) {
+      const snap = snapshot(actor, calismaAlani);
+      const t = now();
+      return snap.state.tasks
+        .filter((task) => isOpen(task) && taskObstacles(task, snap.state).length)
+        .map((task) => ({
+          ...summarizeTask(task, snap.state, t),
+          engeller: taskObstacles(task, snap.state),
+          cozumSorumlulari: snap.state.blockers
+            .filter((b) => b.task === task.id && !b.resolved)
+            .map((b) => b.owner || 'Belirlenmedi'),
+        }));
+    },
+
+    /** Proje sağlığı: Projeler ekranıyla aynı hesap (projectSummaries). */
+    projectStatus(actor, { calismaAlani } = {}) {
+      const snap = snapshot(actor, calismaAlani);
+      return projectSummaries(snap.state, now()).map((p) => ({
+        id: p.id,
+        ad: p.name,
+        hedefTarih: p.date,
+        durum: p.health,
+        ilerleme: p.progress,
+        acik: p.open,
+        geciken: p.late,
+        engelli: p.blocked,
+      }));
     },
 
     /** İşin ayrıntısı, son yorumları ve tamamlanmak için eksik kalanlar. */

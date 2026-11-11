@@ -3,7 +3,8 @@
 ## Yayınlanmamış — MCP hazırlığı (1. adım)
 - **İnce servis katmanı (`src/shared/taskCommands.js`):** "Tek iş, tek değişiklik" komutları: iş listele (geciken, benim, açık, ekip, proje filtreleri), iş ayrıntısı, iş oluştur, durum değiştir, sorumlu ata, termin değiştir (gerekçe zorunlu), kontrol maddesi işaretle, yorum ekle. Komutlar kural kopyalamaz; değişikliği mevcut `save` üzerinden kaydeder, böylece yetki, termin, bildirim ve geçmiş kuralları tek yerde kalır. Arada başka biri kaydederse güncel veriyle bir kez yeniden dener. MCP araçlarının temeli.
 - **Tamamlama kuralları ortak katmanda (`src/shared/taskRules.js`):** "Bu iş neden henüz tamamlanamaz?" kontrolü (açık engel, bitmemiş ön koşul, zorunlu kontrol listesi, kabul ölçütü) arayüzden taşındı. Arayüz aynı fonksiyonu kullanmaya devam ediyor; komut katmanı da artık uyguluyor.
-- **Test:** Komut katmanı için 8 birim testi (yetki, tamamlama kuralı, termin revizyonu, filtreler, çakışmada yeniden deneme, yorum).
+- **Okuma hesapları ortak katmanda (2. adım):** Ekip panosu istatistikleri (`src/shared/dashboardStats.js`) ve proje sağlığı (`src/shared/projectStats.js`) arayüzden taşındı; sabah özetindeki kişisel gündem `agendaFor` olarak ayrıldı. Yeni okuma komutları: gündemim, ekip durumu, engeller, proje durumu. Hepsi arayüz ve e-postayla aynı hesabı kullanır; eski içe aktarma yolları çalışmaya devam eder.
+- **Test:** Komut katmanı için 10 birim testi (yetki, tamamlama kuralı, termin revizyonu, filtreler, çakışmada yeniden deneme, yorum, gündem, ekip durumu, engeller).
 
 ## 0.7.1 — 2026-11-09
 - **Güvenlik:** zod 3 → 4.6.7 (GHSA-mrhx-c7xc-m3w5, büyük koleksiyon doğrulamasında bellek tüketimi). Yükseltme öncesi ve sonrası 248 rastgele etkileşim durumunda karşılaştırıldı, fark yok. `npm audit`: 0 açık.

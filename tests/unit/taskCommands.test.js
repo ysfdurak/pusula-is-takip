@@ -112,3 +112,31 @@ test('yorum ve ayrıntı: eksikler ve son yorumlar döner', () => {
   assert.equal(detail.sonYorumlar[0].metin, 'Başladım');
   assert.deepEqual(detail.tamamlamakIcinEksikler, []);
 });
+
+test('gündem: sabah özetiyle aynı hesap; geciken, bugün, bu hafta ayrılır', () => {
+  const { commands, service } = setup();
+  commands.createTask(ADMIN, { baslik: 'Bugün', sorumlular: [ECE], termin: '2026-11-11' });
+  commands.createTask(ADMIN, { baslik: 'Hafta', sorumlular: [ECE], termin: '2026-11-14' });
+  commands.createTask(ADMIN, { baslik: 'Başkasının', sorumlular: [ADMIN], termin: '2026-11-11' });
+  const agenda = commands.myAgenda(ECE);
+  assert.deepEqual(agenda.bugun.map((t) => t.baslik), ['Bugün']);
+  assert.deepEqual(agenda.buHafta.map((t) => t.baslik), ['Hafta']);
+  const later = createTaskCommands(service, { newId: () => 'x', now: () => NOW + 864e5 });
+  assert.deepEqual(later.myAgenda(ECE).geciken.map((t) => t.baslik), ['Bugün']);
+});
+
+test('ekip durumu ve engeller: pano hesabı ve açık engeller döner', () => {
+  const { commands, data, id } = setup();
+  const a = commands.createTask(ADMIN, { baslik: 'Sahipsiz' });
+  const b = commands.createTask(ADMIN, { baslik: 'Engelli', sorumlular: [ECE] });
+  data.states[id].blockers.push({ id: 'b1', project: '', task: b.id, title: 'Forklift arızalı', owner: 'Bakım', resolved: false });
+  const status = commands.teamStatus(ADMIN);
+  assert.equal(status.acik, 2);
+  assert.deepEqual(status.sorumluBekleyen.map((t) => t.id), [a.id]);
+  assert.deepEqual(status.engelli.map((t) => t.id), [b.id]);
+  const blockers = commands.listBlockers(ECE);
+  assert.deepEqual(blockers[0].engeller, ['Forklift arızalı']);
+  assert.deepEqual(blockers[0].cozumSorumlulari, ['Bakım']);
+  // Engelli iş tamamlanamaz
+  assert.throws(() => commands.changeStatus(ECE, { isId: b.id, durum: 'done' }), /Forklift arızalı/);
+});
