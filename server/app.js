@@ -7,6 +7,7 @@ import { randomToken } from './auth.js';
 import { createHash, randomUUID, timingSafeEqual } from 'node:crypto';
 import { createMcpHandler } from './mcp.js';
 import { createOAuthServer } from './oauth.js';
+import { createDemoSandboxes } from './demo.js';
 
 const MAX_BODY = 8 * 1024 * 1024; // 5 MB ek dosya base64 ile ~6,7 MB eder
 const COOKIE = 'pusula_sid';
@@ -36,6 +37,9 @@ export function createApp({ config, store, auth, html, mailer = null, log = () =
     blobs: store.blobs,
     maxFileBytes: config.maxFileMb * 1024 * 1024,
   });
+
+  // Ziyaretçi demo alanları (DEMO_MODE=true): üye olmayan kişi girince kendine ait örnek verili alan açılır
+  const demo = config.demoMode ? createDemoSandboxes({ store, ttlDays: config.demoTtlDays, max: config.demoMax, log }) : null;
 
   bootstrap();
   syncAdmins();
@@ -98,6 +102,7 @@ export function createApp({ config, store, auth, html, mailer = null, log = () =
     if (!admins.size) return;
     const data = store.load();
     for (const [wsId, list] of Object.entries(data.members)) {
+      if (demo?.isDemo(wsId)) continue; // demo alanının yöneticisi ziyaretçinin kendisidir
       const extra = list.filter((m) => m.role === 'owner' && !admins.has(m.email));
       const remaining = list.filter((m) => m.role === 'owner' && m.active && admins.has(m.email));
       if (!extra.length) continue;
@@ -253,14 +258,42 @@ ${link ? `<p><a href="${escapeHtml(link.href)}" style="color:#2c6549;font-weight
     return Object.fromEntries(new URLSearchParams(Buffer.concat(chunks).toString('utf8')));
   }
 
-  function startSession(res, user, returnTo) {
+  function startSession(res, user, returnTo, { welcome = false } = {}) {
     if (!bindAccount(user)) {
       store.audit(user.email, 'login_denied', 'hesap kimliği eşleşmedi');
       return page(res, 403, 'Hesap eşleşmedi', `${user.email} adresi Pusula'da başka bir hesaba bağlı. Pusula yöneticine başvur.`);
     }
     const id = store.sessions.create(user.email, user.name, config.sessionHours);
     store.audit(user.email, 'login');
-    redirect(res, `${basePath}${safeReturn(returnTo)}`, [sessionCookie(id, config.sessionHours * 3600), loginCookie('', 0)]);
+    const cookies = [sessionCookie(id, config.sessionHours * 3600), loginCookie('', 0)];
+    if (!welcome) return redirect(res, `${basePath}${safeReturn(returnTo)}`, cookies);
+    // İlk demo girişi: ne olduğunu ve verinin ne zaman silineceğini açıkça söyle
+    res.setHeader('Set-Cookie', cookies);
+    return page(
+      res,
+      200,
+      'Demo alanın hazır',
+      `Bu alan yalnızca sana ait; içinde kurgusal bir depo ekibi ve örnek işler var. Yönetici sensin, her şeyi deneyebilirsin. ` +
+        `Alan ve içindeki her şey ${config.demoTtlDays} gün sonra silinir; yeniden girersen yenisi açılır. Gerçek kişi ya da şirket bilgisi girme. ` +
+        `E-posta adresin yalnızca giriş için kullanılır ve güvenlik kaydında tutulur.`,
+      { href: `${basePath}/`, text: "Pusula'yı aç" },
+    );
+  }
+
+  /**
+   * Girişten sonra: üye ya da yöneticiyse oturum açılır. Değilse demo modunda kendi demo alanı açılır,
+   * demo kapalıysa erişim reddedilir.
+   */
+  function admit(res, user, returnTo) {
+    if (admins.has(user.email) || isMember(user.email)) return startSession(res, user, returnTo);
+    if (!demo) return denyNonMember(res, user.email);
+    try {
+      demo.create(user);
+    } catch (err) {
+      if (err.code === 'full') return page(res, 503, 'Demo şu an dolu', 'Aynı anda açık demo alanı sınırına ulaşıldı. Birkaç gün sonra yeniden dene.');
+      throw err;
+    }
+    return startSession(res, user, returnTo, { welcome: safeReturn(returnTo) === '/' });
   }
 
   function denyNonMember(res, email) {
@@ -295,8 +328,7 @@ ${link ? `<p><a href="${escapeHtml(link.href)}" style="color:#2c6549;font-weight
     }
     if (path === '/auth/dev' && config.authMode === 'dev') {
       const email = String(url.searchParams.get('email') || '').toLowerCase();
-      if (!admins.has(email) && !isMember(email)) return denyNonMember(res, email);
-      return startSession(res, { email, name: email.split('@')[0], oid: '' }, '/');
+      return admit(res, { email, name: email.split('@')[0], oid: '' }, '/');
     }
     if (path === '/auth/callback' && req.method === 'GET' && auth) {
       if (url.searchParams.get('error')) {
@@ -308,8 +340,7 @@ ${link ? `<p><a href="${escapeHtml(link.href)}" style="color:#2c6549;font-weight
       try {
         const idToken = await auth.redeem(url.searchParams.get('code'), saved.verifier);
         const user = auth.verify(idToken, saved.nonce);
-        if (!admins.has(user.email) && !isMember(user.email)) return denyNonMember(res, user.email);
-        return startSession(res, user, saved.return_to);
+        return admit(res, user, saved.return_to);
       } catch (err) {
         log(`Giriş hatası: ${err.message}`);
         return page(res, 400, 'Giriş tamamlanamadı', err.message, { href: `${basePath}/auth/login`, text: 'Yeniden dene' });
@@ -364,6 +395,8 @@ ${link ? `<p><a href="${escapeHtml(link.href)}" style="color:#2c6549;font-weight
           const r = await flushMail();
           return json(res, 200, { configured: !!mailer, accepted: r.accepted || 0 });
         }
+        const demoError = body.action === 'member' ? demo?.memberError(body.id, body.email) : null;
+        if (demoError) return json(res, 400, { error: demoError });
         const result = service.post(email, body);
         if (['save', 'member', 'policy', 'create', 'attach', 'detach'].includes(body.action)) {
           store.audit(email, body.action, body.action === 'member' ? `${body.email} · ${body.role}` : body.action === 'detach' ? body.file : body.reason || body.name || '');
@@ -429,6 +462,7 @@ ${link ? `<p><a href="${escapeHtml(link.href)}" style="color:#2c6549;font-weight
     flushMail,
     sendDigest,
     purgeOAuth: () => oauth?.purge(),
+    cleanupDemo: (now) => demo?.cleanup(now) || 0,
     service,
   };
 }

@@ -66,6 +66,11 @@ export function loadConfig(env = process.env) {
     else mcpTokens.set(token, email);
   }
 
+  // Ziyaretçi demo alanları: Pusula'ya üye olmayan biri girince kendine ait, örnek verili, süreli bir alan açılır.
+  // Şirket kurulumunda KAPALI kalmalı (varsayılan). Portföy sunucusu için: DEMO_MODE=true
+  const demoMode = env.DEMO_MODE === 'true';
+  if (demoMode && authMode === 'entra') errors.push('DEMO_MODE şirket girişiyle (AUTH_MODE=entra) birlikte kullanılamaz.');
+
   const admins = list(env.PUSULA_ADMINS);
   const dataDir = resolve(env.DATA_DIR || './data');
   return {
@@ -83,6 +88,9 @@ export function loadConfig(env = process.env) {
     admins,
     mcpEnabled,
     mcpTokens,
+    demoMode,
+    demoTtlDays: Math.min(Math.max(Number(env.DEMO_TTL_DAYS) || 7, 1), 30),
+    demoMax: Math.min(Math.max(Number(env.DEMO_MAX_SANDBOXES) || 300, 1), 5000),
     workspaceName: env.PUSULA_WORKSPACE_NAME || 'Pusula',
     dataDir,
     dbFile: join(dataDir, 'pusula.db'),

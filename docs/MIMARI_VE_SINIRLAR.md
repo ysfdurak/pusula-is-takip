@@ -11,6 +11,7 @@
 | `src/demo/demoServer.js` | Tarayıcı içi örnek sunucu | Örnek veri + localStorage + örnek kullanıcı seçimi |
 | `server/` | Pilot sunucusu | Microsoft (Entra ID) ya da Google girişi (OIDC + PKCE), oturum, SQLite, yedek, güvenlik başlıkları |
 | `server/oauth.js` | MCP için OAuth yetkilendirme sunucusu | Claude kullanıcının normal girişiyle izin alır; [MCP.md](MCP.md) |
+| `server/demo.js`, `src/shared/sampleData.js` | Ziyaretçi demo alanları ve örnek veri | `DEMO_MODE=true`; tarayıcı demosu da aynı örnek veriyi kullanır |
 | `deploy/` | VPS kurulumu: Docker Compose + Caddy (otomatik HTTPS) | [SUNUCU_KURULUMU.md](SUNUCU_KURULUMU.md) |
 | `src/shared/taskCommands.js` | İnce servis katmanı: tek iş, tek değişiklik komutları | Kural yazmaz; `save` üzerinden kaydeder. MCP kapısı bunu kullanır |
 | `src/shared/taskRules.js`, `dashboardStats.js`, `projectStats.js` | Tamamlama kuralları, ekip panosu ve proje sağlığı hesapları | Saf fonksiyonlar; arayüz ve MCP aynı hesabı kullanır |

@@ -86,6 +86,7 @@ AUTH_MODE=google
 GOOGLE_CLIENT_ID=...apps.googleusercontent.com
 GOOGLE_CLIENT_SECRET=...
 MCP_ENABLED=true                              # Claude bağlantısı
+DEMO_MODE=true                                # ziyaretçilere kendi demo alanı (aşağıda)
 MAIL_MODE=off
 DATA_DIR=/data
 ```
@@ -101,12 +102,29 @@ curl https://pusula.ysfdurak.com/healthz                  # {"ok":true}
 
 Tarayıcıda `https://pusula.ysfdurak.com` → **Giriş yap** → Google hesabın. `PUSULA_ADMINS`'teki adresle girdiğinde yönetici olursun. Diğer kişileri **Ekip → Kişiler**'den eklersin; Pusula'ya eklenmemiş bir Google hesabı giremez.
 
+### Ziyaretçi demo alanları (`DEMO_MODE=true`)
+
+Portföy ziyaretçisi Google ile girdiğinde **kendine ait** bir çalışma alanı açılır: kurgusal bir depo ekibi (Ece, Mert, Selin) ve örnek işler; yönetici ziyaretçinin kendisidir. Kurallar:
+
+| Kural | Neden |
+|---|---|
+| Herkesin alanı ayrı | Ziyaretçiler birbirinin verisini bozamaz, birbirinin e-posta adresini göremez |
+| Alana yalnızca `@example.test` adresli kurgusal kişi eklenir | Ziyaretçi gerçek birini davet edemez, sunucu kimseye e-posta göndermez |
+| `DEMO_TTL_DAYS` (varsayılan 7) gün sonra alan tümüyle silinir | Sunucu dolmaz; ziyaretçi verisi süresiz tutulmaz. Silinirken oturum ve Claude bağlantısı da kapanır |
+| En fazla `DEMO_MAX_SANDBOXES` (varsayılan 300) alan | Kötüye kullanıma karşı; dolunca "Demo şu an dolu" sayfası |
+| İlk girişte karşılama sayfası | Alanın kurgusal olduğunu, ne zaman silineceğini ve e-postanın ne için tutulduğunu açıkça söyler |
+| `PUSULA_ADMINS` demo alanı almaz | Senin gerçek çalışma alanın demodan etkilenmez; ziyaretçiler onu göremez |
+
+Ziyaretçinin e-posta adresi giriş ve güvenlik kaydı (audit) için tutulur. Kişisel sitende kısa bir gizlilik notu (hangi veri, ne kadar süre, ne için) bulundurman iyi olur.
+
 ## 6. Claude'a bağla
 
 1. Claude → **Ayarlar → Bağlayıcılar (Connectors) → Özel bağlayıcı ekle**.
 2. Ad: **Pusula**, adres: `https://pusula.ysfdurak.com/mcp`.
 3. **Bağlan** → Pusula giriş sayfası (Google) → izin ekranında uygulama adını ve dönüş adresini (`claude.ai`) kontrol et → **İzin ver**.
 4. Yeni sohbette: "Pusula'da panomu göster" ya da "Bu hafta geciken işler neler?".
+
+Ziyaretçiler de aynı adımlarla kendi demo alanlarını Claude'a bağlayabilir: izin ekranından önce Google ile girerler, demo alanı o anda açılır.
 
 Bağlantıyı kaldırmak için Claude'da bağlayıcıyı kaldır **ve** `https://pusula.ysfdurak.com/oauth/baglantilar` sayfasından **Kaldır**'a bas (ikincisi anahtarı sunucuda hemen geçersiz kılar). Ücretsiz Claude planında tek özel bağlayıcı eklenebilir.
 
@@ -132,5 +150,6 @@ Yedekler aynı sunucuda durur; sunucu kaybolursa onlar da kaybolur. Ayda bir `sc
 
 ## Bilinen sınırlar
 
-- Portföy ziyaretçileri şu an giremez: yalnızca Pusula'ya eklenmiş kişiler girer. Ziyaretçilere ayrı bir demo çalışma alanı açmak sonraki karar.
+- `DEMO_MODE=false` iken yalnızca Pusula'ya eklenmiş kişiler girer.
+- Demo alanı sıfırlama düğmesi yok; süre dolunca silinir, yeniden girişte yenisi açılır.
 - E-posta bildirimi Google modunda kapalıdır (`MAIL_MODE=off`); Outlook gönderimi şirket kurulumu içindir.
