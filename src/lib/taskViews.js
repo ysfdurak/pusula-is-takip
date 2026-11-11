@@ -1,24 +1,14 @@
 import { taskFromTemplate, taskSchema } from '../shared/workspaceModel.js';
 
+// Tamamlama kuralları ortak katmanda: arayüz, sunucu ve MCP aynı kuralı kullanır.
+import { taskObstacles, completionIssues } from '../shared/taskRules.js';
+
+export { taskObstacles, completionIssues };
+
 const isOpenTask = (task) => !['done', 'cancelled'].includes(task.status);
 
 const dueTimestamp = (task) =>
   task.dueAt ? Date.parse(task.dueAt) : task.date ? Date.parse(task.date + 'T23:59:59+03:00') : null;
-
-export function taskObstacles(item, workspace) {
-  return [
-    ...workspace.blockers
-      .filter((blocker) => blocker.task === item.id && !blocker.resolved)
-      .map((blocker) => blocker.title),
-    ...item.depends
-      .filter((dependencyId) => workspace.tasks.find((task) => task.id === dependencyId)?.status !== 'done')
-      .map(
-        (dependencyId) =>
-          'Ön koşul: ' +
-          (workspace.tasks.find((task) => task.id === dependencyId)?.title || 'Bulunamayan iş'),
-      ),
-  ];
-}
 
 export function projectSummaries(state, now) {
   return state.projects.map((project) => {
@@ -163,16 +153,4 @@ export function buildQuickTask(e, workspace, n, user, i, a, o, s) {
     task.project = '';
   }
   return taskSchema.parse(task);
-}
-
-export function completionIssues(item, workspace) {
-  return [
-    ...taskObstacles(item, workspace),
-    ...(item.waitingReason ? ['Bekleme sona erdiğinde bekleme bilgisini kaldır.'] : []),
-    ...(item.checklistRequired && item.checklist.some((step) => !step.done)
-      ? ['Zorunlu kontrol adımlarını tamamla.']
-      : []),
-    ...(item.requireApproval && !item.criteria.trim() ? ['Kabul ölçütü henüz tanımlanmadı.'] : []),
-    ...(item.requireApproval && !item.verified ? ['Kabul ölçütünü doğrula.'] : []),
-  ];
 }

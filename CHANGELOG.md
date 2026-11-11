@@ -1,5 +1,10 @@
 # Değişiklik geçmişi
 
+## Yayınlanmamış — MCP hazırlığı (1. adım)
+- **İnce servis katmanı (`src/shared/taskCommands.js`):** "Tek iş, tek değişiklik" komutları: iş listele (geciken, benim, açık, ekip, proje filtreleri), iş ayrıntısı, iş oluştur, durum değiştir, sorumlu ata, termin değiştir (gerekçe zorunlu), kontrol maddesi işaretle, yorum ekle. Komutlar kural kopyalamaz; değişikliği mevcut `save` üzerinden kaydeder, böylece yetki, termin, bildirim ve geçmiş kuralları tek yerde kalır. Arada başka biri kaydederse güncel veriyle bir kez yeniden dener. MCP araçlarının temeli.
+- **Tamamlama kuralları ortak katmanda (`src/shared/taskRules.js`):** "Bu iş neden henüz tamamlanamaz?" kontrolü (açık engel, bitmemiş ön koşul, zorunlu kontrol listesi, kabul ölçütü) arayüzden taşındı. Arayüz aynı fonksiyonu kullanmaya devam ediyor; komut katmanı da artık uyguluyor.
+- **Test:** Komut katmanı için 8 birim testi (yetki, tamamlama kuralı, termin revizyonu, filtreler, çakışmada yeniden deneme, yorum).
+
 ## 0.7.1 — 2026-11-09
 - **Güvenlik:** zod 3 → 4.6.7 (GHSA-mrhx-c7xc-m3w5, büyük koleksiyon doğrulamasında bellek tüketimi). Yükseltme öncesi ve sonrası 248 rastgele etkileşim durumunda karşılaştırıldı, fark yok. `npm audit`: 0 açık.
 - **Telefon:** README'ye demo ve pilot önizlemesi için QR kodları. Demo ile önizleme arasında banttan tek dokunuşla geçiş.
