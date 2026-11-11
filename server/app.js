@@ -6,6 +6,7 @@ import { runDigest } from './mail/digest.js';
 import { randomToken } from './auth.js';
 import { createHash, randomUUID, timingSafeEqual } from 'node:crypto';
 import { createMcpHandler } from './mcp.js';
+import { createOAuthServer } from './oauth.js';
 
 const MAX_BODY = 8 * 1024 * 1024; // 5 MB ek dosya base64 ile ~6,7 MB eder
 const COOKIE = 'pusula_sid';
@@ -53,11 +54,25 @@ export function createApp({ config, store, auth, html, mailer = null, log = () =
   // Anahtarlar özetleriyle (SHA-256) sabit sürede karşılaştırılır: zamanlama ile tahmin edilemez.
   const digestOf = (value) => createHash('sha256').update(value).digest();
   const mcpKeys = [...(config.mcpTokens || new Map())].map(([token, email]) => ({ hash: digestOf(token), email }));
+  // OAuth yetkilendirme sunucusu: claude.ai gibi istemciler kullanıcının normal girişiyle (Google/Microsoft) izin alır.
+  const oauth = config.mcpEnabled
+    ? createOAuthServer({
+        db: store.db,
+        origin: new URL(config.appUrl).origin,
+        basePath: new URL(config.appUrl).pathname.replace(/\/$/, ''),
+        session: (req) => store.sessions.get(cookieValue(req), config.sessionIdleMinutes),
+        isAllowed: (email) => admins.has(email) || isMember(email),
+        http: { headers: (...a) => headers(...a), json: (...a) => json(...a), page: (...a) => page(...a), redirect: (...a) => redirect(...a), readBody: (...a) => readBody(...a) },
+        audit: (email, action, detail) => store.audit(email, action, detail),
+      })
+    : null;
+
+  /** /mcp kimliği: önce kişisel erişim anahtarı (geliştirme, Inspector), sonra OAuth erişim anahtarı (Claude). */
   function mcpUser(req) {
     const m = String(req.headers.authorization || '').match(/^Bearer\s+(\S+)$/i);
     if (!m) return null;
     const hash = digestOf(m[1]);
-    return mcpKeys.find((k) => timingSafeEqual(k.hash, hash))?.email || null;
+    return mcpKeys.find((k) => timingSafeEqual(k.hash, hash))?.email || oauth?.verifyAccessToken(m[1])?.email || null;
   }
 
   /** İlk kurulum: hiç çalışma alanı yoksa yöneticiler için bir tane oluşturulur. */
@@ -102,7 +117,7 @@ export function createApp({ config, store, auth, html, mailer = null, log = () =
   const isMember = (email) => Object.values(store.load().members).some((list) => list.some((m) => m.email === email && m.active));
 
   /**
-   * Girişte üye kaydını Microsoft hesabına bağlar ve adını tamamlar.
+   * Girişte üye kaydını giriş hesabına (Microsoft ya da Google) bağlar ve adını tamamlar.
    * İlk girişte hesabın değişmeyen kimliği (oid) kaydedilir; sonraki girişlerde aynı adresi taşıyan
    * başka bir hesap (örneğin yeniden kullanılan bir adres) reddedilir.
    * @returns {boolean} hesap eşleşiyorsa true
@@ -194,9 +209,9 @@ ${link ? `<p><a href="${escapeHtml(link.href)}" style="color:#2c6549;font-weight
   };
   const sessionCookie = (id, maxAgeSec) =>
     `${COOKIE}=${id}; Path=${basePath || '/'}; HttpOnly; SameSite=Lax; Max-Age=${maxAgeSec}${secure ? '; Secure' : ''}`;
-  /** Girişten sonra dönülecek yol: yalnızca uygulama içindeki göreli yollar (açık yönlendirmeye karşı) */
+  /** Girişten sonra dönülecek yol: yalnızca uygulama içindeki göreli yollar (açık yönlendirmeye karşı). OAuth izin adresi de buradan döner. */
   const safeReturn = (value) => {
-    if (typeof value !== 'string' || !/^\/[A-Za-z0-9\-._~/?=&%#]*$/.test(value) || value.startsWith('//')) return '/';
+    if (typeof value !== 'string' || value.length > 4000 || !/^\/[A-Za-z0-9\-._~/?=&%#:+@,;!*()']*$/.test(value) || value.startsWith('//')) return '/';
     try {
       return new URL(value, appOrigin).origin === appOrigin ? value : '/';
     } catch {
@@ -225,10 +240,23 @@ ${link ? `<p><a href="${escapeHtml(link.href)}" style="color:#2c6549;font-weight
     }
   }
 
+  /** JSON ya da form (application/x-www-form-urlencoded) gövdesi; OAuth uç noktaları için. */
+  async function readBody(req, kind) {
+    if (kind === 'json') return readJson(req);
+    let size = 0;
+    const chunks = [];
+    for await (const chunk of req) {
+      size += chunk.length;
+      if (size > 64 * 1024) throw Object.assign(new Error('İstek çok büyük.'), { status: 413 });
+      chunks.push(chunk);
+    }
+    return Object.fromEntries(new URLSearchParams(Buffer.concat(chunks).toString('utf8')));
+  }
+
   function startSession(res, user, returnTo) {
     if (!bindAccount(user)) {
       store.audit(user.email, 'login_denied', 'hesap kimliği eşleşmedi');
-      return page(res, 403, 'Hesap eşleşmedi', `${user.email} adresi Pusula'da başka bir Microsoft hesabına bağlı. Pusula yöneticine başvur.`);
+      return page(res, 403, 'Hesap eşleşmedi', `${user.email} adresi Pusula'da başka bir hesaba bağlı. Pusula yöneticine başvur.`);
     }
     const id = store.sessions.create(user.email, user.name, config.sessionHours);
     store.audit(user.email, 'login');
@@ -248,10 +276,13 @@ ${link ? `<p><a href="${escapeHtml(link.href)}" style="color:#2c6549;font-weight
 
     if (path === '/healthz') return json(res, 200, { ok: true });
 
+    // OAuth (MCP bağlantı izni) uç noktaları
+    if (oauth && (await oauth.handle(req, res, path, url))) return;
+
     // Giriş
     if (path === '/auth/login' && req.method === 'GET') {
       if (config.authMode === 'dev') {
-        return page(res, 200, 'Geliştirme girişi', 'Bu sunucu geliştirme modunda. Microsoft girişi yerine aşağıdaki adreslerden biriyle girebilirsin: ' +
+        return page(res, 200, 'Geliştirme girişi', 'Bu sunucu geliştirme modunda. Gerçek giriş yerine aşağıdaki adreslerden biriyle girebilirsin: ' +
           [...new Set([...admins, ...Object.values(store.load().members).flat().map((m) => m.email)])].join(', '),
           { href: `${basePath}/auth/dev?email=${encodeURIComponent([...admins][0] || '')}`, text: `${[...admins][0] || ''} olarak gir` });
       }
@@ -360,7 +391,9 @@ ${link ? `<p><a href="${escapeHtml(link.href)}" style="color:#2c6549;font-weight
       if (origin && origin !== appOrigin) return json(res, 403, { error: 'İstek kaynağı reddedildi.' });
       const email = mcpUser(req);
       if (!email) {
-        res.setHeader('WWW-Authenticate', 'Bearer');
+        // İstemciye yetkiyi nereden alacağını söyler (MCP Authorization: RFC 9728 korumalı kaynak üst verisi)
+        const presented = /^Bearer\s+\S+/i.test(String(req.headers.authorization || ''));
+        res.setHeader('WWW-Authenticate', `Bearer resource_metadata="${oauth.resourceMetadataUrl}"${presented ? ', error="invalid_token"' : ''}`);
         return json(res, 401, { error: 'Geçerli bir MCP erişim anahtarı gerekli.' });
       }
       if (!admins.has(email) && !isMember(email)) return json(res, 403, { error: 'Pusula erişimin kaldırılmış.' });
@@ -395,6 +428,7 @@ ${link ? `<p><a href="${escapeHtml(link.href)}" style="color:#2c6549;font-weight
       }),
     flushMail,
     sendDigest,
+    purgeOAuth: () => oauth?.purge(),
     service,
   };
 }

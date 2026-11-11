@@ -1,0 +1,6 @@
+# Caddy: HTTPS sertifikasını Let's Encrypt'ten otomatik alır ve yeniler; istekleri Pusula'ya aktarır.
+# Alan adını kendi adresinle değiştir. Ayrıntı: docs/SUNUCU_KURULUMU.md
+pusula.ysfdurak.com {
+	encode zstd gzip
+	reverse_proxy pusula:8080
+}

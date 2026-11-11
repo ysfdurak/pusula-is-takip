@@ -47,10 +47,10 @@ async function connect(base, key) {
 
 const parse = (result) => JSON.parse(result.content[0].text);
 
-test('ayarlar: MCP varsayılan kapalı; açıkken anahtar zorunlu ve en az 32 karakter', () => {
+test('ayarlar: MCP varsayılan kapalı; kişisel anahtar isteğe bağlı ama en az 32 karakter', () => {
   const base = { APP_URL: 'http://localhost:8080/', AUTH_MODE: 'dev', PUSULA_ADMINS: ADMIN };
   assert.equal(loadConfig(base).mcpEnabled, false);
-  assert.match(loadConfig({ ...base, MCP_ENABLED: 'true' }).errors.join(), /en az bir MCP_TOKENS/);
+  assert.deepEqual(loadConfig({ ...base, MCP_ENABLED: 'true' }).errors, []);
   assert.match(loadConfig({ ...base, MCP_TOKENS: `${ADMIN}:kisa` }).errors.join(), /en az 32 karakter/);
 });
 

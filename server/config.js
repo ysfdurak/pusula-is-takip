@@ -17,7 +17,7 @@ export function loadConfig(env = process.env) {
 
   const production = env.NODE_ENV === 'production';
   const authMode = env.AUTH_MODE || 'entra';
-  if (!['entra', 'dev'].includes(authMode)) errors.push('AUTH_MODE "entra" ya da "dev" olmalı.');
+  if (!['entra', 'google', 'dev'].includes(authMode)) errors.push('AUTH_MODE "entra", "google" ya da "dev" olmalı.');
   const local = parsed && ['localhost', '127.0.0.1', '[::1]'].includes(parsed.hostname);
   if (authMode === 'dev' && production) errors.push('AUTH_MODE=dev üretimde (NODE_ENV=production) kullanılamaz.');
   if (authMode === 'dev' && parsed && !local) errors.push('AUTH_MODE=dev yalnızca APP_URL localhost iken kullanılabilir.');
@@ -31,6 +31,15 @@ export function loadConfig(env = process.env) {
   };
   if (authMode === 'entra') for (const k of ['ENTRA_TENANT_ID', 'ENTRA_CLIENT_ID', 'ENTRA_CLIENT_SECRET']) if (!env[k]) errors.push(`${k} eksik.`);
 
+  // Google ile giriş (AUTH_MODE=google): Google Cloud Console → OAuth istemci kimliği (Web uygulaması)
+  const google = {
+    clientId: env.GOOGLE_CLIENT_ID,
+    clientSecret: env.GOOGLE_CLIENT_SECRET,
+    redirectUri: new URL('auth/callback', appUrl).toString(),
+    allowedDomains: list(env.GOOGLE_ALLOWED_DOMAINS),
+  };
+  if (authMode === 'google') for (const k of ['GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET']) if (!env[k]) errors.push(`${k} eksik.`);
+
   const mailMode = env.MAIL_MODE || 'off';
   if (!['off', 'outlook'].includes(mailMode)) errors.push('MAIL_MODE "off" ya da "outlook" olmalı.');
   const graph = {
@@ -42,7 +51,8 @@ export function loadConfig(env = process.env) {
   if (mailMode === 'outlook' && !graph.sender) errors.push('MAIL_SENDER eksik.');
 
   // MCP kapısı (/mcp): varsayılan KAPALI. Şirket verisinin yapay zekâ araçlarına bağlanmaması gereken
-  // kurulumlarda kapalı bırakılır. Kimlik şimdilik kişisel erişim anahtarıyla doğrulanır:
+  // kurulumlarda kapalı bırakılır. Claude gibi istemciler OAuth ile bağlanır (server/oauth.js; kullanıcı normal
+  // girişiyle izin verir). İsteğe bağlı olarak geliştirme ve MCP Inspector için kişisel erişim anahtarları:
   // MCP_TOKENS="eposta:anahtar,eposta2:anahtar2" (anahtar en az 32 karakter; üretmek için: openssl rand -hex 32)
   const mcpEnabled = env.MCP_ENABLED === 'true';
   const mcpTokens = new Map();
@@ -55,7 +65,6 @@ export function loadConfig(env = process.env) {
     else if ([...mcpTokens.values()].includes(email) || mcpTokens.has(token)) errors.push('MCP_TOKENS: her kişi ve anahtar bir kez yazılmalı.');
     else mcpTokens.set(token, email);
   }
-  if (mcpEnabled && !mcpTokens.size) errors.push('MCP_ENABLED=true iken en az bir MCP_TOKENS kaydı gerekli.');
 
   const admins = list(env.PUSULA_ADMINS);
   const dataDir = resolve(env.DATA_DIR || './data');
@@ -67,6 +76,7 @@ export function loadConfig(env = process.env) {
     appUrl: parsed ? parsed.toString() : appUrl,
     authMode,
     entra,
+    google,
     mailMode,
     graph,
     mailAllowedDomains: list(env.MAIL_ALLOWED_DOMAINS),

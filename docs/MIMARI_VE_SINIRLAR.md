@@ -9,7 +9,9 @@
 | `src/shared/workspaceModel.js` | Veri şeması (zod) ve iş kuralları | Pilot sunucusu bu kuralları aynen uygulamalı |
 | `src/shared/workspaceService.js` | `/api/workspace` sözleşmesinin uygulaması | Depolamadan ve kullanıcıdan bağımsız; demo ve pilot sunucusu ortak kullanır |
 | `src/demo/demoServer.js` | Tarayıcı içi örnek sunucu | Örnek veri + localStorage + örnek kullanıcı seçimi |
-| `server/` | Pilot sunucusu | Entra ID girişi (OIDC + PKCE), oturum, SQLite, yedek, güvenlik başlıkları |
+| `server/` | Pilot sunucusu | Microsoft (Entra ID) ya da Google girişi (OIDC + PKCE), oturum, SQLite, yedek, güvenlik başlıkları |
+| `server/oauth.js` | MCP için OAuth yetkilendirme sunucusu | Claude kullanıcının normal girişiyle izin alır; [MCP.md](MCP.md) |
+| `deploy/` | VPS kurulumu: Docker Compose + Caddy (otomatik HTTPS) | [SUNUCU_KURULUMU.md](SUNUCU_KURULUMU.md) |
 | `src/shared/taskCommands.js` | İnce servis katmanı: tek iş, tek değişiklik komutları | Kural yazmaz; `save` üzerinden kaydeder. MCP kapısı bunu kullanır |
 | `src/shared/taskRules.js`, `dashboardStats.js`, `projectStats.js` | Tamamlama kuralları, ekip panosu ve proje sağlığı hesapları | Saf fonksiyonlar; arayüz ve MCP aynı hesabı kullanır |
 | `server/mcp.js` | MCP kapısı (`/mcp`) | Varsayılan kapalı; ayrıntı [MCP.md](MCP.md) |
@@ -28,7 +30,7 @@
 ```
                  ┌─ web kapısı  /api/workspace  (oturum çerezi)  → React arayüzü
 çekirdek ────────┤
-(workspaceService,└─ MCP kapısı  /mcp            (erişim anahtarı) → Claude ve diğer MCP istemcileri
+(workspaceService,└─ MCP kapısı  /mcp            (OAuth anahtarı)  → Claude ve diğer MCP istemcileri
  kurallar, veri)      └─ ince servis katmanı (taskCommands) → aynı `save`
 ```
 

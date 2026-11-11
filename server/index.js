@@ -3,7 +3,7 @@ import { createServer } from 'node:http';
 import { existsSync, mkdirSync, readFileSync } from 'node:fs';
 import { loadConfig } from './config.js';
 import { openStore } from './store.js';
-import { createEntraAuth } from './auth.js';
+import { createEntraAuth, createGoogleAuth } from './auth.js';
 import { createGraphMailer } from './mail/graphMailer.js';
 import { createApp } from './app.js';
 
@@ -18,11 +18,11 @@ if (!existsSync(config.htmlFile)) {
   process.exit(1);
 }
 if (!config.admins.length) log('Uyarı: PUSULA_ADMINS boş. İlk çalışma alanı oluşturulmaz ve kimse giriş yapamaz.');
-if (config.authMode === 'dev') log('UYARI: AUTH_MODE=dev — Microsoft girişi KAPALI. Yalnızca kendi bilgisayarında deneme için.');
+if (config.authMode === 'dev') log('UYARI: AUTH_MODE=dev — gerçek giriş (Microsoft/Google) KAPALI. Yalnızca kendi bilgisayarında deneme için.');
 
 mkdirSync(config.dataDir, { recursive: true });
 const store = openStore(config.dbFile);
-const auth = config.authMode === 'entra' ? createEntraAuth(config.entra) : null;
+const auth = config.authMode === 'entra' ? createEntraAuth(config.entra) : config.authMode === 'google' ? createGoogleAuth(config.google) : null;
 const mailer = config.mailMode === 'outlook' ? createGraphMailer(config.graph) : null;
 let boardHtml = null;
 if (config.mcpEnabled) {
@@ -34,7 +34,7 @@ const app = createApp({ config, store, auth, html: readFileSync(config.htmlFile)
 const timers = [
   setInterval(() => app.flushMail(), 30_000),
   setInterval(() => app.sendDigest(), 5 * 60_000),
-  setInterval(() => store.sessions.purge(), 3600e3),
+  setInterval(() => (store.sessions.purge(), app.purgeOAuth()), 3600e3),
   setInterval(() => {
     try {
       log(`Yedek alındı: ${store.backup(config.backupDir, config.backupKeep)}`);

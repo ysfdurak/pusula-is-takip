@@ -2,12 +2,12 @@
 
 Pusula'nın pilot sunucusu, web arayüzüne ek olarak bir **MCP (Model Context Protocol) kapısı** sunar: `/mcp`. Claude gibi bir yapay zekâ istemcisi bu kapı üzerinden kullanıcının işlerini okuyabilir ve sınırlı değişiklikler yapabilir. Örneğin "Bu haftaki geciken işlerim ne?" ya da "Rampa 3 sayımını Ece'ye ata, termini cumaya al, gerekçe: araç gecikti".
 
-> Durum: 4. adım. 13 araç ve bir MCP App ("Benim panom") hazır. Gerçek Claude bağlantısı için gereken OAuth girişi ve internete açık sunucu (VPS) kurulumu 5. adımda gelecek.
+> Durum: 5. adım. 13 araç, bir MCP App ("Benim panom") ve Claude bağlantısı için OAuth hazır. Sunucuya kurulum: [SUNUCU_KURULUMU.md](SUNUCU_KURULUMU.md).
 
 ## Nasıl çalışır
 
 ```
-Claude ──(MCP, erişim anahtarı)──▶ /mcp ──▶ server/mcp.js ──▶ taskCommands ──▶ workspaceService (kurallar) ──▶ SQLite
+Claude ──(MCP, OAuth erişim anahtarı)──▶ /mcp ──▶ server/mcp.js ──▶ taskCommands ──▶ workspaceService (kurallar) ──▶ SQLite
 Tarayıcı ──(oturum çerezi)──▶ /api/workspace ─────────────────────────────────▶ workspaceService (aynı kurallar)
 ```
 
@@ -59,16 +59,35 @@ Kullanıcı "Ayrıntı" ── sohbete kullanıcı adına mesaj → Claude is_de
 
 ## Açma ve kapama
 
-Varsayılan olarak **kapalıdır**. Şirket verisinin yapay zekâ araçlarına bağlanmaması gereken kurulumlarda kapalı kalmalıdır.
+Varsayılan olarak **kapalıdır**. Şirket verisinin yapay zekâ araçlarına bağlanmaması gereken kurulumlarda kapalı kalmalıdır. Açmak için `.env` içinde `MCP_ENABLED=true` yeterli.
 
-```bash
-MCP_ENABLED=true
-MCP_TOKENS=deniz@sirket.com.tr:<64 karakterlik anahtar>,ece@sirket.com.tr:<anahtar>
+## Claude nasıl bağlanır: OAuth
+
+claude.ai'deki özel bağlayıcı sabit anahtar kabul etmez; MCP standardındaki OAuth 2.1 akışını kullanır. Pusula bunun için kendi yetkilendirme sunucusunu içerir (`server/oauth.js`). Kullanıcı ayrı bir parola oluşturmaz: Pusula'ya her zamanki gibi (Google ya da Microsoft) girer ve izin verir.
+
+```
+1  Claude → /mcp (anahtarsız)                 ← 401 + "yetki bilgisi şurada" (WWW-Authenticate: resource_metadata)
+2  Claude → /.well-known/oauth-protected-resource   ← "yetkilendirme sunucusu: bu site"
+3  Claude → /.well-known/oauth-authorization-server ← uç noktalar
+4  Claude → /oauth/register                    ← Claude kendini istemci olarak kaydeder (RFC 7591)
+5  Kullanıcı → /oauth/authorize                → Pusula girişi (Google) → izin ekranı → "İzin ver"
+6  Claude → /oauth/token (kod + PKCE)          ← erişim anahtarı (1 saat) + yenileme anahtarı (30 gün)
+7  Claude → /mcp (Authorization: Bearer …)     ← araçlar
 ```
 
-Anahtar üretmek için: `openssl rand -hex 32`. Anahtar, sahibinin Pusula'daki yetkileriyle çalışır. Kişi Pusula'dan çıkarılırsa anahtarı da çalışmaz. Anahtarlar sunucuda yalnızca karşılaştırma için kullanılır, kayıtlara yazılmaz.
+| Karar | Neden |
+|---|---|
+| PKCE (S256) zorunlu | Dönüş adresindeki kod ele geçirilse bile doğrulayıcı olmadan anahtara çevrilemez |
+| Dönüş adresi kayıttakiyle birebir aynı, yalnızca https (ya da localhost) | Kodun saldırganın sitesine gönderilmesini engeller; kayıtsız adrese hiç yönlendirilmez |
+| İzin ekranı uygulama adını **ve dönüş adresini** gösterir | Herkes "Claude" adıyla istemci kaydedebilir; asıl güvence dönüş adresidir |
+| Anahtarlar veritabanında SHA-256 özetiyle | Veritabanı ya da yedek sızsa bile anahtarlar kullanılamaz |
+| Yenileme anahtarı her kullanımda değişir | Çalınan eski bir yenileme anahtarı işe yaramaz |
+| Anahtar yalnızca bu sunucunun `/mcp` adresi için (resource, RFC 8707) | Başka bir hizmete karşı kullanılamaz |
+| Her istekte üyelik kontrolü | Pusula'dan çıkarılan kişinin anahtarı hemen çalışmaz |
+| Bağlı uygulamalar sayfası (`/oauth/baglantilar`) | Kullanıcı bağlantıyı kendisi kaldırır; anahtar sunucuda hemen geçersiz olur |
+| İzin ve kaldırma denetim kaydında (`oauth_grant`, `oauth_revoke`) | Kim, hangi uygulamaya, ne zaman izin verdi |
 
-> Kişisel anahtar geçici bir çözümdür ve yalnızca deneme içindir. claude.ai'ye bağlanmak için OAuth girişi gerekir (5. adım).
+**Kişisel erişim anahtarı (yalnızca deneme):** MCP Inspector ya da yerel testler için `MCP_TOKENS="eposta:anahtar"` (en az 32 karakter, `openssl rand -hex 32`) tanımlanabilir. Üretimde gerekmez.
 
 ## Yerelde denemek (MCP Inspector)
 
@@ -83,7 +102,10 @@ Başka bir terminalde:
 npx @modelcontextprotocol/inspector
 ```
 
-Inspector'da **Transport: Streamable HTTP**, **URL: `http://localhost:8080/mcp`** seç. **Authentication** bölümünde başlık `Authorization`, değer `Bearer gelistirme-anahtari-yalnizca-yerel-deneme` olsun. **Connect** → **Tools** → `calisma_alanlarim` ile başla.
+Inspector'da **Transport: Streamable HTTP**, **URL: `http://localhost:8080/mcp`** seç. İki yol var:
+
+- **Kişisel anahtarla:** **Authentication** bölümünde başlık `Authorization`, değer `Bearer gelistirme-anahtari-yalnizca-yerel-deneme`. **Connect** → **Tools** → `calisma_alanlarim` ile başla.
+- **OAuth ile (Claude'un yolu):** Authentication'ı boş bırak, **Open Auth Settings → Quick OAuth Flow**. Tarayıcıda geliştirme girişi ve izin ekranı açılır; "İzin ver" sonrası Inspector anahtarı alır.
 
 Web arayüzünü aynı anda `http://localhost:8080` adresinde aç (`deneme@sirket.test` olarak gir). MCP'den açtığın iş arayüzde de görünür, çünkü veri ve kurallar ortaktır.
 
@@ -103,6 +125,7 @@ Otomatik tarayıcı testi aynı host'u kullanır: `npm run test:mcp-app` (kurall
 ## Kodda nereye bakmalı
 
 - `server/mcp.js`: araç tanımları (ad, açıklama, girdi şeması) ve MCP sunucusu. Araç açıklamaları Claude'un doğru aracı seçmesi için ayrıntılı yazıldı.
-- `server/app.js` → `/mcp`: kapı açık mı, kaynak (Origin) kontrolü, anahtar doğrulama, üyelik kontrolü.
+- `server/app.js` → `/mcp`: kapı açık mı, kaynak (Origin) kontrolü, anahtar doğrulama (kişisel ya da OAuth), üyelik kontrolü.
+- `server/oauth.js`: OAuth yetkilendirme sunucusu (keşif, kayıt, izin ekranı, anahtar, bağlı uygulamalar).
 - `src/shared/taskCommands.js`: komutlar. Yeni bir araç eklemek için önce buraya komut, sonra `server/mcp.js`'ye tanım eklenir.
-- Testler: `tests/unit/taskCommands.test.js`, `tests/unit/mcpBoard.test.js`, `tests/server/mcp.test.js` (gerçek sunucu + resmi MCP istemcisi), `tests/e2e/mcpApp.mjs` (tarayıcıda pano).
+- Testler: `tests/unit/taskCommands.test.js`, `tests/unit/mcpBoard.test.js`, `tests/server/mcp.test.js` (gerçek sunucu + resmi MCP istemcisi), `tests/server/oauth.test.js` (resmi istemcinin OAuth akışı ve saldırı denemeleri), `tests/e2e/mcpApp.mjs` (tarayıcıda pano).

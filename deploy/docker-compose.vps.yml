@@ -1,0 +1,26 @@
+# VPS kurulumu: Pusula + Caddy (otomatik HTTPS). Ayrıntı: docs/SUNUCU_KURULUMU.md
+#   cd deploy && docker compose -f docker-compose.vps.yml up -d --build
+# Pusula dışarıya açılmaz; yalnızca Caddy 80/443 portlarını dinler.
+services:
+  pusula:
+    build: ..
+    env_file: ../.env
+    volumes:
+      - pusula-data:/data
+    restart: unless-stopped
+  caddy:
+    image: caddy:2
+    depends_on: [pusula]
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    restart: unless-stopped
+volumes:
+  pusula-data: {}
+  caddy-data: {}
+  caddy-config: {}
