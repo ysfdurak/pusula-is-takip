@@ -83,6 +83,7 @@ export function loadConfig(env = process.env) {
     // Sabah özeti saati (Türkiye saati, 5–11); DIGEST_HOUR=off kapatır
     digestHour: env.DIGEST_HOUR === 'off' ? null : Math.min(Math.max(Number(env.DIGEST_HOUR) || 8, 5), 11),
     maxFileMb: Math.min(Math.max(Number(env.MAX_FILE_MB || 5), 1), 5),
+    boardHtmlFile: resolve(env.PUSULA_BOARD_HTML || new URL('../dist-mcp-app/panom.html', import.meta.url).pathname),
     htmlFile: resolve(env.PUSULA_HTML || new URL('../dist-pilot/index.html', import.meta.url).pathname),
   };
 }

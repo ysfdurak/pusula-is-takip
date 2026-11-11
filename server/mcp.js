@@ -10,7 +10,12 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import { z } from 'zod';
+import { RESOURCE_MIME_TYPE, registerAppResource, registerAppTool } from '@modelcontextprotocol/ext-apps/server';
 import { createTaskCommands } from '../src/shared/taskCommands.js';
+import { summaryText } from '../src/shared/board.js';
+
+/** "Benim panom" MCP App'inin adresi: araç bu adresi gösterir, host sayfayı buradan okur. */
+export const BOARD_URI = 'ui://pusula/panom.html';
 
 const ws = z.string().optional().describe('Çalışma alanı kimliği. Kullanıcının tek çalışma alanı varsa boş bırak.');
 const taskId = z.string().describe('İşin kimliği (isleri_listele veya gundemim sonucundaki "id").');
@@ -74,7 +79,7 @@ const TOOLS = [
   }, WRITE, (c, actor, a) => c.addComment(actor, a)],
 ];
 
-export const MCP_TOOL_NAMES = TOOLS.map(([name]) => name);
+export const MCP_TOOL_NAMES = [...TOOLS.map(([name]) => name), 'panom'];
 
 /**
  * @param {object} o
@@ -83,8 +88,9 @@ export const MCP_TOOL_NAMES = TOOLS.map(([name]) => name);
  * @param {(email: string, tool: string, detail: string) => void} o.audit
  * @param {() => void} o.afterWrite   yazma araçlarından sonra (ör. e-posta kuyruğunu gönder)
  * @param {(msg: string) => void} o.log
+ * @param {string|null} [o.boardHtml]  derlenmiş "Benim panom" sayfası (dist-mcp-app/panom.html)
  */
-export function createMcpHandler({ service, newId, audit, afterWrite = () => {}, log = () => {} }) {
+export function createMcpHandler({ service, newId, audit, afterWrite = () => {}, log = () => {}, boardHtml = null }) {
   const commands = createTaskCommands(service, { newId });
 
   /** Her istek için yeni sunucu: kimlik isteğe bağlıdır, istekler arasında durum tutulmaz (stateless). */
@@ -112,7 +118,52 @@ export function createMcpHandler({ service, newId, audit, afterWrite = () => {},
         }
       });
     }
+    registerBoard(server, actor);
     return server;
+  }
+
+  /**
+   * MCP App: `panom` aracı + `ui://pusula/panom.html` kaynağı.
+   * Arayüzü destekleyen istemcide (Claude) etkileşimli pano açılır; desteklemeyende aynı veri metin olarak döner.
+   * Veri `gundemim` ile aynı komuttan (myAgenda → agendaFor) gelir: sabah özeti, web ve Claude aynı sayıyı gösterir.
+   */
+  function registerBoard(server, actor) {
+    registerAppTool(
+      server,
+      'panom',
+      {
+        title: 'Benim panom',
+        description:
+          'Kullanıcının Pusula panosunu etkileşimli olarak gösterir: geciken, bugün ve bu hafta termini olan işler; ekip yöneticisiyse sorumlu bekleyen ekip işleri. Kullanıcı işleri panodan başlatıp tamamlayabilir. "Panomu göster", "işlerime bakalım" gibi istekler için bunu kullan; yalnızca bilgi gerekiyorsa gundemim yeterlidir.',
+        inputSchema: { calismaAlani: ws },
+        annotations: READ,
+        _meta: { ui: { resourceUri: BOARD_URI } },
+      },
+      async (args) => {
+        try {
+          const calismaAlani = commands.resolveWorkspace(actor, args.calismaAlani);
+          const data = { calismaAlani, kullanici: actor, ...commands.myAgenda(actor, { calismaAlani }) };
+          return { structuredContent: data, content: [{ type: 'text', text: summaryText(data) }] };
+        } catch (err) {
+          if (err instanceof Error && err.constructor === Error) return { isError: true, content: [{ type: 'text', text: err.message }] };
+          log(`MCP hatası (panom): ${err?.stack || err}`);
+          return { isError: true, content: [{ type: 'text', text: 'İstek işlenemedi.' }] };
+        }
+      },
+    );
+    registerAppResource(server, 'Benim panom', BOARD_URI, { description: 'Pusula · Benim panom (etkileşimli)' }, async () => ({
+      contents: [
+        {
+          uri: BOARD_URI,
+          mimeType: RESOURCE_MIME_TYPE,
+          text:
+            boardHtml ||
+            '<!doctype html><meta charset="utf-8"><p style="font-family:sans-serif">Pano arayüzü bu sunucuda derlenmemiş (npm run build:mcp-app). Aynı bilgi metin olarak da döndü.</p>',
+          // Sayfa dış kaynak yüklemez ve ağ isteği atmaz: izin verilen alan adı yok.
+          _meta: { ui: { csp: { connectDomains: [], resourceDomains: [] }, prefersBorder: true } },
+        },
+      ],
+    }));
   }
 
   /** /mcp isteğini işler. `actor` kimliği doğrulanmış kullanıcının e-postasıdır. */

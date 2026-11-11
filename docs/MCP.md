@@ -2,7 +2,7 @@
 
 Pusula'nın pilot sunucusu, web arayüzüne ek olarak bir **MCP (Model Context Protocol) kapısı** sunar: `/mcp`. Claude gibi bir yapay zekâ istemcisi bu kapı üzerinden kullanıcının işlerini okuyabilir ve sınırlı değişiklikler yapabilir. Örneğin "Bu haftaki geciken işlerim ne?" ya da "Rampa 3 sayımını Ece'ye ata, termini cumaya al, gerekçe: araç gecikti".
 
-> Durum: 3. adım. Araçlar metin olarak döner. Claude'un içinde açılan etkileşimli pano (MCP App) 4. adımda, internetten erişim için OAuth girişi ve sunucu kurulumu 5. adımda gelecek.
+> Durum: 4. adım. 13 araç ve bir MCP App ("Benim panom") hazır. Gerçek Claude bağlantısı için gereken OAuth girişi ve internete açık sunucu (VPS) kurulumu 5. adımda gelecek.
 
 ## Nasıl çalışır
 
@@ -35,7 +35,27 @@ Tarayıcı ──(oturum çerezi)──▶ /api/workspace ───────�
 | `kontrol_maddesi_isaretle` | Kontrol listesi maddesi | Yazma |
 | `yorum_ekle` | Yorum; ilgililere bildirim | Yazma |
 
+| `panom` | **MCP App:** Claude'un içinde açılan etkileşimli pano (aşağıda) | Okuma + arayüz |
+
 **Bilerek MCP'ye açılmayanlar:** üye ve rol yönetimi, çalışma kuralları, iş silme, ek dosya. Yanlış anlaşılmanın bedeli yüksek olan bu işlemler yalnızca web arayüzünden yapılır.
+
+## MCP App: "Benim panom"
+
+`panom` aracı, sonucunu Claude'un içinde açılan etkileşimli bir panoyla gösterir: geciken, bugün ve bu hafta termini olan işler, ekip yöneticisine sorumlu bekleyen ekip işleri. Kartlarda **Başla**, **Tamamla**, **Üstlen** ve **Ayrıntı** düğmeleri var.
+
+```
+Claude ── panom aracını çağırır ──▶ sunucu: veri (structuredContent) + "ui://pusula/panom.html"
+Claude ── sayfayı okur ve yalıtılmış iframe'de açar ──▶ pano çizilir
+Kullanıcı "Tamamla" ── sayfa → Claude (postMessage) → durum_degistir aracı → sunucu (kurallar) ──▶ pano yenilenir
+                                                  └─ Claude'a "kullanıcı X'i tamamladı" bilgisi (updateModelContext)
+Kullanıcı "Ayrıntı" ── sohbete kullanıcı adına mesaj → Claude is_detayi ile cevaplar
+```
+
+- **Sayfa sunucuya doğrudan gitmez.** Ağ isteği atamaz (izin verilen alan adı yok). Her işlem Claude üzerinden bir MCP aracı çağrısıdır, bu yüzden yetki, kurallar ve denetim kaydı aynen uygulanır. Örneğin kontrol listesi bitmemiş iş için "Tamamla" basılırsa sunucunun hatası kartın altında görünür.
+- **Veri tek hesaptan gelir.** Pano, `gundemim` ve sabah özeti e-postası aynı fonksiyonu (`agendaFor`) kullanır.
+- **Arayüzü olmayan istemciler** aynı aracı çağırdığında pano yerine metin özeti alır.
+- **Güvenlik:** İş adları kullanıcı girdisidir; sayfa bunları yalnızca metin olarak yazar (`textContent`, `innerHTML` yok).
+- Kod: `src/mcp-app/panom.html` ve `panom.js` (arayüz), `src/shared/board.js` (hangi kartta hangi düğme, metin özeti; test edilebilir), `server/mcp.js` → `registerBoard`. Derleme: `npm run build:mcp-app` → `dist-mcp-app/panom.html` (tek dosya; MCP Apps kütüphanesiyle birlikte ~110 KB sıkıştırılmış).
 
 ## Açma ve kapama
 
@@ -67,9 +87,22 @@ Inspector'da **Transport: Streamable HTTP**, **URL: `http://localhost:8080/mcp`*
 
 Web arayüzünü aynı anda `http://localhost:8080` adresinde aç (`deneme@sirket.test` olarak gir). MCP'den açtığın iş arayüzde de görünür, çünkü veri ve kurallar ortaktır.
 
+## Panoyu Claude'a bağlamadan görmek (deneme host'u)
+
+`tools/mcp-host/` Claude'un bir MCP App'i nasıl açtığını taklit eden küçük bir sayfadır: `panom` aracını çağırır, arayüzü iframe'de açar ve arayüzün araç çağrılarını sunucuya iletir. Arayüzün Claude'a gönderdiği bilgiler sayfanın altında listelenir.
+
+```bash
+npm run start:mcp-dev     # terminal 1: pilot sunucusu + MCP (http://localhost:8080)
+npm run mcp-host          # terminal 2: http://localhost:5174 adresini aç
+```
+
+Web arayüzünde (`http://localhost:8080`) iş açıp termini bugüne ver, sonra deneme host'unda **↻ Yenile**'ye bas.
+
+Otomatik tarayıcı testi aynı host'u kullanır: `npm run test:mcp-app` (kurallar, düğmeler, Claude'a giden bilgi, denetim kaydı).
+
 ## Kodda nereye bakmalı
 
 - `server/mcp.js`: araç tanımları (ad, açıklama, girdi şeması) ve MCP sunucusu. Araç açıklamaları Claude'un doğru aracı seçmesi için ayrıntılı yazıldı.
 - `server/app.js` → `/mcp`: kapı açık mı, kaynak (Origin) kontrolü, anahtar doğrulama, üyelik kontrolü.
 - `src/shared/taskCommands.js`: komutlar. Yeni bir araç eklemek için önce buraya komut, sonra `server/mcp.js`'ye tanım eklenir.
-- Testler: `tests/unit/taskCommands.test.js`, `tests/server/mcp.test.js` (gerçek sunucu + resmi MCP istemcisi).
+- Testler: `tests/unit/taskCommands.test.js`, `tests/unit/mcpBoard.test.js`, `tests/server/mcp.test.js` (gerçek sunucu + resmi MCP istemcisi), `tests/e2e/mcpApp.mjs` (tarayıcıda pano).

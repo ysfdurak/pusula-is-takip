@@ -76,6 +76,23 @@ test('araç listesi ve yetki: üye olmayan anahtar sahibi reddedilir', async () 
   await assert.rejects(connect(base, ECE_KEY), /403|erişimin/);
 });
 
+test('MCP App: panom aracı arayüz kaynağına işaret eder; kaynak HTML döner; veri hem yapılandırılmış hem metin', async () => {
+  const { base } = await start();
+  const admin = await connect(base, ADMIN_KEY);
+  const { tools } = await admin.listTools();
+  const board = tools.find((t) => t.name === 'panom');
+  assert.equal(board._meta.ui.resourceUri, 'ui://pusula/panom.html');
+  const { contents } = await admin.readResource({ uri: 'ui://pusula/panom.html' });
+  assert.equal(contents[0].mimeType, 'text/html;profile=mcp-app');
+  assert.match(contents[0].text, /<!doctype html>/i);
+  assert.deepEqual(contents[0]._meta.ui.csp, { connectDomains: [], resourceDomains: [] });
+  const result = await admin.callTool({ name: 'panom', arguments: {} });
+  assert.equal(result.structuredContent.kullanici, ADMIN);
+  assert.ok(result.structuredContent.calismaAlani);
+  assert.deepEqual(result.structuredContent.geciken, []);
+  assert.match(result.content[0].text, /^Pano: 0 geciken/);
+});
+
 test('uçtan uca: iş aç, ata, termin değiştir, tamamla; kurallar ve denetim kaydı', async () => {
   const { base, app, store } = await start();
   const admin = await connect(base, ADMIN_KEY);

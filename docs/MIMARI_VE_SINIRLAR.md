@@ -13,6 +13,8 @@
 | `src/shared/taskCommands.js` | İnce servis katmanı: tek iş, tek değişiklik komutları | Kural yazmaz; `save` üzerinden kaydeder. MCP kapısı bunu kullanır |
 | `src/shared/taskRules.js`, `dashboardStats.js`, `projectStats.js` | Tamamlama kuralları, ekip panosu ve proje sağlığı hesapları | Saf fonksiyonlar; arayüz ve MCP aynı hesabı kullanır |
 | `server/mcp.js` | MCP kapısı (`/mcp`) | Varsayılan kapalı; ayrıntı [MCP.md](MCP.md) |
+| `src/mcp-app/`, `src/shared/board.js` | MCP App: Claude içinde açılan "Benim panom" | `npm run build:mcp-app` → `dist-mcp-app/panom.html` |
+| `tools/mcp-host/` | MCP App deneme host'u | Yalnızca geliştirme ve tarayıcı testi |
 | `src/lib/` | Çakışma raporu, biçimlendirme, arayüze özel görünümler | Taşınan hesaplar için eski yollar yeniden dışa aktarır |
 | `src/styles.css` | Tüm stiller | |
 | `vite.config.js` | Tek dosyalı derleme, mod ve güvenlik politikası (CSP) | `--mode pilot` sunucu modu |

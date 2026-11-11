@@ -24,7 +24,12 @@ mkdirSync(config.dataDir, { recursive: true });
 const store = openStore(config.dbFile);
 const auth = config.authMode === 'entra' ? createEntraAuth(config.entra) : null;
 const mailer = config.mailMode === 'outlook' ? createGraphMailer(config.graph) : null;
-const app = createApp({ config, store, auth, html: readFileSync(config.htmlFile), mailer, log });
+let boardHtml = null;
+if (config.mcpEnabled) {
+  if (existsSync(config.boardHtmlFile)) boardHtml = readFileSync(config.boardHtmlFile, 'utf8');
+  else log(`Uyarı: MCP pano arayüzü bulunamadı (${config.boardHtmlFile}). "npm run build:mcp-app" çalıştır; o zamana kadar pano metin olarak döner.`);
+}
+const app = createApp({ config, store, auth, html: readFileSync(config.htmlFile), mailer, log, boardHtml });
 
 const timers = [
   setInterval(() => app.flushMail(), 30_000),

@@ -10,4 +10,5 @@ _site/
 dist/
 dist-pilot/
 dist-preview/
+dist-mcp-app/
 tmp/

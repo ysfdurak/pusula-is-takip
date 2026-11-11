@@ -20,8 +20,9 @@ const escapeHtml = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&a
  * @param {Buffer} o.html       dist-pilot/index.html
  * @param {object|null} o.mailer
  * @param {(msg: string) => void} [o.log]
+ * @param {string|null} [o.boardHtml]  MCP App sayfası (dist-mcp-app/panom.html)
  */
-export function createApp({ config, store, auth, html, mailer = null, log = () => {} }) {
+export function createApp({ config, store, auth, html, mailer = null, log = () => {}, boardHtml = null }) {
   const admins = new Set(config.admins);
   const names = new Map(); // oturumdaki görünen adlar (yeni çalışma alanı sahibi için)
   const service = createWorkspaceService({
@@ -46,6 +47,7 @@ export function createApp({ config, store, auth, html, mailer = null, log = () =
         audit: (email, action, detail) => store.audit(email, action, detail),
         afterWrite: () => flushMail(),
         log,
+        boardHtml,
       })
     : null;
   // Anahtarlar özetleriyle (SHA-256) sabit sürede karşılaştırılır: zamanlama ile tahmin edilemez.
