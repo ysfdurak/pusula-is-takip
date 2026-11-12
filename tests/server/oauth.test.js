@@ -166,7 +166,10 @@ test('saldırı denemeleri: yanlış PKCE, yanlış dönüş adresi, başka kayn
 
   // Başka bir kullanıcının izin isteği onaylanamaz
   app.service.post(ADMIN, { action: 'member', id: app.service.get(ADMIN, '').workspaces[0].id, email: ECE, name: 'Ece', department: '', role: 'editor', active: true, originalEmail: '' });
-  const pageHtml = await (await fetch(authUrl(), { headers: { Cookie: cookie } })).text();
+  const izinSayfasi = await fetch(authUrl(), { headers: { Cookie: cookie } });
+  // İzin formu gönderildikten sonra dönüş adresine yönlenebilmeli: CSP form-action o kaynağa izin vermeli
+  assert.match(izinSayfasi.headers.get('content-security-policy'), /form-action 'self' http:\/\/localhost:9999;/);
+  const pageHtml = await izinSayfasi.text();
   const id = pageHtml.match(/name="id" value="([^"]+)"/)[1];
   const eceCookie = await login(ECE);
   const stolen = await fetch(base + '/oauth/authorize', { method: 'POST', redirect: 'manual', headers: { Cookie: eceCookie, Origin: base, 'Content-Type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams({ id, decision: 'allow' }) });
