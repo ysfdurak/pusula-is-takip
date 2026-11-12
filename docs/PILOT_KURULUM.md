@@ -1,5 +1,7 @@
 # Pilot sunucusu kurulumu
 
+> Kendi sunucunda (VPS) Google girişiyle ve Claude bağlantısıyla kurulum için: [SUNUCU_KURULUMU.md](SUNUCU_KURULUMU.md).
+
 Bu belge, Pusula'yı şirket içinde 5–50 kişilik bir pilot için kurmak isteyen BT ekibi içindir. Kurulum yaklaşık bir saat sürer; Microsoft tarafındaki yetkilerin devreye girmesi buna ek olarak 2 saate kadar sürebilir.
 
 ## Ne kurulur?

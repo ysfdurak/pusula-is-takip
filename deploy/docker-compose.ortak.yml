@@ -1,0 +1,21 @@
+# ysfdurak.com ortak altyapısında çalıştırma (önerilen).
+# Caddy (HTTPS) ve gece yedeği ortak altyapıda: github.com/ysfdurak/ysfdurak.com → sunucu/
+#   cd deploy && docker compose -f docker-compose.ortak.yml up -d --build
+# Pusula hiçbir portu dışarı açmaz; ortak Caddy "web" ağı üzerinden pusula:8080'e ulaşır.
+services:
+  pusula:
+    build: ..
+    container_name: pusula
+    env_file: ../.env
+    volumes:
+      - pusula-data:/data
+    restart: unless-stopped
+    networks:
+      - web
+
+networks:
+  web:
+    external: true
+
+volumes:
+  pusula-data: {}

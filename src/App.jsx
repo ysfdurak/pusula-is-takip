@@ -41,6 +41,7 @@ import {
   resetDemoData,
   setDemoActor,
 } from './demo/demoServer.js';
+import { FeedbackButton } from './components/FeedbackButton.jsx';
 import { applyConflictChoices, buildConflictReport } from './lib/conflicts.js';
 import { buildDashboardStats, dueTime } from './lib/dashboardStats.js';
 import { formatDateTime, fromDateTimeInput, newId, toDateTimeInput, todayKey } from './lib/format.js';
@@ -635,6 +636,18 @@ export function App({ demo = false, preview = false }) {
     setSearchQuery('');
     setFiltersOpen(t !== 'all');
   }
+  // Kullanım ölçümü: yalnızca sunucudaki ziyaretçi demo alanlarında; ekran adı gönderilir, içerik gönderilmez.
+  let isDemoSpace = !demo && !!workspaces.find((space) => space.id === workspaceId)?.demo;
+  function trackEvent(name) {
+    if (!isDemoSpace) return;
+    fetch('/api/event', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name }) }).catch(() => {});
+  }
+  useEffect(() => {
+    if (isDemoSpace && page) trackEvent('ekran:' + page);
+  }, [page, isDemoSpace]);
+  useEffect(() => {
+    if (isDemoSpace && page === 'tasks') trackEvent('gorunum:' + taskView);
+  }, [taskView, page, isDemoSpace]);
   function navigate(e) {
     setMetricFilter('all');
     setDueDayFilter('');
@@ -1549,6 +1562,7 @@ export function App({ demo = false, preview = false }) {
     </span>
   );
   const appContext = {
+    trackEvent,
     preview,
     attachFiles,
     fileCounts,
@@ -1781,6 +1795,7 @@ export function App({ demo = false, preview = false }) {
                 {' Ekibinin ortak çalışma alanı'}
                 <p>Bir iş. Doğru kişiler. Net ilerleme.</p>
               </div>
+              {!demo && <FeedbackButton screen={page} />}
               <button
                 className={'settings-link ' + (page === 'settings' ? 'active' : '')}
                 onClick={() => navigate('settings')}

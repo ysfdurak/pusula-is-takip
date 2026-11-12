@@ -4,7 +4,11 @@ import { DEFAULT_NOTIFY_POLICY, EMPTY_STATE } from '../src/shared/workspaceModel
 import { processOutbox } from './mail/outbox.js';
 import { runDigest } from './mail/digest.js';
 import { randomToken } from './auth.js';
-import { randomUUID } from 'node:crypto';
+import { createHash, randomUUID, timingSafeEqual } from 'node:crypto';
+import { createMcpHandler } from './mcp.js';
+import { createOAuthServer } from './oauth.js';
+import { createDemoSandboxes } from './demo.js';
+import { createAnalytics } from './analytics.js';
 
 const MAX_BODY = 8 * 1024 * 1024; // 5 MB ek dosya base64 ile ~6,7 MB eder
 const COOKIE = 'pusula_sid';
@@ -19,8 +23,9 @@ const escapeHtml = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&a
  * @param {Buffer} o.html       dist-pilot/index.html
  * @param {object|null} o.mailer
  * @param {(msg: string) => void} [o.log]
+ * @param {string|null} [o.boardHtml]  MCP App sayfası (dist-mcp-app/panom.html)
  */
-export function createApp({ config, store, auth, html, mailer = null, log = () => {} }) {
+export function createApp({ config, store, auth, html, mailer = null, log = () => {}, boardHtml = null }) {
   const admins = new Set(config.admins);
   const names = new Map(); // oturumdaki görünen adlar (yeni çalışma alanı sahibi için)
   const service = createWorkspaceService({
@@ -34,8 +39,61 @@ export function createApp({ config, store, auth, html, mailer = null, log = () =
     maxFileBytes: config.maxFileMb * 1024 * 1024,
   });
 
+  // Ziyaretçi demo alanları (DEMO_MODE=true): üye olmayan kişi girince kendine ait örnek verili alan açılır
+  const demo = config.demoMode ? createDemoSandboxes({ store, ttlDays: config.demoTtlDays, max: config.demoMax, log }) : null;
+
+  // Kullanım ölçümü (yalnızca demo ziyaretçileri, takma kimlikle) ve geri bildirim (herkes)
+  const analytics = createAnalytics({
+    db: store.db,
+    shouldTrack: (email) => !!demo && !admins.has(email) && !!demo.sandboxOf(email),
+    retentionDays: config.analyticsRetentionDays,
+  });
+  const eventBudget = new Map(); // kişi başı günlük olay sınırı (arayüzden gelen olaylar)
+
   bootstrap();
   syncAdmins();
+
+  // MCP kapısı: aynı servisi (aynı kurallar, aynı veri) kullanır; yalnızca kimlik doğrulama farklıdır.
+  const mcp = config.mcpEnabled
+    ? createMcpHandler({
+        service,
+        newId: randomUUID,
+        audit: (email, action, detail) => store.audit(email, action, detail),
+        afterWrite: () => flushMail(),
+        log,
+        boardHtml,
+        isAdmin: (email) => admins.has(email),
+        onTool: (email, tool) => analytics.track(email, 'claude:' + tool, 'claude'),
+        feedback: (email, input) => analytics.addFeedback(email, { ...input, channel: 'claude' }),
+        stats: () => analytics.summary(),
+      })
+    : null;
+  // Anahtarlar özetleriyle (SHA-256) sabit sürede karşılaştırılır: zamanlama ile tahmin edilemez.
+  const digestOf = (value) => createHash('sha256').update(value).digest();
+  const mcpKeys = [...(config.mcpTokens || new Map())].map(([token, email]) => ({ hash: digestOf(token), email }));
+  // OAuth yetkilendirme sunucusu: claude.ai gibi istemciler kullanıcının normal girişiyle (Google/Microsoft) izin alır.
+  const oauth = config.mcpEnabled
+    ? createOAuthServer({
+        db: store.db,
+        origin: new URL(config.appUrl).origin,
+        basePath: new URL(config.appUrl).pathname.replace(/\/$/, ''),
+        session: (req) => store.sessions.get(cookieValue(req), config.sessionIdleMinutes),
+        isAllowed: (email) => admins.has(email) || isMember(email),
+        http: { headers: (...a) => headers(...a), json: (...a) => json(...a), page: (...a) => page(...a), redirect: (...a) => redirect(...a), readBody: (...a) => readBody(...a) },
+        audit: (email, action, detail) => {
+          store.audit(email, action, detail);
+          if (action === 'oauth_grant') analytics.track(email, 'oturum:claude_baglandi', 'claude');
+        },
+      })
+    : null;
+
+  /** /mcp kimliği: önce kişisel erişim anahtarı (geliştirme, Inspector), sonra OAuth erişim anahtarı (Claude). */
+  function mcpUser(req) {
+    const m = String(req.headers.authorization || '').match(/^Bearer\s+(\S+)$/i);
+    if (!m) return null;
+    const hash = digestOf(m[1]);
+    return mcpKeys.find((k) => timingSafeEqual(k.hash, hash))?.email || oauth?.verifyAccessToken(m[1])?.email || null;
+  }
 
   /** İlk kurulum: hiç çalışma alanı yoksa yöneticiler için bir tane oluşturulur. */
   function bootstrap() {
@@ -60,6 +118,7 @@ export function createApp({ config, store, auth, html, mailer = null, log = () =
     if (!admins.size) return;
     const data = store.load();
     for (const [wsId, list] of Object.entries(data.members)) {
+      if (demo?.isDemo(wsId)) continue; // demo alanının yöneticisi ziyaretçinin kendisidir
       const extra = list.filter((m) => m.role === 'owner' && !admins.has(m.email));
       const remaining = list.filter((m) => m.role === 'owner' && m.active && admins.has(m.email));
       if (!extra.length) continue;
@@ -79,7 +138,7 @@ export function createApp({ config, store, auth, html, mailer = null, log = () =
   const isMember = (email) => Object.values(store.load().members).some((list) => list.some((m) => m.email === email && m.active));
 
   /**
-   * Girişte üye kaydını Microsoft hesabına bağlar ve adını tamamlar.
+   * Girişte üye kaydını giriş hesabına (Microsoft ya da Google) bağlar ve adını tamamlar.
    * İlk girişte hesabın değişmeyen kimliği (oid) kaydedilir; sonraki girişlerde aynı adresi taşıyan
    * başka bir hesap (örneğin yeniden kullanılan bir adres) reddedilir.
    * @returns {boolean} hesap eşleşiyorsa true
@@ -171,9 +230,9 @@ ${link ? `<p><a href="${escapeHtml(link.href)}" style="color:#2c6549;font-weight
   };
   const sessionCookie = (id, maxAgeSec) =>
     `${COOKIE}=${id}; Path=${basePath || '/'}; HttpOnly; SameSite=Lax; Max-Age=${maxAgeSec}${secure ? '; Secure' : ''}`;
-  /** Girişten sonra dönülecek yol: yalnızca uygulama içindeki göreli yollar (açık yönlendirmeye karşı) */
+  /** Girişten sonra dönülecek yol: yalnızca uygulama içindeki göreli yollar (açık yönlendirmeye karşı). OAuth izin adresi de buradan döner. */
   const safeReturn = (value) => {
-    if (typeof value !== 'string' || !/^\/[A-Za-z0-9\-._~/?=&%#]*$/.test(value) || value.startsWith('//')) return '/';
+    if (typeof value !== 'string' || value.length > 4000 || !/^\/[A-Za-z0-9\-._~/?=&%#:+@,;!*()']*$/.test(value) || value.startsWith('//')) return '/';
     try {
       return new URL(value, appOrigin).origin === appOrigin ? value : '/';
     } catch {
@@ -202,14 +261,57 @@ ${link ? `<p><a href="${escapeHtml(link.href)}" style="color:#2c6549;font-weight
     }
   }
 
-  function startSession(res, user, returnTo) {
+  /** JSON ya da form (application/x-www-form-urlencoded) gövdesi; OAuth uç noktaları için. */
+  async function readBody(req, kind) {
+    if (kind === 'json') return readJson(req);
+    let size = 0;
+    const chunks = [];
+    for await (const chunk of req) {
+      size += chunk.length;
+      if (size > 64 * 1024) throw Object.assign(new Error('İstek çok büyük.'), { status: 413 });
+      chunks.push(chunk);
+    }
+    return Object.fromEntries(new URLSearchParams(Buffer.concat(chunks).toString('utf8')));
+  }
+
+  function startSession(res, user, returnTo, { welcome = false } = {}) {
     if (!bindAccount(user)) {
       store.audit(user.email, 'login_denied', 'hesap kimliği eşleşmedi');
-      return page(res, 403, 'Hesap eşleşmedi', `${user.email} adresi Pusula'da başka bir Microsoft hesabına bağlı. Pusula yöneticine başvur.`);
+      return page(res, 403, 'Hesap eşleşmedi', `${user.email} adresi Pusula'da başka bir hesaba bağlı. Pusula yöneticine başvur.`);
     }
     const id = store.sessions.create(user.email, user.name, config.sessionHours);
     store.audit(user.email, 'login');
-    redirect(res, `${basePath}${safeReturn(returnTo)}`, [sessionCookie(id, config.sessionHours * 3600), loginCookie('', 0)]);
+    analytics.track(user.email, 'oturum:giris');
+    const cookies = [sessionCookie(id, config.sessionHours * 3600), loginCookie('', 0)];
+    if (!welcome) return redirect(res, `${basePath}${safeReturn(returnTo)}`, cookies);
+    // İlk demo girişi: ne olduğunu ve verinin ne zaman silineceğini açıkça söyle
+    res.setHeader('Set-Cookie', cookies);
+    return page(
+      res,
+      200,
+      'Demo alanın hazır',
+      `Bu alan yalnızca sana ait; içinde kurgusal bir depo ekibi ve örnek işler var. Yönetici sensin, her şeyi deneyebilirsin. ` +
+        `Alan ve içindeki her şey ${config.demoTtlDays} gün sonra silinir; yeniden girersen yenisi açılır. Gerçek kişi ya da şirket bilgisi girme. ` +
+        `E-posta adresin yalnızca giriş için kullanılır ve güvenlik kaydında tutulur.`,
+      { href: `${basePath}/`, text: "Pusula'yı aç" },
+    );
+  }
+
+  /**
+   * Girişten sonra: üye ya da yöneticiyse oturum açılır. Değilse demo modunda kendi demo alanı açılır,
+   * demo kapalıysa erişim reddedilir.
+   */
+  function admit(res, user, returnTo) {
+    if (admins.has(user.email) || isMember(user.email)) return startSession(res, user, returnTo);
+    if (!demo) return denyNonMember(res, user.email);
+    try {
+      demo.create(user);
+      analytics.track(user.email, 'oturum:demo_acildi');
+    } catch (err) {
+      if (err.code === 'full') return page(res, 503, 'Demo şu an dolu', 'Aynı anda açık demo alanı sınırına ulaşıldı. Birkaç gün sonra yeniden dene.');
+      throw err;
+    }
+    return startSession(res, user, returnTo, { welcome: safeReturn(returnTo) === '/' });
   }
 
   function denyNonMember(res, email) {
@@ -225,10 +327,13 @@ ${link ? `<p><a href="${escapeHtml(link.href)}" style="color:#2c6549;font-weight
 
     if (path === '/healthz') return json(res, 200, { ok: true });
 
+    // OAuth (MCP bağlantı izni) uç noktaları
+    if (oauth && (await oauth.handle(req, res, path, url))) return;
+
     // Giriş
     if (path === '/auth/login' && req.method === 'GET') {
       if (config.authMode === 'dev') {
-        return page(res, 200, 'Geliştirme girişi', 'Bu sunucu geliştirme modunda. Microsoft girişi yerine aşağıdaki adreslerden biriyle girebilirsin: ' +
+        return page(res, 200, 'Geliştirme girişi', 'Bu sunucu geliştirme modunda. Gerçek giriş yerine aşağıdaki adreslerden biriyle girebilirsin: ' +
           [...new Set([...admins, ...Object.values(store.load().members).flat().map((m) => m.email)])].join(', '),
           { href: `${basePath}/auth/dev?email=${encodeURIComponent([...admins][0] || '')}`, text: `${[...admins][0] || ''} olarak gir` });
       }
@@ -241,8 +346,7 @@ ${link ? `<p><a href="${escapeHtml(link.href)}" style="color:#2c6549;font-weight
     }
     if (path === '/auth/dev' && config.authMode === 'dev') {
       const email = String(url.searchParams.get('email') || '').toLowerCase();
-      if (!admins.has(email) && !isMember(email)) return denyNonMember(res, email);
-      return startSession(res, { email, name: email.split('@')[0], oid: '' }, '/');
+      return admit(res, { email, name: email.split('@')[0], oid: '' }, '/');
     }
     if (path === '/auth/callback' && req.method === 'GET' && auth) {
       if (url.searchParams.get('error')) {
@@ -254,8 +358,7 @@ ${link ? `<p><a href="${escapeHtml(link.href)}" style="color:#2c6549;font-weight
       try {
         const idToken = await auth.redeem(url.searchParams.get('code'), saved.verifier);
         const user = auth.verify(idToken, saved.nonce);
-        if (!admins.has(user.email) && !isMember(user.email)) return denyNonMember(res, user.email);
-        return startSession(res, user, saved.return_to);
+        return admit(res, user, saved.return_to);
       } catch (err) {
         log(`Giriş hatası: ${err.message}`);
         return page(res, 400, 'Giriş tamamlanamadı', err.message, { href: `${basePath}/auth/login`, text: 'Yeniden dene' });
@@ -310,7 +413,14 @@ ${link ? `<p><a href="${escapeHtml(link.href)}" style="color:#2c6549;font-weight
           const r = await flushMail();
           return json(res, 200, { configured: !!mailer, accepted: r.accepted || 0 });
         }
+        const demoError = body.action === 'member' ? demo?.memberError(body.id, body.email) : null;
+        if (demoError) return json(res, 400, { error: demoError });
+        const activitiesBefore = store.load().activities.length;
         const result = service.post(email, body);
+        // Ölçüm: kaydın ürettiği yeni geçmiş kayıtlarının türü (oluşturma, durum, düzenleme, engel); içerik yazılmaz
+        if (body.action === 'save') {
+          for (const a of store.load().activities.slice(0, store.load().activities.length - activitiesBefore)) analytics.track(email, 'is:' + a.kind);
+        } else if (['comment', 'attach'].includes(body.action)) analytics.track(email, 'is:' + body.action);
         if (['save', 'member', 'policy', 'create', 'attach', 'detach'].includes(body.action)) {
           store.audit(email, body.action, body.action === 'member' ? `${body.email} · ${body.role}` : body.action === 'detach' ? body.file : body.reason || body.name || '');
         }
@@ -326,6 +436,72 @@ ${link ? `<p><a href="${escapeHtml(link.href)}" style="color:#2c6549;font-weight
         const message = err.message;
         const status = message.includes('Kayıt değişti') ? 409 : /erişimin yok|yalnızca|Görüntüleme rolünde/.test(message) ? 403 : 400;
         return json(res, status, { error: message });
+      }
+    }
+
+    // Arayüzden ölçüm olayı ve geri bildirim
+    if ((path === '/api/event' || path === '/api/feedback') && req.method === 'POST') {
+      const session = store.sessions.get(cookieValue(req), config.sessionIdleMinutes);
+      if (!session) return json(res, 401, { error: 'Oturum açman gerekiyor.' });
+      const origin = req.headers.origin;
+      if (!origin || origin !== appOrigin) return json(res, 403, { error: 'İstek kaynağı reddedildi.' });
+      try {
+        const body = await readJson(req);
+        if (path === '/api/feedback') {
+          return json(res, 200, analytics.addFeedback(session.email, { rating: body.rating, message: body.message, screen: body.screen, contact: body.contact === true }));
+        }
+        const name = String(body.name || '');
+        if (!/^(ekran|gorunum):[a-z]{1,24}$|^is:excel$/.test(name)) return json(res, 400, { error: 'Bilinmeyen olay.' });
+        const today = new Date().toISOString().slice(0, 10);
+        const budget = eventBudget.get(session.email);
+        if (budget?.day === today && budget.count >= 500) return json(res, 429, { error: 'Çok fazla olay.' });
+        eventBudget.set(session.email, { day: today, count: budget?.day === today ? budget.count + 1 : 1 });
+        return json(res, 200, { tracked: analytics.track(session.email, name) });
+      } catch (err) {
+        if (err.status) return json(res, err.status, { error: err.message });
+        if (err instanceof Error && err.constructor === Error) return json(res, 400, { error: err.message });
+        throw err;
+      }
+    }
+
+    // Yönetici: kullanım ve geri bildirim özeti
+    if ((path === '/yonetim/istatistik' || path === '/yonetim/istatistik.json') && req.method === 'GET') {
+      const session = store.sessions.get(cookieValue(req), config.sessionIdleMinutes);
+      if (!session) return redirect(res, `${basePath}/auth/login?return_to=${encodeURIComponent(path)}`);
+      if (!admins.has(session.email)) return page(res, 403, 'Yetki yok', 'Bu sayfayı yalnızca Pusula yöneticisi (PUSULA_ADMINS) görebilir.');
+      const days = Math.min(Math.max(Number(url.searchParams.get('gun')) || 30, 1), 365);
+      const summary = analytics.summary({ days });
+      if (path.endsWith('.json')) return json(res, 200, summary);
+      headers(res, { 'Content-Type': 'text/html; charset=utf-8', 'Content-Security-Policy': "default-src 'none'; style-src 'unsafe-inline'; frame-ancestors 'none'" });
+      res.statusCode = 200;
+      return res.end(analytics.renderPage(summary, basePath));
+    }
+
+    // MCP kapısı
+    if (path === '/mcp') {
+      if (!mcp) return json(res, 404, { error: 'MCP kapısı bu kurulumda kapalı.' });
+      // Tarayıcıdan gelen istekler yalnızca uygulamanın kendi adresinden kabul edilir (DNS rebinding'e karşı).
+      const origin = req.headers.origin;
+      if (origin && origin !== appOrigin) return json(res, 403, { error: 'İstek kaynağı reddedildi.' });
+      const email = mcpUser(req);
+      if (!email) {
+        // İstemciye yetkiyi nereden alacağını söyler (MCP Authorization: RFC 9728 korumalı kaynak üst verisi)
+        const presented = /^Bearer\s+\S+/i.test(String(req.headers.authorization || ''));
+        res.setHeader('WWW-Authenticate', `Bearer resource_metadata="${oauth.resourceMetadataUrl}"${presented ? ', error="invalid_token"' : ''}`);
+        return json(res, 401, { error: 'Geçerli bir MCP erişim anahtarı gerekli.' });
+      }
+      if (!admins.has(email) && !isMember(email)) return json(res, 403, { error: 'Pusula erişimin kaldırılmış.' });
+      // Durumsuz (stateless) çalışır: yalnızca POST. Sunucudan istemciye akış (GET) ve oturum kapatma (DELETE) yok.
+      if (req.method !== 'POST') {
+        res.setHeader('Allow', 'POST');
+        return json(res, 405, { error: 'Yöntem desteklenmiyor.' });
+      }
+      try {
+        const body = await readJson(req);
+        return await mcp.handle(req, res, email, body);
+      } catch (err) {
+        if (err.status) return json(res, err.status, { error: err.message });
+        throw err;
       }
     }
 
@@ -346,6 +522,10 @@ ${link ? `<p><a href="${escapeHtml(link.href)}" style="color:#2c6549;font-weight
       }),
     flushMail,
     sendDigest,
+    purgeOAuth: () => oauth?.purge(),
+    cleanupDemo: (now) => demo?.cleanup(now) || 0,
+    purgeAnalytics: () => analytics.purge(),
+    analytics,
     service,
   };
 }

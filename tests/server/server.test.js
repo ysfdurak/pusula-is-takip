@@ -270,7 +270,7 @@ test('güvenlik incelemesi: açık yönlendirme, giriş CSRF, hesap kimliği, ka
   // Aynı adres, başka Microsoft hesabı
   const other = await s.login('deniz@sirket.test', { oid: 'baska-hesap' });
   assert.equal(other.status, 403);
-  assert.match(other.text, /başka bir Microsoft hesabına bağlı/);
+  assert.match(other.text, /başka bir hesaba bağlı/);
 
   const admin = (await s.login('deniz@sirket.test')).cookie;
   const id = (await s.api(admin)).body.workspaces[0].id;

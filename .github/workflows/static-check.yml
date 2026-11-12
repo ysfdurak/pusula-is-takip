@@ -31,6 +31,7 @@ jobs:
           npx playwright install --with-deps chromium
           npm run test:e2e
           node tests/e2e/pilot.mjs
+          npm run test:mcp-app
   docker:
     runs-on: ubuntu-latest
     steps:

@@ -78,6 +78,7 @@ export function TaskListPage() {
     workspace,
     workspaceId,
     workspaces,
+    trackEvent,
   } = useApp();
   return (
     <>
@@ -203,6 +204,7 @@ export function TaskListPage() {
               title="Listede görünen işleri Excel dosyası olarak indir"
               onClick={() => {
                 const name = workspaces.find((space) => space.id === workspaceId)?.name || 'Pusula';
+                trackEvent('is:excel');
                 downloadBlob(
                   tasksWorkbook(listedTasks, { workspace, memberName, projectName, isLate, workspaceName: name }),
                   safeFileName('pusula-' + name + '-' + todayKey()) + '.xlsx',

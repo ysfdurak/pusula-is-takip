@@ -8,8 +8,9 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci --no-audit --no-fund
 COPY index.html vite.config.js ./
+COPY vite.mcp-app.config.js ./
 COPY src ./src
-RUN npm run build:pilot
+RUN npm run build:pilot && npm run build:mcp-app
 
 FROM node:22-bookworm-slim
 ENV NODE_ENV=production DATA_DIR=/data PORT=8080
@@ -19,6 +20,7 @@ RUN npm ci --omit=dev --no-audit --no-fund && npm cache clean --force
 COPY server ./server
 COPY src/shared ./src/shared
 COPY --from=build /app/dist-pilot ./dist-pilot
+COPY --from=build /app/dist-mcp-app ./dist-mcp-app
 RUN mkdir -p /data && chown node:node /data
 USER node
 VOLUME ["/data"]

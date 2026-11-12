@@ -74,3 +74,79 @@ export function createEntraAuth({ tenantId, clientId, clientSecret, redirectUri,
 
   return { authorizeUrl, redeem, verify };
 }
+
+/**
+ * Google ile giriş: OpenID Connect yetkilendirme kodu akışı + PKCE (gizli istemci).
+ * Microsoft girişiyle aynı arayüzü sunar (authorizeUrl, redeem, verify); sunucunun geri kalanı hangisinin kullanıldığını bilmez.
+ * @param {object} o
+ * @param {string[]} [o.allowedDomains]  boş değilse yalnızca bu alan adlarındaki hesaplar (Google Workspace "hd" alanı ya da e-posta alan adı)
+ */
+export function createGoogleAuth({ clientId, clientSecret, redirectUri, allowedDomains = [], fetchImpl = globalThis.fetch }) {
+  for (const [k, v] of Object.entries({ clientId, clientSecret, redirectUri })) {
+    if (!v) throw new Error(`Google girişi için ${k} eksik.`);
+  }
+
+  function authorizeUrl({ state, nonce, verifier }) {
+    const url = new URL('https://accounts.google.com/o/oauth2/v2/auth');
+    url.search = new URLSearchParams({
+      client_id: clientId,
+      response_type: 'code',
+      redirect_uri: redirectUri,
+      scope: 'openid email profile',
+      state,
+      nonce,
+      code_challenge: pkceChallenge(verifier),
+      code_challenge_method: 'S256',
+      prompt: 'select_account',
+      ...(allowedDomains.length === 1 ? { hd: allowedDomains[0] } : {}),
+    }).toString();
+    return url.toString();
+  }
+
+  async function redeem(code, verifier) {
+    const res = await fetchImpl('https://oauth2.googleapis.com/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        client_id: clientId,
+        client_secret: clientSecret,
+        grant_type: 'authorization_code',
+        code,
+        redirect_uri: redirectUri,
+        code_verifier: verifier,
+      }).toString(),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || !data.id_token) throw new Error(`Google girişi tamamlanamadı: ${data.error_description || data.error || res.status}`);
+    return data.id_token;
+  }
+
+  /** Microsoft'takiyle aynı gerekçe: belirteç doğrudan token uç noktasından TLS ile alınır (OIDC Core 3.1.3.7, madde 6). */
+  function verify(idToken, nonce) {
+    const parts = String(idToken).split('.');
+    if (parts.length !== 3) throw new Error('Geçersiz kimlik belirteci.');
+    let claims;
+    try {
+      claims = JSON.parse(Buffer.from(parts[1], 'base64url').toString('utf8'));
+    } catch {
+      throw new Error('Geçersiz kimlik belirteci.');
+    }
+    const now = Math.floor(Date.now() / 1000);
+    if (!['https://accounts.google.com', 'accounts.google.com'].includes(claims.iss)) throw new Error('Belirteci veren tanınmadı.');
+    if (claims.aud !== clientId) throw new Error('Belirteç bu uygulama için değil.');
+    if (!claims.exp || claims.exp < now - 60) throw new Error('Oturum belirtecinin süresi dolmuş.');
+    if (!nonce || claims.nonce !== nonce) throw new Error('Giriş isteği eşleşmedi; yeniden dene.');
+    const email = String(claims.email || '').toLowerCase();
+    if (!/^\S+@\S+\.\S+$/.test(email)) throw new Error('Hesapta e-posta adresi bulunamadı.');
+    // Doğrulanmamış e-posta adresi başkasının adresi olabilir: kabul edilmez.
+    if (claims.email_verified !== true && claims.email_verified !== 'true') throw new Error('Google hesabının e-posta adresi doğrulanmamış.');
+    if (allowedDomains.length && !allowedDomains.includes(String(claims.hd || email.split('@')[1]).toLowerCase())) {
+      throw new Error('Bu Google hesabı izin verilen alan adlarından değil.');
+    }
+    if (!claims.sub) throw new Error('Hesap kimliği bulunamadı.');
+    // Değişmeyen hesap kimliği; Microsoft'un oid'iyle karışmasın diye önekli.
+    return { email, name: claims.name || email.split('@')[0], oid: 'google:' + claims.sub };
+  }
+
+  return { authorizeUrl, redeem, verify };
+}

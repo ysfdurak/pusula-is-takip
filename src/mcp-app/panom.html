@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Pusula · Benim panom</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        --bg: var(--color-background-primary, #ffffff);
+        --card: var(--color-background-secondary, #f7f8f4);
+        --text: var(--color-text-primary, #243c33);
+        --muted: var(--color-text-secondary, #5d6f66);
+        --line: var(--color-border-primary, #e2e7dd);
+        --accent: #2c6549;
+        --late: #b4442f;
+        --today: #b07a12;
+        --week: #2c6549;
+        --pool: #5a5f9e;
+        --radius: var(--border-radius-md, 10px);
+        font-family: var(--font-sans, 'Segoe UI', system-ui, sans-serif);
+      }
+      [data-theme='dark'] {
+        --bg: var(--color-background-primary, #1f2421);
+        --card: var(--color-background-secondary, #2a302c);
+        --text: var(--color-text-primary, #e8ede9);
+        --muted: var(--color-text-secondary, #a9b5ae);
+        --line: var(--color-border-primary, #3a423d);
+        --accent: #6fc39a;
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: var(--bg); color: var(--text); font-size: 14px; }
+      header { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; padding: 12px 14px 4px; }
+      header strong { font-size: 15px; }
+      header span { color: var(--muted); font-size: 12px; }
+      #status { padding: 0 14px; color: var(--muted); font-size: 12px; min-height: 16px; }
+      #status.error { color: var(--late); }
+      section { padding: 6px 14px 4px; }
+      h2 { font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; margin: 8px 0 6px; display: flex; gap: 6px; align-items: center; }
+      h2 .dot { width: 8px; height: 8px; border-radius: 50%; }
+      h2 .dot.late { background: var(--late); }
+      h2 .dot.today { background: var(--today); }
+      h2 .dot.week { background: var(--week); }
+      h2 .dot.pool { background: var(--pool); }
+      h2 .count { color: var(--muted); font-weight: normal; }
+      .empty { color: var(--muted); font-size: 13px; margin: 0 0 6px; }
+      .card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 10px 12px; margin-bottom: 6px; }
+      .card .title { font-weight: 600; line-height: 1.35; }
+      .card .meta { color: var(--muted); font-size: 12px; margin-top: 2px; }
+      .card .row { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+      .card .msg { color: var(--late); font-size: 12px; margin-top: 6px; }
+      button { font: inherit; font-size: 12px; border-radius: 6px; padding: 5px 10px; cursor: pointer; border: 1px solid var(--line); background: transparent; color: var(--text); }
+      button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+      button.link { border: 0; color: var(--muted); padding-left: 2px; }
+      button:disabled { opacity: 0.5; cursor: wait; }
+      footer { padding: 6px 14px 12px; }
+    </style>
+  </head>
+  <body>
+    <header><strong>Benim panom</strong><span id="who"></span></header>
+    <div id="status" role="status" aria-live="polite">Yükleniyor…</div>
+    <main id="board"></main>
+    <footer><button id="refresh" class="link" type="button">↻ Yenile</button></footer>
+    <script type="module" src="./panom.js"></script>
+  </body>
+</html>
