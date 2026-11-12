@@ -9,6 +9,28 @@ Claude ───┼── pusula.ysfdurak.com ──┤
           └─ giriş: Google hesabı · Claude bağlantısı: OAuth izni (docs/MCP.md)
 ```
 
+## Önerilen yol: ysfdurak.com ortak altyapısı
+
+Sunucu, Docker, Caddy (HTTPS) ve gece yedeği [ysfdurak.com/sunucu](https://github.com/ysfdurak/ysfdurak.com/tree/main/sunucu) ile zaten kuruluysa aşağıdaki 1-3. adımları atla. Pusula kendi Caddy'sini çalıştırmaz; ortak Caddy'ye bağlanır:
+
+```
+Cloudflare (turuncu bulut, Full strict) ─▶ ortak Caddy ─(web ağı)─▶ pusula:8080 ─▶ SQLite /data
+                                                                    gece 03:30: son yedek → Cloudflare R2
+```
+
+1. **Cloudflare DNS:** `A pusula → SUNUCU_IP`, **turuncu bulut (Proxied)**.
+2. **Google OAuth istemcisi:** aşağıdaki 4. adım.
+3. **Sunucuda:**
+   ```bash
+   git clone https://github.com/ysfdurak/pusula-is-takip.git ~/pusula-is-takip && cd ~/pusula-is-takip
+   cp .env.example .env && nano .env            # 5. adımdaki değerler
+   cd deploy && sudo docker compose -f docker-compose.ortak.yml up -d --build
+   cd ~/ysfdurak.com && git pull && cd sunucu/altyapi && sudo docker compose restart caddy
+   ```
+4. Kontrol: `https://pusula.ysfdurak.com/healthz` → `{"ok":true}`
+
+Aşağıdaki bölümler Pusula'yı **tek başına** (kendi Caddy'siyle) kuracaklar içindir.
+
 ## 0. Ne lazım?
 
 | Parça | Öneri | Not |
