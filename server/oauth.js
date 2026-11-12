@@ -191,9 +191,12 @@ export function createOAuthServer({ db, origin, basePath = '', session, isAllowe
     const params = { client_id: client.id, redirect_uri: p.redirect_uri, code_challenge: p.code_challenge, state: p.state || '' };
     db.prepare('INSERT INTO oauth_pending (id, email, params, created) VALUES (?, ?, ?, ?)').run(id, user.email, JSON.stringify(params), now());
     const target = new URL(p.redirect_uri).host;
+    // form-action, formun gönderildiği adresle birlikte ardından gelen yönlendirmeyi de kapsar (Chrome):
+    // onaydan sonra uygulamanın dönüş adresine (ör. claude.ai) gidilebilmesi için o kaynak da izinli olmalı.
+    const backOrigin = new URL(p.redirect_uri).origin;
     headers(res, {
       'Content-Type': 'text/html; charset=utf-8',
-      'Content-Security-Policy': "default-src 'none'; style-src 'unsafe-inline'; form-action 'self'; frame-ancestors 'none'",
+      'Content-Security-Policy': `default-src 'none'; style-src 'unsafe-inline'; form-action 'self' ${backOrigin}; frame-ancestors 'none'`,
     });
     res.statusCode = 200;
     return res.end(`<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Bağlantı izni · Pusula</title></head>
