@@ -41,3 +41,11 @@ Sözlüğe eklenmeyen metin İngilizce arayüzde Türkçe görünür; bir şey b
 ## Test
 
 `tests/unit/i18n.test.js`: sözlükte boş karşılık olmaması, kalıplı çeviri, sunucu sayfası çevirisi, dil seçimi ve İngilizce örnek veri (kimlik ve durum kodları değişmeden).
+
+## Sayı ve çoğul (İngilizce)
+
+Türkçede sayıdan sonra isim tekil kalır ("1 görev", "3 görev"); İngilizcede ise "1 task", "3 tasks" olur. Sözlükte karşılıklar çoğul yazılır ("{0} tasks"); sayı 1 olduğunda çoğul isim çalışma anında tekile çevrilir.
+
+- `translate` dosyasındaki `PLURAL` tablosu çoğul → tekil eşleşmesidir (`tasks: 'task'`, `people: 'person'`). Yeni bir isim "1 …s" diye görünürse buraya eklenir.
+- `fill(biçim, değerler)`: `{0} tasks` gibi kalıpları doldurur; değeri 1 olan yer tutucudan sonraki ilk üç kelimedeki çoğul ismi tekile çevirir. `__tt` ve sunucu iletileri bunu kullanır.
+- `__tn(sayı, metin)`: derleme, sayının hemen ardından gelen metni bu çağrıya çevirir. Tanınan biçimler: `{n} görev`, `{n}{' görev'}`, `{n}<em>görev</em>`, `<strong>{n}</strong><small>açık görev</small>` ve `n + ' görev'`. Sayı ifadesi iki kez yazıldığı için yalnızca yan etkisiz ifadeler (değişken, `x.length`, `a || 0`, `Math.ceil(...)`) kabul edilir; başka bir ifadede metin `__t` ile çevrilir ve çoğul kalır.

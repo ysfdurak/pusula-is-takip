@@ -42,3 +42,13 @@ test('örnek veri İngilizce açılır; kimlik ve kodlar değişmez', () => {
   assert.deepEqual(translateSample('tr', tr), tr);
   assert.deepEqual(translateDeep(EN, { status: 'done' }), { status: 'done' });
 });
+
+test('İngilizcede sayı 1 ise çoğul isim tekile döner', async () => {
+  const { fill, singularize } = await import('../../src/shared/i18n/translate.js');
+  assert.equal(fill('{0} tasks overdue', [1]), '1 task overdue');
+  assert.equal(fill('{0} tasks overdue', [3]), '3 tasks overdue');
+  assert.equal(fill('{0} of {1} records', [1, 1]), '1 of 1 record');
+  assert.equal(singularize('timesheet warnings'), 'timesheet warning');
+  assert.equal(singularize('People'), 'Person');
+  assert.equal(singularize('In progress'), 'In progress');
+});
