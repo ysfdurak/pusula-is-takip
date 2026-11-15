@@ -5,6 +5,8 @@ Pusula, operasyon ekiplerinin işlerini, sorumlularını, terminlerini ve işi d
 **Canlı demo (örnek verilerle):** https://ysfdurak.github.io/pusula-is-takip/
 **Pilot önizlemesi (boş başlar):** https://ysfdurak.github.io/pusula-is-takip/pilot-onizleme/
 
+> **English:** add `?lang=en` to any address (e.g. https://ysfdurak.github.io/pusula-is-takip/?lang=en) or use the English button in the sidebar. Nasıl çalıştığı: [docs/CEVIRI.md](docs/CEVIRI.md).
+>
 > İkisi de tarayıcıda çalışır; veriler yalnızca sizin tarayıcınızda saklanır, sunucuya gitmez. Gerçek şirket verisi girmeyin.
 > Demo kurgusal bir depo ekibiyle açılır. Pilot önizlemesi şirket pilotundaki gibi boş açılır: yönetici sizsiniz, ekipleri ve kişileri siz kurarsınız, "Kullanıcı olarak dene" ile ekip üyesinin gözünden bakarsınız.
 

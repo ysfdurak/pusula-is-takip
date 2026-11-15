@@ -1,4 +1,5 @@
 import { BoardsPage } from './screens/BoardsPage.jsx';
+import { tMessage, LANG, setLang } from './i18n.js';
 import { TaskListPage } from './screens/TaskListPage.jsx';
 import { TeamPage } from './screens/TeamPage.jsx';
 import { NotificationsPage } from './screens/NotificationsPage.jsx';
@@ -339,7 +340,7 @@ export function App({ demo = false, preview = false }) {
       throw (setAuthRequired(true), Error('Lütfen oturum aç.'));
     }
     if (!task.ok) {
-      throw Error(i.error || 'Veriler alınamadı.');
+      throw Error(tMessage(i.error) || 'Veriler alınamadı.');
     }
     return i;
   }
@@ -383,7 +384,7 @@ export function App({ demo = false, preview = false }) {
       try {
         return demoPost(t);
       } catch (err) {
-        throw (err.message.includes('Kayıt değişti') && (err.status = 409), err);
+        throw (/Kayıt değişti|The record changed/.test(err.message) && (err.status = 409), err);
       }
     }
     let task = await fetch('/api/workspace', {
@@ -395,7 +396,7 @@ export function App({ demo = false, preview = false }) {
     });
     let r = await task.json();
     if (!task.ok) {
-      let otherTask = Error(r.error || 'İşlem tamamlanamadı.');
+      let otherTask = Error(tMessage(r.error) || 'İşlem tamamlanamadı.');
       throw ((otherTask.status = task.status), otherTask);
     }
     return r;
@@ -1708,6 +1709,9 @@ export function App({ demo = false, preview = false }) {
             {'Şirket hesabınla giriş yap '}
             <ArrowUpRightIcon size={17} />
           </a>
+          <button type="button" className="lang-switch" lang={LANG === 'en' ? 'tr' : 'en'} onClick={() => setLang(LANG === 'en' ? 'tr' : 'en')}>
+            {LANG === 'en' ? 'Türkçe' : 'English'}
+          </button>
         </main>
       ) : (
         <div className="shell">
@@ -1802,6 +1806,9 @@ export function App({ demo = false, preview = false }) {
               >
                 <Settings2Icon size={17} />
                 {' Ayarlar'}
+              </button>
+              <button type="button" className="lang-switch" lang={LANG === 'en' ? 'tr' : 'en'} onClick={() => setLang(LANG === 'en' ? 'tr' : 'en')}>
+                {LANG === 'en' ? 'Türkçe' : 'English'}
               </button>
               <div className="account">
                 <Avatar name={memberName(user) || 'P'} />

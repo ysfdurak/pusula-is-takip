@@ -9,6 +9,7 @@ import { createMcpHandler } from './mcp.js';
 import { createOAuthServer } from './oauth.js';
 import { createDemoSandboxes } from './demo.js';
 import { createAnalytics } from './analytics.js';
+import { langOf, wrapResponse } from './i18n.js';
 
 const MAX_BODY = 8 * 1024 * 1024; // 5 MB ek dosya base64 ile ~6,7 MB eder
 const COOKIE = 'pusula_sid';
@@ -305,7 +306,7 @@ ${link ? `<p style="margin:20px 0 0"><a href="${escapeHtml(link.href)}" style="d
     if (admins.has(user.email) || isMember(user.email)) return startSession(res, user, returnTo);
     if (!demo) return denyNonMember(res, user.email);
     try {
-      demo.create(user);
+      demo.create(user, Date.now(), res.lang);
       analytics.track(user.email, 'oturum:demo_acildi');
     } catch (err) {
       if (err.code === 'full') return page(res, 503, 'Demo şu an dolu', 'Aynı anda açık demo alanı sınırına ulaşıldı. Birkaç gün sonra yeniden dene.');
@@ -324,6 +325,9 @@ ${link ? `<p style="margin:20px 0 0"><a href="${escapeHtml(link.href)}" style="d
     const url = new URL(req.url, appOrigin);
     let path = url.pathname;
     if (basePath && path.startsWith(basePath)) path = path.slice(basePath.length) || '/';
+    // Dil: giriş, hata ve izin sayfaları ile JSON hata iletileri seçili dilde yazılır (arayüz kendi çevirir)
+    const lang = (res.lang = langOf(req, url));
+    wrapResponse(res, lang, () => path === '/' || path === '/index.html' || path.startsWith('/yonetim'));
 
     if (path === '/healthz') return json(res, 200, { ok: true });
 

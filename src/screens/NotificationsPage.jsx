@@ -1,5 +1,6 @@
 // Bildirimler. App.jsx'ten ayrıldı; değerleri AppContext üzerinden alır.
 import { NotificationGroups } from '../components/NotificationGroups.jsx';
+import { tMessage } from '../i18n.js';
 import {
   BellIcon,
   CheckCheckIcon,
@@ -127,7 +128,7 @@ export function NotificationsPage() {
                 )}
               </span>
               <span>
-                <strong>{notification.title}</strong>
+                <strong>{tMessage(notification.title)}</strong>
                 <small>
                   {notificationScope === 'all' ? memberName(notification.recipient) + ' · ' : ''}
                   {new Date(notification.created).toLocaleString('tr-TR', {

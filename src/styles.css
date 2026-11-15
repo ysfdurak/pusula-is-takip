@@ -37,3 +37,26 @@
 .design-banner.preview{background:#eef3fa;border-color:#d5e0ee}
 .banner-switch{color:#2c6549;font-weight:700;text-decoration:underline;text-underline-offset:2px}
 .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* Dil seçimi (Türkçe / English) */
+.lang-switch {
+  align-self: flex-start;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 6px;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  margin: 2px 0 8px;
+  opacity: 0.85;
+  padding: 4px 10px;
+}
+.lang-switch:hover {
+  opacity: 1;
+}
+.auth-page .lang-switch {
+  align-self: center;
+  border-color: currentColor;
+  margin-top: 18px;
+}
