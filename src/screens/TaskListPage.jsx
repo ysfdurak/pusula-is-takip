@@ -477,6 +477,8 @@ export function TaskListPage() {
               ))}
             </div>
           ) : (
+            <>
+            <h2 className="sr-only">Statü panosu</h2>
             <TaskBoard
               onWait={(e) => openModal('waiting', e)}
               onClaim={(e) => changeAssignees(e, [user])}
@@ -500,6 +502,7 @@ export function TaskListPage() {
               busy={busy}
               now={now}
             />
+            </>
           )
         ) : (
           <div className="empty-state">
