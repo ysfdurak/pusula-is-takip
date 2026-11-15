@@ -215,7 +215,7 @@ export function createApp({ config, store, auth, html, mailer = null, log = () =
 <body style="font-family:Segoe UI,Arial,sans-serif;background:#f7f8f4;color:#243c33;display:grid;place-items:center;min-height:90vh;margin:0">
 <main style="max-width:460px;background:#fff;border:1px solid #e6eae1;border-radius:10px;padding:28px"><p style="font-weight:bold;margin:0 0 12px">pusula.</p>
 <h1 style="font-size:20px;margin:0 0 8px">${escapeHtml(title)}</h1><p style="line-height:1.5">${escapeHtml(message)}</p>
-${link ? `<p><a href="${escapeHtml(link.href)}" style="color:#2c6549;font-weight:bold">${escapeHtml(link.text)}</a></p>` : ''}</main></body></html>`);
+${link ? `<p style="margin:20px 0 0"><a href="${escapeHtml(link.href)}" style="display:inline-block;background:#2c6549;color:#fff;font-weight:bold;text-decoration:none;padding:11px 18px;border-radius:8px">${escapeHtml(link.text)} →</a></p>` : ''}</main></body></html>`);
   }
   function redirect(res, location, cookies = []) {
     headers(res);
