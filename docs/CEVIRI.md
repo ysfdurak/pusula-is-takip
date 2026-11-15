@@ -15,7 +15,7 @@ Kenar çubuğunda ve giriş ekranında **English / Türkçe** düğmesi var; bas
 
 | Parça | Dosya | Ne yapar |
 | --- | --- | --- |
-| Derleme eklentisi | `tools/ceviri/vite-ceviri.js` | Derlemede `src/` altındaki kodu okur. Sözlükte karşılığı olan her Türkçe metni dile göre seçilen bir çağrıya çevirir: `"Yeni iş"` → `__t("Yeni iş")`, `` `${n} iş seçildi` `` → `__tt("{0} iş seçildi", n)`, `'tr-TR'` → `__L()` (tarih biçimi). Sözlükte olmayan metne dokunmaz. |
+| Derleme eklentisi | `ceviri/vite-ceviri.js` | Derlemede `src/` altındaki kodu okur. Sözlükte karşılığı olan her Türkçe metni dile göre seçilen bir çağrıya çevirir: `"Yeni iş"` → `__t("Yeni iş")`, `` `${n} iş seçildi` `` → `__tt("{0} iş seçildi", n)`, `'tr-TR'` → `__L()` (tarih biçimi). Sözlükte olmayan metne dokunmaz. |
 | Çalışma anı | `src/i18n.js` | Dili belirler, `__t`, `__tt`, `__L` ve `tMessage` (sunucudan gelen hazır iletiyi çevirir) fonksiyonlarını verir. |
 | Sunucu | `server/i18n.js` | Aynı sözlükle giriş, hata ve izin sayfalarını, JSON hata iletilerini çevirir; ziyaretçi demosunu seçilen dilde açar (örnek işler İngilizce gelir). |
 
@@ -25,7 +25,7 @@ Kenar çubuğunda ve giriş ekranında **English / Türkçe** düğmesi var; bas
 ## Yeni metin eklediğimde ne yapmalıyım?
 
 1. Kodu her zamanki gibi Türkçe yaz.
-2. `node tools/ceviri/cikar.js --dosyali` sözlükte karşılığı olmayan metinleri dosyalarıyla listeler.
+2. `node ceviri/cikar.js --dosyali` sözlükte karşılığı olmayan metinleri dosyalarıyla listeler.
 3. Her birinin İngilizcesini `src/shared/i18n/en.json`'a ekle (anahtar Türkçe metnin **tam** hâli; şablonlarda `{0}`, `{1}`).
 4. CSS sınıfı gibi metin olmayan dizgiler listede çıkabilir; onları sözlüğe ekleme.
 

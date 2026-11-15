@@ -1,6 +1,6 @@
 // Arayüz dili: tr (varsayılan) ya da en. Seçim sırası: adresteki ?lang=, "pusula_dil" çerezi, Türkçe.
 // Seçim çereze yazılır; sunucu da (giriş ve hata sayfaları, demo verisi) aynı çerezi okur.
-// Metinler kaynakta Türkçe durur; derlemede tools/ceviri/vite-ceviri.js onları __t / __tt çağrılarına çevirir.
+// Metinler kaynakta Türkçe durur; derlemede ceviri/vite-ceviri.js onları __t / __tt çağrılarına çevirir.
 import en from './shared/i18n/en.json';
 import { translateText } from './shared/i18n/translate.js';
 

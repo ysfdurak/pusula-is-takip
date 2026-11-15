@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { viteSingleFile } from 'vite-plugin-singlefile';
-import { ceviri } from './tools/ceviri/vite-ceviri.js';
+import { ceviri } from './ceviri/vite-ceviri.js';
 
 const sozluk = new URL('./src/shared/i18n/en.json', import.meta.url).pathname;
 const runtime = '/src/i18n.js';

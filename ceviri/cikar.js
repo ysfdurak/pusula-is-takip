@@ -1,11 +1,11 @@
 // Sözlükte karşılığı olmayan Türkçe arayüz metinlerini listeler.
-// node tools/ceviri/cikar.js            → eksik anahtarlar (JSON dizi)
-// node tools/ceviri/cikar.js --dosyali  → anahtar ve geçtiği dosyalar
+// node ceviri/cikar.js            → eksik anahtarlar (JSON dizi)
+// node ceviri/cikar.js --dosyali  → anahtar ve geçtiği dosyalar
 import fs from 'node:fs';
 import path from 'node:path';
 import { candidates, isNatural } from './ortak.js';
 
-const root = path.resolve(import.meta.dirname, '../..');
+const root = path.resolve(import.meta.dirname, '..');
 const dict = JSON.parse(fs.readFileSync(path.join(root, 'src/shared/i18n/en.json'), 'utf8'));
 const files = [];
 const walkDir = (d) => fs.readdirSync(d, { withFileTypes: true }).forEach((e) => {
