@@ -9,6 +9,7 @@ COPY package.json package-lock.json ./
 RUN npm ci --no-audit --no-fund
 COPY index.html vite.config.js ./
 COPY vite.mcp-app.config.js ./
+COPY ceviri ./ceviri
 COPY src ./src
 RUN npm run build:pilot && npm run build:mcp-app
 

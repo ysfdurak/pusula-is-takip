@@ -9,6 +9,7 @@
 //   - Yönetici adresleri (PUSULA_ADMINS) demo alanı almaz; gerçek çalışma alanları demodan etkilenmez.
 import { randomUUID } from 'node:crypto';
 import { DEMO_USERS, createSampleData } from '../src/shared/sampleData.js';
+import { translateSample } from './i18n.js';
 
 export const DEMO_DOMAIN = 'example.test';
 const OWNER = DEMO_USERS[0];
@@ -25,11 +26,11 @@ export function createDemoSandboxes({ store, ttlDays = 7, max = 300, log = () =>
   const sandboxOf = (email) => store.load().workspaces.find((w) => w.demo?.owner === email) || null;
 
   /** Ziyaretçiye örnek verili yeni alan açar. Örnek verideki yönetici (Deniz) ziyaretçinin kendisi olur. */
-  function create(user, now = Date.now()) {
+  function create(user, now = Date.now(), lang = 'tr') {
     const data = store.load();
     if (sandboxOf(user.email)) return sandboxOf(user.email).id;
     if (data.workspaces.filter((w) => w.demo).length >= max) throw Object.assign(new Error('Demo şu an dolu.'), { code: 'full' });
-    const sample = createSampleData(now);
+    const sample = translateSample(lang, createSampleData(now));
     const id = randomUUID();
     const name = user.name || user.email.split('@')[0];
     // Örnek veride Deniz'in adresi ve adı geçen her yer ziyaretçiye çevrilir (atamalar, yorumlar, geçmiş)

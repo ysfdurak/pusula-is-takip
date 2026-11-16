@@ -1,6 +1,10 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { viteSingleFile } from 'vite-plugin-singlefile';
+import { ceviri } from './ceviri/vite-ceviri.js';
+
+const sozluk = new URL('./src/shared/i18n/en.json', import.meta.url).pathname;
+const runtime = '/src/i18n.js';
 
 // Derleme çıktısı tek bir HTML dosyasıdır; internetsiz açılabilir.
 //   npm run build        → dist/index.html        (tasarım demosu, tarayıcı içi örnek sunucu)
@@ -15,6 +19,8 @@ export default defineConfig(({ mode }) => {
   const preview = mode === 'preview';
   return {
     plugins: [
+      // Türkçe arayüz metinlerini dile göre seçilen çağrılara çevirir (İngilizce: ?lang=en)
+      ceviri({ sozluk, runtime }),
       react(),
       viteSingleFile(),
       {

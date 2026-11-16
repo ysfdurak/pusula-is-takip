@@ -1,4 +1,5 @@
 import { ArrowUpRightIcon } from 'lucide-react';
+import { tMessage } from '../i18n.js';
 
 export function NotificationGroups({ items, onRead, onOpen, name }) {
   let lookup = new Map();
@@ -43,8 +44,8 @@ export function NotificationGroups({ items, onRead, onOpen, name }) {
             </button>
             {i.map((e) => (
               <article key={e.id}>
-                <strong>{e.title}</strong>
-                <p>{e.body}</p>
+                <strong>{tMessage(e.title)}</strong>
+                <p>{tMessage(e.body)}</p>
                 <small>
                   {name(e.recipient)}
                   {' · '}
