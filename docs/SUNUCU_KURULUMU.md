@@ -139,6 +139,30 @@ Portföy ziyaretçisi Google ile girdiğinde **kendine ait** bir çalışma alan
 
 Ziyaretçinin e-posta adresi giriş ve güvenlik kaydı (audit) için tutulur. Kişisel sitende kısa bir gizlilik notu (hangi veri, ne kadar süre, ne için) bulundurman iyi olur.
 
+### Portföy veri seti (`DEMO_DATASET=portfoy`)
+
+`src/shared/portfolio.json`, projelerin gerçek geçmişidir: 36 proje (fikirler dahil), GitHub birleştirmeleri tarihleriyle kontrol maddesi olarak, kararlar ve engeller. İki kullanımı var:
+
+| Kullanım | Nasıl | Kim görür |
+|---|---|---|
+| Ziyaretçi demosu | `.env` içinde `DEMO_DATASET=portfoy`, sonra `kurulum-pusula.sh` | Demoyu açan herkes. Ziyaretçi alanın yöneticisi olur, işler "Yusuf Durak" (`yusuf@example.test`) üzerindedir |
+| Kendi hesabında ayrı alan | Aşağıdaki komutlar | Yalnızca verilen e-posta adresi |
+
+Varsayılan `DEMO_DATASET=ornek`tir: ayar değiştirilmedikçe ziyaretçiler kurgusal depo ekibini görür.
+
+Kendi hesabına yüklemek (sunucu durdurulmalı; çalışırken veriyi bellekte tuttuğu için yeni alanı kendi kaydıyla silebilir):
+
+```bash
+cd ~/pusula-is-takip/deploy
+sudo docker compose -f docker-compose.ortak.yml stop pusula
+sudo docker compose -f docker-compose.ortak.yml run --rm pusula node server/portfoy-yukle.js eposta@ornek.com "Ad Soyad"
+sudo docker compose -f docker-compose.ortak.yml start pusula
+```
+
+Aynı alan zaten varsa dokunulmaz; `portfolio.json` güncellendikten sonra yenilemek için komutun sonuna `--yenile` eklenir (alandaki işler dosyadaki hâline döner).
+
+Açık işlerin çoğunda termin yok; Pusula terminsiz açık işi olan projeyi "Dikkat gerekiyor" olarak gösterir. Termin verdikçe projeler "Yolunda"ya geçer.
+
 ### Kullanım ölçümü ve geri bildirim
 
 `https://pusula.ysfdurak.com/yonetim/istatistik` (yalnızca `PUSULA_ADMINS`): kaç ziyaretçi, kaçı farklı günde geri döndü, kaçı Claude'dan kullandı, günlük grafik, huni (giriş → iş oluşturma → durum değiştirme → Claude → geri bildirim), hangi ekranları ve özellikleri web ve Claude üzerinden kullandılar, geri bildirimler ve ortalama puan. `?gun=90` ile dönem değişir; `istatistik.json` aynı veriyi JSON verir. Claude'a "demoyu kaç kişi denedi?" diye de sorabilirsin (`kullanim_istatistikleri` aracı, yalnızca yöneticide).

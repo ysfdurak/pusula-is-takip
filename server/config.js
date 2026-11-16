@@ -89,6 +89,8 @@ export function loadConfig(env = process.env) {
     mcpEnabled,
     mcpTokens,
     demoMode,
+    // Demo verisi: ornek (kurgusal depo ekibi, varsayılan) · portfoy (gerçek proje geçmişi)
+    demoDataset: env.DEMO_DATASET === 'portfoy' ? 'portfoy' : 'ornek',
     demoTtlDays: Math.min(Math.max(Number(env.DEMO_TTL_DAYS) || 7, 1), 30),
     // Kullanım ölçümü yalnızca demo ziyaretçileri için; olaylar bu kadar gün tutulur
     analyticsRetentionDays: Math.min(Math.max(Number(env.ANALYTICS_RETENTION_DAYS) || 180, 7), 730),

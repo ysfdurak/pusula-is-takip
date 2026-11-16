@@ -9,6 +9,7 @@
 //   - Yönetici adresleri (PUSULA_ADMINS) demo alanı almaz; gerçek çalışma alanları demodan etkilenmez.
 import { randomUUID } from 'node:crypto';
 import { DEMO_USERS, createSampleData } from '../src/shared/sampleData.js';
+import { createPortfolioData } from '../src/shared/portfolioData.js';
 import { translateSample } from './i18n.js';
 
 export const DEMO_DOMAIN = 'example.test';
@@ -20,8 +21,10 @@ const OWNER = DEMO_USERS[0];
  * @param {number} o.ttlDays
  * @param {number} o.max
  * @param {(msg: string) => void} [o.log]
+ * @param {'ornek'|'portfoy'} [o.dataset]  ornek: kurgusal depo ekibi (varsayılan) · portfoy: gerçek proje geçmişi
  */
-export function createDemoSandboxes({ store, ttlDays = 7, max = 300, log = () => {} }) {
+export function createDemoSandboxes({ store, ttlDays = 7, max = 300, log = () => {}, dataset = 'ornek' }) {
+  const makeData = dataset === 'portfoy' ? () => createPortfolioData() : (now) => createSampleData(now);
   const isDemo = (workspaceId) => !!store.load().workspaces.find((w) => w.id === workspaceId)?.demo;
   const sandboxOf = (email) => store.load().workspaces.find((w) => w.demo?.owner === email) || null;
 
@@ -30,14 +33,14 @@ export function createDemoSandboxes({ store, ttlDays = 7, max = 300, log = () =>
     const data = store.load();
     if (sandboxOf(user.email)) return sandboxOf(user.email).id;
     if (data.workspaces.filter((w) => w.demo).length >= max) throw Object.assign(new Error('Demo şu an dolu.'), { code: 'full' });
-    const sample = translateSample(lang, createSampleData(now));
+    const sample = translateSample(lang, makeData(now));
     const id = randomUUID();
     const name = user.name || user.email.split('@')[0];
     // Örnek veride Deniz'in adresi ve adı geçen her yer ziyaretçiye çevrilir (atamalar, yorumlar, geçmiş)
     const swap = (value) => JSON.parse(JSON.stringify(value).replaceAll(OWNER.email, user.email).replaceAll(OWNER.name, name));
     const scoped = (list) => swap(list.filter((x) => x.workspace === 'design')).map((x) => ({ ...x, id: `${id}-${x.id}`, workspace: id }));
 
-    data.workspaces.push({ id, name: `Demo · ${name}`, demo: { owner: user.email, created: now } });
+    data.workspaces.push({ id, name: dataset === 'portfoy' ? sample.workspaces[0].name : `Demo · ${name}`, demo: { owner: user.email, created: now } });
     data.members[id] = swap(sample.members.design).map((m) => ({ ...m, active: 1, mail_enabled: 0, oid: m.email === user.email ? user.oid || '' : '' }));
     data.states[id] = swap(sample.states.design);
     data.revisions[id] = 0;

@@ -67,7 +67,7 @@ export function createApp({ config, store, auth, html, mailer = null, log = () =
   });
 
   // Ziyaretçi demo alanları (DEMO_MODE=true): üye olmayan kişi girince kendine ait örnek verili alan açılır
-  const demo = config.demoMode ? createDemoSandboxes({ store, ttlDays: config.demoTtlDays, max: config.demoMax, log }) : null;
+  const demo = config.demoMode ? createDemoSandboxes({ store, ttlDays: config.demoTtlDays, max: config.demoMax, log, dataset: config.demoDataset }) : null;
   // Herkese açık demoda arayüz sayfasına arama ve paylaşım etiketleri eklenir; şirket kurulumunda sayfa değişmez.
   const pageHtml = demo ? withSeoHead(html, config.appUrl) : html;
 
