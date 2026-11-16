@@ -26,6 +26,32 @@ const escapeHtml = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&a
  * @param {(msg: string) => void} [o.log]
  * @param {string|null} [o.boardHtml]  MCP App sayfası (dist-mcp-app/panom.html)
  */
+/** Demo sunucusunun arama ve paylaşım etiketleri (ör. pusula.ysfdurak.com). Adres APP_URL'den gelir. */
+export function withSeoHead(html, appUrl) {
+  const esc = (v) => String(v).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+  const url = new URL('/', appUrl).href;
+  const title = 'Pusula · Türkçe iş ve ekip takip uygulaması';
+  const desc = "Ekibin işlerini, terminlerini ve engellerini tek panoda izleyen ücretsiz Türkçe iş takip uygulaması; Claude'a da bağlanır. Google ile girip örnek verili demoyu deneyin.";
+  const image = 'https://ysfdurak.com/img/pusula/og.jpg';
+  const head = [
+    `<title>${esc(title)}</title>`,
+    `<meta name="description" content="${esc(desc)}" />`,
+    `<link rel="canonical" href="${esc(url)}" />`,
+    `<link rel="alternate" hreflang="tr" href="${esc(url)}" />`,
+    `<link rel="alternate" hreflang="en" href="${esc(url)}?lang=en" />`,
+    `<link rel="alternate" hreflang="x-default" href="${esc(url)}" />`,
+    '<meta property="og:type" content="website" />',
+    '<meta property="og:site_name" content="ysfdurak.com" />',
+    '<meta property="og:locale" content="tr_TR" />',
+    `<meta property="og:title" content="${esc(title)}" />`,
+    `<meta property="og:description" content="${esc(desc)}" />`,
+    `<meta property="og:url" content="${esc(url)}" />`,
+    `<meta property="og:image" content="${esc(image)}" />`,
+    '<meta name="twitter:card" content="summary_large_image" />',
+  ].join('\n    ');
+  return Buffer.from(String(html).replace(/<title>[^<]*<\/title>/, head), 'utf8');
+}
+
 export function createApp({ config, store, auth, html, mailer = null, log = () => {}, boardHtml = null }) {
   const admins = new Set(config.admins);
   const names = new Map(); // oturumdaki görünen adlar (yeni çalışma alanı sahibi için)
@@ -42,6 +68,8 @@ export function createApp({ config, store, auth, html, mailer = null, log = () =
 
   // Ziyaretçi demo alanları (DEMO_MODE=true): üye olmayan kişi girince kendine ait örnek verili alan açılır
   const demo = config.demoMode ? createDemoSandboxes({ store, ttlDays: config.demoTtlDays, max: config.demoMax, log }) : null;
+  // Herkese açık demoda arayüz sayfasına arama ve paylaşım etiketleri eklenir; şirket kurulumunda sayfa değişmez.
+  const pageHtml = demo ? withSeoHead(html, config.appUrl) : html;
 
   // Kullanım ölçümü (yalnızca demo ziyaretçileri, takma kimlikle) ve geri bildirim (herkes)
   const analytics = createAnalytics({
@@ -513,7 +541,7 @@ ${link ? `<p style="margin:20px 0 0"><a href="${escapeHtml(link.href)}" style="d
     if (req.method === 'GET' && (path === '/' || path === '/index.html')) {
       headers(res, { 'Content-Type': 'text/html; charset=utf-8' });
       res.statusCode = 200;
-      return res.end(html);
+      return res.end(pageHtml);
     }
     return page(res, 404, 'Sayfa bulunamadı', 'Aradığın sayfa yok.', { href: `${basePath}/`, text: "Pusula'ya dön" });
   }
