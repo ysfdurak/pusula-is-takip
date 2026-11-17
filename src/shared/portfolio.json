@@ -1,0 +1,2602 @@
+{
+ "name": "Portföy yol haritası",
+ "teams": [
+  {
+   "id": "site",
+   "name": "Site ve altyapı"
+  },
+  {
+   "id": "operasyon",
+   "name": "Operasyon ve depo"
+  },
+  {
+   "id": "ekip",
+   "name": "İş ve ekip"
+  },
+  {
+   "id": "veri",
+   "name": "Veri ve raporlama"
+  },
+  {
+   "id": "ogrenme",
+   "name": "Öğrenme"
+  }
+ ],
+ "projects": [
+  {
+   "id": "site",
+   "name": "ysfdurak.com",
+   "goal": "Projeleri tek yerde göstermek, çalıştırmak ve Google'dan ziyaretçi almak.",
+   "scope": "Proje sayfaları, rehberler, sunucu, izleme, SEO",
+   "excluded": "Hesap ve abonelik (site bitince, belirli projelerde)",
+   "date": ""
+  },
+  {
+   "id": "mcp",
+   "name": "MCP altyapısı",
+   "goal": "Projelere hem web arayüzünden hem Claude'dan erişim (ikili yapı).",
+   "scope": "Aynı çekirdek, iki kapı: web ve MCP",
+   "excluded": "Öneri içeriği gibi şirket verisinin dış yapay zekâya gitmesi",
+   "date": ""
+  },
+  {
+   "id": "vz",
+   "name": "Video Zaman Etüdü",
+   "goal": "Videodan zaman etüdü: adım ölçümü, standart süre, yalın araçlar, Excel çıktısı.",
+   "scope": "Tarayıcı (sunucusuz) ve Windows masaüstü; TR/EN",
+   "excluded": "Video yükleme ve merkezi kayıt (video cihazdan çıkmaz)",
+   "date": ""
+  },
+  {
+   "id": "durus",
+   "name": "Duruş – Ergonomi Analizi",
+   "goal": "Her ergonomi analizinin yapılabildiği tek yer; yöntem seçiminde rehber.",
+   "scope": "11 temel + ileri yöntemler, risk tablosu, önlem takibi; web ve Windows; TR/EN",
+   "excluded": "Görüntünün cihazdan çıkması",
+   "date": ""
+  },
+  {
+   "id": "destek",
+   "name": "Destek Merkezi",
+   "goal": "Bölümler arası işgücü desteğini kaydetmek, onaylatmak ve puantajla karşılaştırmak.",
+   "scope": "Web sunucusu + Access istemcisi; TR/EN; ziyaretçi demosu",
+   "excluded": "Adam-saat ve verimlilik hesabı",
+   "date": ""
+  },
+  {
+   "id": "malkabul",
+   "name": "Mal Kabul Rezervasyon ve Kapasite",
+   "goal": "Tedarikçi randevularını koli bazlı kapasiteye otomatik atamak.",
+   "scope": "Sanal kapılar, kural oluşturucu, depo bazlı yetki",
+   "excluded": "Rampa çizelgeleme optimizasyonu",
+   "date": ""
+  },
+  {
+   "id": "sorter",
+   "name": "Sorter Studio",
+   "goal": "Sorter seçimi ve boyutlandırma için karar desteği.",
+   "scope": "Çevrimdışı; yatırım planlama modu",
+   "excluded": "Tedarikçi teklif karşılaştırması",
+   "date": ""
+  },
+  {
+   "id": "wdl",
+   "name": "WDL – Warehouse Decision Lab",
+   "goal": "Depo editörü, adresleme ve toplama simülasyonu.",
+   "scope": "Adresleme, toplama, vardiya ve işgücü ataması",
+   "excluded": "Otomasyon senaryoları (ayrı)",
+   "date": ""
+  },
+  {
+   "id": "karar-odasi",
+   "name": "Depo Karar Odası",
+   "goal": "Depo birleşme ve taşıma alternatiflerinin ön fizibilitesi.",
+   "scope": "3 deponun birleşmesi; kiralama, satın alma, inşa; çok katlı depo",
+   "excluded": "",
+   "date": ""
+  },
+  {
+   "id": "liman",
+   "name": "Liman Kulesi",
+   "goal": "Gemi trafiği (AIS) ile depo varışlarını ilişkilendiren lojistik analiz.",
+   "scope": "Denizyolu",
+   "excluded": "Hava ve karayolu",
+   "date": ""
+  },
+  {
+   "id": "yalin-oyun",
+   "name": "Rampa Krizi / Yalın Akademi",
+   "goal": "Yalını oyunla, gerçekçi bir depo hikâyesinde öğretmek.",
+   "scope": "Bölüm 1: mal kabul; programlarım oyunun içinde",
+   "excluded": "Zorluk seviyeleri",
+   "date": ""
+  },
+  {
+   "id": "yalin-araclar",
+   "name": "Yalın araçlar (A3, VSM, 5S)",
+   "goal": "Yalın yöntemler için yazılım.",
+   "scope": "",
+   "excluded": "",
+   "date": ""
+  },
+  {
+   "id": "optimizasyon",
+   "name": "\"Neden?\" motoru (açıklanabilir optimizasyon)",
+   "goal": "Çözücünün kararlarını neden / neden değil / ya şöyle olsaydı sorularıyla açıklayan uygulama.",
+   "scope": "",
+   "excluded": "Rampa çizelgeleme",
+   "date": ""
+  },
+  {
+   "id": "ivme",
+   "name": "İvme – Öneri ve Kaizen Merkezi",
+   "goal": "Öneriyi değerlendirmeden kazanca, puana ve ödüle tek akışta yönetmek.",
+   "scope": "Genel tasarım, iki sürüm (süreç / MCP), TR/EN",
+   "excluded": "Öneri içeriğinin dış yapay zekâya gitmesi",
+   "date": ""
+  },
+  {
+   "id": "pusula",
+   "name": "Pusula",
+   "goal": "Türkçe iş ve ekip takibi; web ve Claude'dan aynı çekirdek.",
+   "scope": "Pano, termin geçmişi, Outlook bildirimleri, MCP, ziyaretçi demosu",
+   "excluded": "Üye yönetimi, silme ve eklerin yapay zekâya açılması",
+   "date": ""
+  },
+  {
+   "id": "aday",
+   "name": "Aday Atölyesi",
+   "goal": "İş görüşmesine vaka çalışması, ölçütlü geri bildirim ve prova ile hazırlık.",
+   "scope": "Rol atölyesi, vaka atölyesi, deneyim arşivi, mülakat dosyası",
+   "excluded": "Tek toplam aday puanı; dış yapay zekâ",
+   "date": ""
+  },
+  {
+   "id": "diyalog",
+   "name": "Diyalog Atölyesi",
+   "goal": "Doğru soru sorma, iletişim ve liderlik pratiği.",
+   "scope": "Aday Atölyesi'ne bağlı ayrı uygulama",
+   "excluded": "Ticari amaç",
+   "date": ""
+  },
+  {
+   "id": "emanet",
+   "name": "Emanet + Usta",
+   "goal": "\"Kim giderse ne bozulur?\" risk haritası ve geçmişten öğrenen çağrı yönlendirme.",
+   "scope": "Sistem çağrıları (IT/WMS), çapraz eğitim planı",
+   "excluded": "Bakım gibi teknik çağrılar; ziyaretçinin kendi verisini yüklemesi",
+   "date": ""
+  },
+  {
+   "id": "termin",
+   "name": "Termin Olasılığı",
+   "goal": "Monte Carlo ile olasılıklı bitiş tarihi, geçmişten tahmin kalibrasyonu.",
+   "scope": "Pusula bağlantısı isteğe bağlı",
+   "excluded": "",
+   "date": ""
+  },
+  {
+   "id": "isbasi",
+   "name": "İşbaşı Simülasyonu",
+   "goal": "Stajyer ve ilk iş arayanlar için bir ay süren şirket simülasyonu.",
+   "scope": "5 bölüm, perakende şirketi",
+   "excluded": "",
+   "date": ""
+  },
+  {
+   "id": "ats",
+   "name": "ATS",
+   "goal": "İlan–beceri eşleştirmeli aday takip sistemi fikri.",
+   "scope": "",
+   "excluded": "",
+   "date": ""
+  },
+  {
+   "id": "bilgi-bankasi",
+   "name": "Bilgi bankası",
+   "goal": "Yapay zekâsız iş bilgi bankası: kendi dokümanlarım ve soru-cevap araması.",
+   "scope": "",
+   "excluded": "Şirket verisini yapay zekâya göndermek",
+   "date": ""
+  },
+  {
+   "id": "hikaye",
+   "name": "Hikâyeleştirme ve oyunlaştırma yetkinliği",
+   "goal": "Ekibime verdiğim eğitimlerin kalıcı olması için.",
+   "scope": "Davranış ve motivasyon dahil",
+   "excluded": "",
+   "date": ""
+  },
+  {
+   "id": "butce",
+   "name": "Bütçe Sapma Otomasyonu",
+   "goal": "Aylık kapanış ve bütçe sapma raporunu tek tıkla üretmek.",
+   "scope": "Python ve Excel VBA eşdeğer sürümler",
+   "excluded": "",
+   "date": ""
+  },
+  {
+   "id": "shiftflow",
+   "name": "ShiftFlow Data Studio",
+   "goal": "Tekrarlanan Excel raporlarını tanımdan tek tuşla üretmek.",
+   "scope": "Windows masaüstü; WMS raporları",
+   "excluded": "WMS veritabanı erişimi",
+   "date": ""
+  },
+  {
+   "id": "otopano",
+   "name": "Otopano",
+   "goal": "Veriden hazır dashboard ve grafik; HTML ve Excel eklentisi.",
+   "scope": "",
+   "excluded": "",
+   "date": ""
+  },
+  {
+   "id": "olcu-elegi",
+   "name": "Ölçü Eleği",
+   "goal": "Kullanılmayan Power BI ölçülerini bulmak.",
+   "scope": "",
+   "excluded": "",
+   "date": ""
+  },
+  {
+   "id": "ortu",
+   "name": "Örtü (veri maskeleme)",
+   "goal": "Veriyi yapay zekâya göndermeden maskelemek, sonra geri açmak.",
+   "scope": "",
+   "excluded": "",
+   "date": ""
+  },
+  {
+   "id": "sunum",
+   "name": "Sunum Atölyesi",
+   "goal": "Excel ya da Word dosyasından yapay zekâsız sunum.",
+   "scope": "",
+   "excluded": "",
+   "date": ""
+  },
+  {
+   "id": "pit-duvari",
+   "name": "Pit Duvarı",
+   "goal": "FastF1 ile F1 verisi analizi: pist, lastik stratejisi, sıralama karşılaştırması.",
+   "scope": "",
+   "excluded": "",
+   "date": ""
+  },
+  {
+   "id": "pozisyon",
+   "name": "Pozisyon Uyum Analizi",
+   "goal": "İlanlardaki rol beklentileriyle mevcut pozisyonumun yetkinliklerini karşılaştırmak.",
+   "scope": "",
+   "excluded": "",
+   "date": ""
+  },
+  {
+   "id": "kesit",
+   "name": "Kesit (SQL, Power BI, Python, İstatistik)",
+   "goal": "Veri işinin dört temel becerisini Türkçe ve yaparak öğretmek.",
+   "scope": "Ders sayfaları, ortak veri setleri, rol yolları",
+   "excluded": "Sertifika doğrulama",
+   "date": ""
+  },
+  {
+   "id": "ingilizce",
+   "name": "İngilizce Atölyesi",
+   "goal": "Türkçe konuşanlara A1–C2 İngilizce ve YDS/YÖKDİL hazırlığı.",
+   "scope": "Dilbilgisi ve YDS kelime sayfaları; PWA",
+   "excluded": "Uygulama mağazası",
+   "date": ""
+  },
+  {
+   "id": "kivilcim",
+   "name": "Kıvılcım Zihin Oyunları",
+   "goal": "Tarayıcı ve telefonda çalışan 50 zihin oyunu.",
+   "scope": "",
+   "excluded": "",
+   "date": ""
+  },
+  {
+   "id": "unite",
+   "name": "Ünite Atölyesi",
+   "goal": "Kitap ve notlardan ünite, soru havuzu ve deneme.",
+   "scope": "",
+   "excluded": "",
+   "date": ""
+  },
+  {
+   "id": "havuz",
+   "name": "Fikir havuzu",
+   "goal": "Beyin fırtınasından kalan ve sırası gelmemiş fikirler.",
+   "scope": "",
+   "excluded": "Yapay zekâya sorarak yapılabilecek işler; cevabı baştan belli analizler",
+   "date": ""
+  }
+ ],
+ "tasks": [
+  {
+   "id": "p1",
+   "project": "site",
+   "title": "ysfdurak.com · Alan adı, GitHub deposu ve Cloudflare yayını",
+   "status": "done",
+   "phase": "Yayın",
+   "priority": "normal",
+   "description": "ysfdurak.com Cloudflare'den alındı; depo Cloudflare Workers'a bağlandı, main'e her gönderim otomatik yayınlanıyor. Search Console, site haritası ve Cloudflare Web Analytics kuruldu.\n\nTarih yaklaşıktır: konuşma notlarındaki güne göre.\n\nTermin geriye dönük verildi: gerçekleşen bitiş günü.",
+   "createdAt": "2026-11-12T08:00:00Z",
+   "startedAt": "2026-11-12T08:00:00Z",
+   "completedAt": "2026-11-12T11:40:51Z",
+   "dueAt": "2026-11-12T20:59:59Z",
+   "teamId": "site"
+  },
+  {
+   "id": "p2",
+   "project": "site",
+   "title": "ysfdurak.com · VPS kurulumu: güvenlik, Docker, Caddy, PostgreSQL ve R2 yedeği",
+   "status": "done",
+   "phase": "Altyapı",
+   "priority": "normal",
+   "description": "Sunucu güvenliği, Docker + Caddy (otomatik HTTPS), ortak PostgreSQL, gece yedeği.\n\nTarih yaklaşıktır: konuşma notlarındaki güne göre.\n\nTermin geriye dönük verildi: gerçekleşen bitiş günü.",
+   "createdAt": "2026-11-14T07:00:00Z",
+   "startedAt": "2026-11-14T07:00:00Z",
+   "completedAt": "2026-11-15T09:30:00Z",
+   "dueAt": "2026-11-15T20:59:59Z",
+   "teamId": "site"
+  },
+  {
+   "id": "p3",
+   "project": "site",
+   "title": "ysfdurak.com · Proje sayfaları ve canlı adresler",
+   "status": "done",
+   "phase": "Yayın",
+   "priority": "normal",
+   "description": "Termin geriye dönük verildi: gerçekleşen bitiş günü.",
+   "checklist": [
+    {
+     "id": "p3c1",
+     "text": "ysfdurak.com #1 · Destek Merkezi: sunucu kurulumu ve proje sayfası",
+     "done": true,
+     "doneAt": "2026-11-15T10:28:29Z"
+    },
+    {
+     "id": "p3c2",
+     "text": "ysfdurak.com #2 · Kesit depoları ve İngilizce Atölyesi canlı adresi",
+     "done": true,
+     "doneAt": "2026-11-15T13:08:22Z"
+    },
+    {
+     "id": "p3c3",
+     "text": "ysfdurak.com #3 · Aday Atölyesi: canlı demo ve güncel proje sayfası",
+     "done": true,
+     "doneAt": "2026-11-15T13:52:01Z"
+    },
+    {
+     "id": "p3c4",
+     "text": "ysfdurak.com #4 · İngilizce Atölyesi: tam proje sayfası",
+     "done": true,
+     "doneAt": "2026-11-15T14:00:42Z"
+    },
+    {
+     "id": "p3c5",
+     "text": "ysfdurak.com #5 · İngilizce Atölyesi: yeni adres (ingilizce-atolyesi.ysfdurak.com)",
+     "done": true,
+     "doneAt": "2026-11-15T14:38:52Z"
+    },
+    {
+     "id": "p3c6",
+     "text": "ysfdurak.com #6 · Video Zaman Etüdü: tam proje sayfası ve Windows indirme düğmesi",
+     "done": true,
+     "doneAt": "2026-11-15T14:32:18Z"
+    },
+    {
+     "id": "p3c7",
+     "text": "ysfdurak.com #7 · Video Zaman Etüdü: öne çıkan projelere ekle, demo metnini güncelle",
+     "done": true,
+     "doneAt": "2026-11-15T14:40:58Z"
+    },
+    {
+     "id": "p3c8",
+     "text": "ysfdurak.com #11 · Video Zaman Etüdü: güncel ekran görüntüleri ve İngilizce demo",
+     "done": true,
+     "doneAt": "2026-11-15T15:09:44Z"
+    },
+    {
+     "id": "p3c9",
+     "text": "ysfdurak.com #12 · Kesit: tam proje sayfası",
+     "done": true,
+     "doneAt": "2026-11-15T16:12:39Z"
+    },
+    {
+     "id": "p3c10",
+     "text": "ysfdurak.com #13 · Duruş: canlı adres ve tam proje sayfası",
+     "done": true,
+     "doneAt": "2026-11-16T11:55:56Z"
+    },
+    {
+     "id": "p3c11",
+     "text": "ysfdurak.com #16 · Zaman Etüdü: yeni ekran görüntüleri ve sade düzen maddesi",
+     "done": true,
+     "doneAt": "2026-11-16T12:51:18Z"
+    },
+    {
+     "id": "p3c12",
+     "text": "ysfdurak.com #17 · Zaman Etüdü: paylaşım görselleri yeni arayüzle",
+     "done": true,
+     "doneAt": "2026-11-16T13:39:02Z"
+    }
+   ],
+   "createdAt": "2026-11-12T22:33:32Z",
+   "startedAt": "2026-11-12T22:33:32Z",
+   "completedAt": "2026-11-16T13:39:02Z",
+   "dueAt": "2026-11-16T20:59:59Z",
+   "teamId": "site"
+  },
+  {
+   "id": "p4",
+   "project": "site",
+   "title": "ysfdurak.com · İngilizce sayfalar ve İngilizce açılış",
+   "status": "done",
+   "phase": "Yayın",
+   "priority": "normal",
+   "description": "Termin geriye dönük verildi: gerçekleşen bitiş günü.",
+   "checklist": [
+    {
+     "id": "p4c1",
+     "text": "ysfdurak.com #9 · Video Zaman Etüdü: İngilizce sayfadan uygulama İngilizce açılsın",
+     "done": true,
+     "doneAt": "2026-11-15T14:55:50Z"
+    },
+    {
+     "id": "p4c2",
+     "text": "ysfdurak.com #10 · Video Zaman Etüdü: İngilizce sayfada İngilizce ekran görüntüleri",
+     "done": true,
+     "doneAt": "2026-11-15T14:59:13Z"
+    },
+    {
+     "id": "p4c3",
+     "text": "ysfdurak.com #14 · Kesit, İngilizce Atölyesi ve Aday Atölyesi: İngilizce sayfada Türkçe arayüz notu",
+     "done": true,
+     "doneAt": "2026-11-16T12:43:50Z"
+    },
+    {
+     "id": "p4c4",
+     "text": "ysfdurak.com #15 · Pusula ve Destek Merkezi: İngilizce sayfadan İngilizce açılış",
+     "done": true,
+     "doneAt": "2026-11-16T12:43:59Z"
+    },
+    {
+     "id": "p4c5",
+     "text": "ysfdurak.com #20 · İvme: English screenshots and currency setting",
+     "done": true,
+     "doneAt": "2026-11-16T14:36:39Z"
+    }
+   ],
+   "createdAt": "2026-11-15T14:48:24Z",
+   "startedAt": "2026-11-15T14:48:24Z",
+   "completedAt": "2026-11-16T14:36:39Z",
+   "dueAt": "2026-11-16T20:59:59Z",
+   "teamId": "site"
+  },
+  {
+   "id": "p5",
+   "project": "site",
+   "title": "ysfdurak.com · Tek site haritası ve SEO",
+   "status": "done",
+   "phase": "SEO",
+   "priority": "normal",
+   "description": "Uygulama alt alan adları ve Duruş, İngilizce Atölyesi'nin kendi haritaları tek dizinde.\n\nTermin geriye dönük verildi: gerçekleşen bitiş günü.",
+   "checklist": [
+    {
+     "id": "p5c1",
+     "text": "ysfdurak.com #8 · Tek site haritası",
+     "done": true,
+     "doneAt": "2026-11-15T14:45:08Z"
+    },
+    {
+     "id": "p5c2",
+     "text": "ysfdurak.com #22 · SEO: Destek Merkezi paylaşım görseli, Duruş site haritası",
+     "done": true,
+     "doneAt": "2026-11-16T16:45:22Z"
+    }
+   ],
+   "createdAt": "2026-11-15T14:45:06Z",
+   "startedAt": "2026-11-15T14:45:06Z",
+   "completedAt": "2026-11-16T16:45:22Z",
+   "dueAt": "2026-11-16T20:59:59Z",
+   "teamId": "site"
+  },
+  {
+   "id": "p6",
+   "project": "site",
+   "title": "ysfdurak.com · Kesinti izleme ve vaka sayfası bölümleri",
+   "status": "done",
+   "phase": "Bakım",
+   "priority": "normal",
+   "description": "GitHub Actions 10 dakikada bir tüm canlı adresleri dışarıdan kontrol ediyor; kesintide kayıt açıp düzelince kapatıyor.\n\nTermin geriye dönük verildi: gerçekleşen bitiş günü.",
+   "checklist": [
+    {
+     "id": "p6c1",
+     "text": "ysfdurak.com #21 · Kesinti izleme ve vaka sayfası bölümleri",
+     "done": true,
+     "doneAt": "2026-11-16T15:15:58Z"
+    }
+   ],
+   "createdAt": "2026-11-16T15:02:14Z",
+   "startedAt": "2026-11-16T15:02:14Z",
+   "completedAt": "2026-11-16T15:15:58Z",
+   "dueAt": "2026-11-16T20:59:59Z",
+   "teamId": "site"
+  },
+  {
+   "id": "p7",
+   "project": "site",
+   "title": "ysfdurak.com · Rehber bölümü: 17 örnek hesaplı yazı",
+   "status": "done",
+   "phase": "İçerik",
+   "priority": "normal",
+   "description": "Örnek hesaplar ilgili uygulamaların kendi koduyla doğrulandı.\n\nTermin geriye dönük verildi: gerçekleşen bitiş günü.",
+   "checklist": [
+    {
+     "id": "p7c1",
+     "text": "ysfdurak.com #23 · Rehber bölümü ve ilk yazı: Zaman etüdü nasıl yapılır?",
+     "done": true,
+     "doneAt": "2026-11-16T16:51:52Z"
+    },
+    {
+     "id": "p7c2",
+     "text": "ysfdurak.com #24 · Rehber: REBA nasıl hesaplanır? ve Takt zamanı nedir?",
+     "done": true,
+     "doneAt": "2026-11-16T17:11:06Z"
+    },
+    {
+     "id": "p7c3",
+     "text": "ysfdurak.com #25 · Rehber: NIOSH, RULA, kaizen/öneri sistemi ve 5S",
+     "done": true,
+     "doneAt": "2026-11-16T17:22:53Z"
+    },
+    {
+     "id": "p7c4",
+     "text": "ysfdurak.com #26 · Rehber: İş örneklemesi ve Hat dengeleme / Yamazumi",
+     "done": true,
+     "doneAt": "2026-11-16T17:39:06Z"
+    },
+    {
+     "id": "p7c5",
+     "text": "ysfdurak.com #27 · Rehber: Fine-Kinney, 7 israf, ROSA, OWAS, standart iş kombinasyon tablosu",
+     "done": true,
+     "doneAt": "2026-11-16T17:46:26Z"
+    },
+    {
+     "id": "p7c6",
+     "text": "ysfdurak.com #28 · Rehber: STAR tekniği, gürültü maruziyeti, ısı stresi (WBGT)",
+     "done": true,
+     "doneAt": "2026-11-16T17:51:26Z"
+    }
+   ],
+   "createdAt": "2026-11-16T16:50:51Z",
+   "startedAt": "2026-11-16T16:50:51Z",
+   "completedAt": "2026-11-16T17:51:26Z",
+   "dueAt": "2026-11-16T20:59:59Z",
+   "teamId": "site"
+  },
+  {
+   "id": "p8",
+   "project": "site",
+   "title": "ysfdurak.com · Uygulamalarda arama ve paylaşım etiketleri",
+   "status": "done",
+   "phase": "SEO",
+   "priority": "normal",
+   "description": "Termin geriye dönük verildi: gerçekleşen bitiş günü.",
+   "checklist": [
+    {
+     "id": "p8c1",
+     "text": "video-zaman-etudu #10 · SEO: arama ve paylaşım etiketleri",
+     "done": true,
+     "doneAt": "2026-11-16T16:45:39Z"
+    },
+    {
+     "id": "p8c2",
+     "text": "ivme-oneri-kaizen #5 · SEO: vitrin demosunda arama ve paylaşım etiketleri",
+     "done": true,
+     "doneAt": "2026-11-16T16:45:53Z"
+    },
+    {
+     "id": "p8c3",
+     "text": "aday_atolyesi #11 · SEO: çalışma alanı sayfasına arama ve paylaşım etiketleri",
+     "done": true,
+     "doneAt": "2026-11-16T16:46:09Z"
+    },
+    {
+     "id": "p8c4",
+     "text": "destek-merkezi #4 · SEO: demo giriş sayfasına arama ve paylaşım etiketleri",
+     "done": true,
+     "doneAt": "2026-11-16T16:46:27Z"
+    },
+    {
+     "id": "p8c5",
+     "text": "pusula-is-takip #12 · SEO: demo arayüz sayfasına arama ve paylaşım etiketleri",
+     "done": true,
+     "doneAt": "2026-11-16T16:46:44Z"
+    }
+   ],
+   "createdAt": "2026-11-16T16:05:53Z",
+   "startedAt": "2026-11-16T16:05:53Z",
+   "completedAt": "2026-11-16T16:46:44Z",
+   "dueAt": "2026-11-16T20:59:59Z",
+   "teamId": "site"
+  },
+  {
+   "id": "p9",
+   "project": "site",
+   "title": "ysfdurak.com · Search Console: ysfdurak.github.io kaydı",
+   "status": "todo",
+   "phase": "SEO",
+   "priority": "high",
+   "description": "Kesit'in ~700 sayfası ayrı sitede. URL ön eki mülkü, HTML etiketiyle doğrulama, ardından sitemap.xml.",
+   "createdAt": "2026-11-16T15:00:00Z",
+   "plannedStart": "2026-11-18T05:00:00Z",
+   "dueAt": "2026-11-18T20:59:59Z",
+   "teamId": "site"
+  },
+  {
+   "id": "p10",
+   "project": "site",
+   "title": "ysfdurak.com · Vaka notlarını tamamla",
+   "status": "todo",
+   "phase": "İçerik",
+   "priority": "normal",
+   "description": "8 proje için taslak hazır; \"Öğrendiklerim\" bölümleri ve açık sorular benim cevabımı bekliyor.",
+   "createdAt": "2026-11-16T14:00:00Z",
+   "plannedStart": "2026-11-19T05:00:00Z",
+   "dueAt": "2026-11-19T20:59:59Z",
+   "teamId": "site"
+  },
+  {
+   "id": "p11",
+   "project": "site",
+   "title": "ysfdurak.com · Maliyet dashboard'u vaka sayfası (sentetik veriyle)",
+   "status": "todo",
+   "phase": "İçerik",
+   "priority": "normal",
+   "description": "Power BI şablonu (.pbit) ya da tablo/sayfa listesi gelince sentetik veriyle yeniden kurulacak. 2–3 saat → 5 dakika hikâyesi, Bütçe Sapma Otomasyonu'na bağlanır.",
+   "createdAt": "2026-11-16T16:00:00Z",
+   "plannedStart": "2026-11-20T05:00:00Z",
+   "dueAt": "2026-11-20T20:59:59Z",
+   "teamId": "site"
+  },
+  {
+   "id": "p12",
+   "project": "site",
+   "title": "ysfdurak.com · LinkedIn tanıtım gönderisi",
+   "status": "todo",
+   "phase": "Duyuru",
+   "priority": "normal",
+   "description": "Taslaklar hazır (proje bağlantılı sürüm). Sunucu güncellemesi ve Pusula demo kontrolünden sonra.",
+   "createdAt": "2026-11-16T18:00:00Z",
+   "plannedStart": "2026-11-24T05:00:00Z",
+   "dueAt": "2026-11-24T20:59:59Z",
+   "teamId": "site"
+  },
+  {
+   "id": "p13",
+   "project": "site",
+   "title": "ysfdurak.com · Rota sayfası (açık proje durum listesi)",
+   "status": "doing",
+   "phase": "İçerik",
+   "priority": "normal",
+   "description": "Projelerin durumu sitede herkese açık; \"durumları güncelle\" komutuyla, onaylı yayın.\n\nTarih yaklaşıktır: konuşma notlarındaki güne göre.",
+   "createdAt": "2026-11-16T17:00:00Z",
+   "startedAt": "2026-11-16T17:00:00Z",
+   "plannedStart": "2026-11-19T05:00:00Z",
+   "dueAt": "2026-11-19T20:59:59Z",
+   "teamId": "site"
+  },
+  {
+   "id": "p14",
+   "project": "site",
+   "title": "ysfdurak.com · Hikâye evreni: Yıldız Ev & Yaşam",
+   "status": "todo",
+   "phase": "Fikir",
+   "priority": "low",
+   "description": "Projeleri ortak bir sanal şirkette geçen hikâyelerle bağlamak. Önce mevcut projeler bitecek.\n\nTarih yaklaşıktır: konuşma notlarındaki güne göre.",
+   "createdAt": "2026-11-13T07:00:00Z",
+   "plannedStart": "2026-11-22T05:00:00Z",
+   "dueAt": "2026-12-11T20:59:59Z",
+   "teamId": "site"
+  },
+  {
+   "id": "p15",
+   "project": "site",
+   "title": "ysfdurak.com · Hesap ve abonelik",
+   "status": "todo",
+   "phase": "Fikir",
+   "priority": "low",
+   "description": "Site bitince, yalnızca belirli projelerde. Kullanım limiti; önerisi uygulananlara ek hak.\n\nTarih yaklaşıktır: konuşma notlarındaki güne göre.",
+   "createdAt": "2026-11-16T12:00:00Z",
+   "plannedStart": "2026-11-24T05:00:00Z",
+   "dueAt": "2026-12-31T20:59:59Z",
+   "teamId": "site"
+  },
+  {
+   "id": "p16",
+   "project": "mcp",
+   "title": "MCP · İkili yapıya karar ve ilk deneme: Pusula",
+   "status": "done",
+   "phase": "Geliştirme",
+   "priority": "normal",
+   "description": "Termin geriye dönük verildi: gerçekleşen bitiş günü.",
+   "checklist": [
+    {
+     "id": "p16c1",
+     "text": "pusula-is-takip #7 · MCP kapısı, MCP App, Claude bağlantısı, ziyaretçi demosu ve ölçüm",
+     "done": true,
+     "doneAt": "2026-11-12T15:45:42Z"
+    },
+    {
+     "id": "p16c2",
+     "text": "pusula-is-takip #8 · Claude bağlantısı: İzin ver sonrası yönlendirme düzeltmesi",
+     "done": true,
+     "doneAt": "2026-11-12T15:57:35Z"
+    }
+   ],
+   "createdAt": "2026-11-11T14:38:26Z",
+   "startedAt": "2026-11-11T14:38:26Z",
+   "completedAt": "2026-11-12T15:57:35Z",
+   "dueAt": "2026-11-12T20:59:59Z",
+   "teamId": "site"
+  },
+  {
+   "id": "p17",
+   "project": "mcp",
+   "title": "MCP · Video Zaman Etüdü için salt okuma MCP (Seviye 1)",
+   "status": "todo",
+   "phase": "Tasarım",
+   "priority": "normal",
+   "description": "Yerel, salt okuma; VPS gerekmiyor. Plan hazır.\n\nTarih yaklaşıktır: konuşma notlarındaki güne göre.",
+   "createdAt": "2026-11-16T13:00:00Z",
+   "plannedStart": "2026-11-23T05:00:00Z",
+   "dueAt": "2026-11-23T20:59:59Z",
+   "teamId": "site"
+  },
+  {
+   "id": "p18",
+   "project": "vz",
+   "title": "Zaman Etüdü · Windows masaüstü sürümü (C#/WPF) ve GitHub paketi",
+   "status": "done",
+   "phase": "Geliştirme",
+   "priority": "normal",
+   "description": "Tarih yaklaşıktır: konuşma notlarındaki güne göre.\n\nTermin geriye dönük verildi: gerçekleşen bitiş günü.",
+   "createdAt": "2026-11-15T08:00:00Z",
+   "startedAt": "2026-11-15T08:00:00Z",
+   "completedAt": "2026-11-15T13:54:42Z",
+   "dueAt": "2026-11-15T20:59:59Z",
+   "teamId": "operasyon"
+  },
+  {
+   "id": "p19",
+   "project": "vz",
+   "title": "Zaman Etüdü · Sunucusuz tarayıcı sürümü ve zaman-etudu.ysfdurak.com",
+   "status": "done",
+   "phase": "Yayın",
+   "priority": "normal",
+   "description": "Termin geriye dönük verildi: gerçekleşen bitiş günü.",
+   "checklist": [
+    {
+     "id": "p19c1",
+     "text": "video-zaman-etudu #1 · Tarayıcı v1.4.0: analiz özeti ve öğretici ekranlar",
+     "done": true,
+     "doneAt": "2026-11-15T15:00:15Z"
+    }
+   ],
+   "createdAt": "2026-11-15T14:57:23Z",
+   "startedAt": "2026-11-15T14:57:23Z",
+   "completedAt": "2026-11-15T15:00:15Z",
+   "dueAt": "2026-11-15T20:59:59Z",
+   "teamId": "operasyon"
+  },
+  {
+   "id": "p20",
+   "project": "vz",
+   "title": "Zaman Etüdü · Ölçüm akışı, takt, tolerans kalemleri, Windows v2.0 (TR/EN)",
+   "status": "done",
+   "phase": "Geliştirme",
+   "priority": "normal",
+   "description": "Termin geriye dönük verildi: gerçekleşen bitiş günü.",
+   "checklist": [
+    {
+     "id": "p20c1",
+     "text": "video-zaman-etudu #2 · Tarayıcı v1.5.0–v1.7.0: ölçüm akışı, grafikler, Excel özeti, takt, notlar, önce/sonra, tolerans kalemleri, toplu yedek",
+     "done": true,
+     "doneAt": "2026-11-16T11:06:13Z"
+    },
+    {
+     "id": "p20c2",
+     "text": "video-zaman-etudu #3 · Windows v2.0.0: tarayıcı v1.5–v1.7 özellikleri, Türkçe/İngilizce arayüz",
+     "done": true,
+     "doneAt": "2026-11-16T11:06:13Z"
+    }
+   ],
+   "createdAt": "2026-11-15T18:10:41Z",
+   "startedAt": "2026-11-15T18:10:41Z",
+   "completedAt": "2026-11-16T11:06:13Z",
+   "dueAt": "2026-11-16T20:59:59Z",
+   "teamId": "operasyon"
+  },
+  {
+   "id": "p21",
+   "project": "vz",
+   "title": "Zaman Etüdü · Yalın araçlar: Yamazumi, standart iş, iş örneklemesi, aykırı değer",
+   "status": "done",
+   "phase": "Geliştirme",
+   "priority": "normal",
+   "description": "Termin geriye dönük verildi: gerçekleşen bitiş günü.",
+   "checklist": [
+    {
+     "id": "p21c1",
+     "text": "video-zaman-etudu #4 · Tarayıcı v1.8.0 + Windows v2.1.0: Yamazumi, standart iş, iş örneklemesi, aykırı değer, kayıt temposu, adım kartları, yan yana video",
+     "done": true,
+     "doneAt": "2026-11-16T11:06:11Z"
+    }
+   ],
+   "createdAt": "2026-11-15T20:13:24Z",
+   "startedAt": "2026-11-15T20:13:24Z",
+   "completedAt": "2026-11-16T11:06:11Z",
+   "dueAt": "2026-11-16T20:59:59Z",
+   "teamId": "operasyon"
+  },
+  {
+   "id": "p22",
+   "project": "vz",
+   "title": "Zaman Etüdü · Kullanıcı gözüyle inceleme ve sade düzen (5 sekme)",
+   "status": "done",
+   "phase": "Geliştirme",
+   "priority": "normal",
+   "description": "İlk sürümü kullanırken yeterince işlevli bulmadım; kullanıcı gözüyle inceletip bulguların hepsini sırayla uygulattım.\n\nTermin geriye dönük verildi: gerçekleşen bitiş günü.",
+   "checklist": [
+    {
+     "id": "p22c1",
+     "text": "video-zaman-etudu #5 · v1.9.0 / v2.2.0: sade düzen (5 sekme), kapsam seçimi, adım kopyalama, toplu düzenleme, onay, kısa tur",
+     "done": true,
+     "doneAt": "2026-11-16T12:47:15Z"
+    },
+    {
+     "id": "p22c2",
+     "text": "video-zaman-etudu #6 · Metin düzeltmeleri: İngilizce tekil/çoğul, eski ekran adları",
+     "done": true,
+     "doneAt": "2026-11-16T13:38:46Z"
+    },
+    {
+     "id": "p22c3",
+     "text": "video-zaman-etudu #7 · v2.2.1 (Windows) · Video Zaman Etüdü — metin düzeltmeleri",
+     "done": true,
+     "doneAt": "2026-11-16T13:48:00Z"
+    },
+    {
+     "id": "p22c4",
+     "text": "video-zaman-etudu #8 · v1.9.1 / v2.2.2: kullanım kolaylıkları ve MCP Seviye 1 planı",
+     "done": true,
+     "doneAt": "2026-11-16T14:16:57Z"
+    }
+   ],
+   "createdAt": "2026-11-16T12:18:15Z",
+   "startedAt": "2026-11-16T12:18:15Z",
+   "completedAt": "2026-11-16T14:16:57Z",
+   "dueAt": "2026-11-16T20:59:59Z",
+   "teamId": "operasyon"
+  },
+  {
+   "id": "p23",
+   "project": "vz",
+   "title": "Zaman Etüdü · README İngilizce bölüm",
+   "status": "done",
+   "phase": "Belgeler",
+   "priority": "normal",
+   "description": "Termin geriye dönük verildi: gerçekleşen bitiş günü.",
+   "checklist": [
+    {
+     "id": "p23c1",
+     "text": "video-zaman-etudu #9 · README: English section",
+     "done": true,
+     "doneAt": "2026-11-16T14:33:35Z"
+    }
+   ],
+   "createdAt": "2026-11-16T14:33:30Z",
+   "startedAt": "2026-11-16T14:33:30Z",
+   "completedAt": "2026-11-16T14:33:35Z",
+   "dueAt": "2026-11-16T20:59:59Z",
+   "teamId": "operasyon"
+  },
+  {
+   "id": "p24",
+   "project": "vz",
+   "title": "Zaman Etüdü · Pilot: kronometre ile video etüdü karşılaştırması",
+   "status": "todo",
+   "phase": "Pilot",
+   "priority": "normal",
+   "description": "1–2 istasyon; etüt süresi, standart süre farkı, yeniden izlenerek düzeltilen kayıt sayısı.",
+   "createdAt": "2026-11-16T14:00:00Z",
+   "plannedStart": "2026-11-20T05:00:00Z",
+   "dueAt": "2026-12-04T20:59:59Z",
+   "teamId": "operasyon"
+  },
+  {
+   "id": "p25",
+   "project": "vz",
+   "title": "Zaman Etüdü · Kullanım limiti ve öneriye ek hak",
+   "status": "todo",
+   "phase": "Fikir",
+   "priority": "low",
+   "description": "Tarih yaklaşıktır: konuşma notlarındaki güne göre.",
+   "createdAt": "2026-11-15T07:00:00Z",
+   "plannedStart": "2026-11-23T05:00:00Z",
+   "dueAt": "2026-12-04T20:59:59Z",
+   "teamId": "operasyon"
+  },
+  {
+   "id": "p26",
+   "project": "durus",
+   "title": "Duruş · İlk sürüm (claude.ai) ve yöntemlerin eklenmesi",
+   "status": "done",
+   "phase": "Geliştirme",
+   "priority": "normal",
+   "description": "Tarih yaklaşıktır: konuşma notlarındaki güne göre.\n\nTermin geriye dönük verildi: gerçekleşen bitiş günü.",
+   "createdAt": "2026-11-15T07:00:00Z",
+   "startedAt": "2026-11-15T07:00:00Z",
+   "completedAt": "2026-11-15T16:15:45Z",
+   "dueAt": "2026-11-15T20:59:59Z",
+   "teamId": "operasyon"
+  },
+  {
+   "id": "p27",
+   "project": "durus",
+   "title": "Duruş · Kullanılabilirlik, QEC, İngilizce ve Windows masaüstü",
+   "status": "done",
+   "phase": "Geliştirme",
+   "priority": "normal",
+   "description": "Termin geriye dönük verildi: gerçekleşen bitiş günü.",
+   "checklist": [
+    {
+     "id": "p27c1",
+     "text": "durus-ergonomi #2 · Kullanılabilirlik iyileştirmeleri",
+     "done": true,
+     "doneAt": "2026-11-15T18:41:32Z"
+    },
+    {
+     "id": "p27c2",
+     "text": "durus-ergonomi #3 · Ergonomi açıklığı ve yorum desteği",
+     "done": true,
+     "doneAt": "2026-11-15T18:49:53Z"
+    },
+    {
+     "id": "p27c3",
+     "text": "durus-ergonomi #4 · QEC, İngilizce sürüm ve Windows masaüstü uygulaması",
+     "done": true,
+     "doneAt": "2026-11-15T19:25:30Z"
+    },
+    {
+     "id": "p27c4",
+     "text": "durus-ergonomi #5 · Masaüstü sürümünü main'den otomatik yayınla",
+     "done": true,
+     "doneAt": "2026-11-15T19:26:42Z"
+    },
+    {
+     "id": "p27c5",
+     "text": "durus-ergonomi #6 · ?lang parametresiyle dil yönlendirmesi",
+     "done": true,
+     "doneAt": "2026-11-15T19:28:14Z"
+    }
+   ],
+   "createdAt": "2026-11-15T18:41:29Z",
+   "startedAt": "2026-11-15T18:41:29Z",
+   "completedAt": "2026-11-15T19:28:14Z",
+   "dueAt": "2026-11-15T20:59:59Z",
+   "teamId": "operasyon"
+  },
+  {
+   "id": "p28",
+   "project": "durus",
+   "title": "Duruş · Otomatik nokta bulma, vücut bölgeleri, rotasyon, maliyet",
+   "status": "done",
+   "phase": "Geliştirme",
+   "priority": "normal",
+   "description": "Termin geriye dönük verildi: gerçekleşen bitiş günü.",
+   "checklist": [
+    {
+     "id": "p28c1",
+     "text": "durus-ergonomi #7 · Benzer araçlardan özellikler: otomatik nokta, vücut bölgeleri, rotasyon, maliyet",
+     "done": true,
+     "doneAt": "2026-11-15T19:59:08Z"
+    }
+   ],
+   "createdAt": "2026-11-15T19:59:05Z",
+   "startedAt": "2026-11-15T19:59:05Z",
+   "completedAt": "2026-11-15T19:59:08Z",
+   "dueAt": "2026-11-15T20:59:59Z",
+   "teamId": "operasyon"
+  },
+  {
+   "id": "p29",
+   "project": "durus",
+   "title": "Duruş · \"Senaryo dene\", raporlar, video tarama",
+   "status": "done",
+   "phase": "Geliştirme",
+   "priority": "normal",
+   "description": "Termin geriye dönük verildi: gerçekleşen bitiş günü.",
+   "checklist": [
+    {
+     "id": "p29c1",
+     "text": "durus-ergonomi #8 · Senaryo dene: “şunu değiştirsem ne olur?”",
+     "done": true,
+     "doneAt": "2026-11-15T20:23:03Z"
+    },
+    {
+     "id": "p29c2",
+     "text": "durus-ergonomi #9 · Raporlar, video tarama, telefon düzeltmeleri, güncelleme denetimi",
+     "done": true,
+     "doneAt": "2026-11-15T20:48:43Z"
+    },
+    {
+     "id": "p29c3",
+     "text": "durus-ergonomi #10 · Tarayıcı diline göre İngilizce sürüme yönlendirme",
+     "done": true,
+     "doneAt": "2026-11-16T14:06:03Z"
+    }
+   ],
+   "createdAt": "2026-11-15T20:23:01Z",
+   "startedAt": "2026-11-15T20:23:01Z",
+   "completedAt": "2026-11-16T14:06:03Z",
+   "dueAt": "2026-11-16T20:59:59Z",
+   "teamId": "operasyon"
+  },
+  {
+   "id": "p30",
+   "project": "durus",
+   "title": "Duruş · Uzman karşılaştırması (aynı istasyon, iki yöntem)",
+   "status": "todo",
+   "phase": "Pilot",
+   "priority": "normal",
+   "description": "",
+   "createdAt": "2026-11-16T14:00:00Z",
+   "plannedStart": "2026-11-20T05:00:00Z",
+   "dueAt": "2026-12-04T20:59:59Z",
+   "teamId": "operasyon"
+  },
+  {
+   "id": "p31",
+   "project": "destek",
+   "title": "Destek Merkezi · V1.1–V1.4: düzeltmeler, vardiya ve toplu giriş, hiyerarşi",
+   "status": "done",
+   "phase": "Geliştirme",
+   "priority": "normal",
+   "description": "Tarih yaklaşıktır: konuşma notlarındaki güne göre.\n\nTermin geriye dönük verildi: gerçekleşen bitiş günü.",
+   "createdAt": "2026-11-12T07:00:00Z",
+   "startedAt": "2026-11-12T07:00:00Z",
+   "completedAt": "2026-11-15T10:03:18Z",
+   "dueAt": "2026-11-15T20:59:59Z",
+   "teamId": "operasyon"
+  },
+  {
+   "id": "p32",
+   "project": "destek",
+   "title": "Destek Merkezi · Sunucuya kurulum: destek.ysfdurak.com",
+   "status": "done",
+   "phase": "Yayın",
+   "priority": "normal",
+   "description": "Termin geriye dönük verildi: gerçekleşen bitiş günü.",
+   "checklist": [
+    {
+     "id": "p32c1",
+     "text": "ysfdurak.com #1 · Destek Merkezi: sunucu kurulumu ve proje sayfası",
+     "done": true,
+     "doneAt": "2026-11-15T10:28:29Z"
+    }
+   ],
+   "createdAt": "2026-11-12T22:33:32Z",
+   "startedAt": "2026-11-12T22:33:32Z",
+   "completedAt": "2026-11-15T10:28:29Z",
+   "dueAt": "2026-11-15T20:59:59Z",
+   "teamId": "operasyon"
+  },
+  {
+   "id": "p33",
+   "project": "destek",
+   "title": "Destek Merkezi · Okunabilirlik, İngilizce arayüz, SEO",
+   "status": "done",
+   "phase": "Geliştirme",
+   "priority": "normal",
+   "description": "Termin geriye dönük verildi: gerçekleşen bitiş günü.",
+   "checklist": [
+    {
+     "id": "p33c1",
+     "text": "destek-merkezi #1 · 1.4.2: okunabilirlik ve erişilebilirlik",
+     "done": true,
+     "doneAt": "2026-11-15T15:36:06Z"
+    },
+    {
+     "id": "p33c2",
+     "text": "destek-merkezi #2 · 1.5.0: İngilizce arayüz",
+     "done": true,
+     "doneAt": "2026-11-16T12:01:08Z"
+    },
+    {
+     "id": "p33c3",
+     "text": "destek-merkezi #3 · README: English section, test count 52",
+     "done": true,
+     "doneAt": "2026-11-16T14:33:44Z"
+    },
+    {
+     "id": "p33c4",
+     "text": "destek-merkezi #4 · SEO: demo giriş sayfasına arama ve paylaşım etiketleri",
+     "done": true,
+     "doneAt": "2026-11-16T16:46:27Z"
+    }
+   ],
+   "createdAt": "2026-11-15T15:25:27Z",
+   "startedAt": "2026-11-15T15:25:27Z",
+   "completedAt": "2026-11-16T16:46:27Z",
+   "dueAt": "2026-11-16T20:59:59Z",
+   "teamId": "operasyon"
+  },
+  {
+   "id": "p34",
+   "project": "destek",
+   "title": "Destek Merkezi · Sunucuda SEO güncellemesini yayınla",
+   "status": "todo",
+   "phase": "Yayın",
+   "priority": "high",
+   "description": "bash ~/ysfdurak.com/sunucu/kurulum-destek.sh",
+   "createdAt": "2026-11-16T15:40:00Z",
+   "plannedStart": "2026-11-18T05:00:00Z",
+   "dueAt": "2026-11-18T20:59:59Z",
+   "teamId": "operasyon"
+  },
+  {
+   "id": "p35",
+   "project": "malkabul",
+   "title": "Mal Kabul · Gereksinimler ve ilk prototip (claude.ai)",
+   "status": "done",
+   "phase": "Geliştirme",
+   "priority": "normal",
+   "description": "Tarih yaklaşıktır: konuşma notlarındaki güne göre.\n\nTermin geriye dönük verildi: gerçekleşen bitiş günü.",
+   "createdAt": "2026-11-15T07:00:00Z",
+   "startedAt": "2026-11-15T07:00:00Z",
+   "completedAt": "2026-11-15T18:00:00Z",
+   "dueAt": "2026-11-15T20:59:59Z",
+   "teamId": "operasyon"
+  },
+  {
+   "id": "p36",
+   "project": "malkabul",
+   "title": "Mal Kabul · Esnek sürüm: kendi alanlar, kural oluşturucu, sanal kapılar",
+   "status": "todo",
+   "phase": "Tasarım",
+   "priority": "normal",
+   "description": "Prototip istediğim gibi olmadı: sade ekranlar, sabit olmayan kurallar ve farklı akış mantığı gerekiyor.\n\nTarih yaklaşıktır: konuşma notlarındaki güne göre.",
+   "createdAt": "2026-11-15T20:00:00Z",
+   "plannedStart": "2026-11-23T05:00:00Z",
+   "dueAt": "2026-12-18T20:59:59Z",
+   "teamId": "operasyon"
+  },
+  {
+   "id": "p37",
+   "project": "sorter",
+   "title": "Sorter Studio · V5 referans sürüm",
+   "status": "done",
+   "phase": "Geliştirme",
+   "priority": "normal",
+   "description": "Tarih yaklaşıktır: konuşma notlarındaki güne göre.\n\nTermin geriye dönük verildi: gerçekleşen bitiş günü.",
+   "createdAt": "2026-11-11T07:00:00Z",
+   "startedAt": "2026-11-11T07:00:00Z",
+   "completedAt": "2026-11-11T16:00:00Z",
+   "dueAt": "2026-11-11T20:59:59Z",
+   "teamId": "operasyon"
+  },
+  {
+   "id": "p38",
+   "project": "sorter",
+   "title": "Sorter Studio · Az parametreli yatırım planlama modu",
+   "status": "todo",
+   "phase": "Tasarım",
+   "priority": "normal",
+   "description": "Henüz var olmayan bir operasyon için: günlük hacim, lot büyüklüğü, mağaza sayısı → oluk sayısı, ısı haritası, istasyon başı kişi.\n\nTarih yaklaşıktır: konuşma notlarındaki güne göre.",
+   "createdAt": "2026-11-11T18:00:00Z",
+   "plannedStart": "2026-11-23T05:00:00Z",
+   "dueAt": "2026-12-11T20:59:59Z",
+   "teamId": "operasyon"
+  },
+  {
+   "id": "p39",
+   "project": "wdl",
+   "title": "WDL · Adresleme kuralları",
+   "status": "done",
+   "phase": "Tasarım",
+   "priority": "normal",
+   "description": "Tarih yaklaşıktır: konuşma notlarındaki güne göre.\n\nTermin geriye dönük verildi: gerçekleşen bitiş günü.",
+   "createdAt": "2026-11-12T07:00:00Z",
+   "startedAt": "2026-11-12T07:00:00Z",
+   "completedAt": "2026-11-12T18:00:00Z",
+   "dueAt": "2026-11-12T20:59:59Z",
+   "teamId": "operasyon"
+  },
+  {
+   "id": "p40",
+   "project": "wdl",
+   "title": "WDL · Fiziksel depo editörü (çevrimdışı)",
+   "status": "todo",
+   "phase": "Geliştirme",
+   "priority": "normal",
+   "description": "Tarih yaklaşıktır: konuşma notlarındaki güne göre.",
+   "createdAt": "2026-11-12T19:00:00Z",
+   "plannedStart": "2026-11-24T05:00:00Z",
+   "dueAt": "2026-12-18T20:59:59Z",
+   "teamId": "operasyon"
+  },
+  {
+   "id": "p41",
+   "project": "wdl",
+   "title": "WDL · Toplama simülasyonu ve rota seçimi",
+   "status": "todo",
+   "phase": "Geliştirme",
+   "priority": "normal",
+   "description": "Toplama rotası seçimi fikri bunun parçası: gelen partiye göre en avantajlı rota algoritması.\n\nTarih yaklaşıktır: konuşma notlarındaki güne göre.",
+   "createdAt": "2026-11-12T19:30:00Z",
+   "plannedStart": "2026-11-24T05:00:00Z",
+   "dueAt": "2026-12-31T20:59:59Z",
+   "teamId": "operasyon"
+  },
+  {
+   "id": "p42",
+   "project": "karar-odasi",
+   "title": "Depo Karar Odası · Ön fizibilite kapsamı",
+   "status": "cancelled",
+   "phase": "Tasarım",
+   "priority": "normal",
+   "description": "Sınırlı kapsamlı sürüm ihtiyacı karşılamayacağı için kenara konuldu.\n\nTarih yaklaşıktır: konuşma notlarındaki güne göre.",
+   "createdAt": "2026-11-13T07:00:00Z",
+   "closedAt": "2026-11-13T20:00:00Z",
+   "teamId": "operasyon"
+  },
+  {
+   "id": "p43",
+   "project": "liman",
+   "title": "Liman Kulesi · Proje haritası ve ilk kurulum",
+   "status": "done",
+   "phase": "Geliştirme",
+   "priority": "normal",
+   "description": "Tarih yaklaşıktır: konuşma notlarındaki güne göre.\n\nTermin geriye dönük verildi: gerçekleşen bitiş günü.",
+   "createdAt": "2026-11-15T07:00:00Z",
+   "startedAt": "2026-11-15T07:00:00Z",
+   "completedAt": "2026-11-15T18:00:00Z",
+   "dueAt": "2026-11-15T20:59:59Z",
+   "teamId": "operasyon"
+  },
+  {
+   "id": "p44",
+   "project": "liman",
+   "title": "Liman Kulesi · Siteye alınıp alınmayacağına karar",
+   "status": "todo",
+   "phase": "Yayın",
+   "priority": "normal",
+   "description": "Tarih yaklaşıktır: konuşma notlarındaki güne göre.",
+   "createdAt": "2026-11-15T19:00:00Z",
+   "plannedStart": "2026-11-21T05:00:00Z",
+   "dueAt": "2026-11-21T20:59:59Z",
+   "teamId": "operasyon"
+  },
+  {
+   "id": "p45",
+   "project": "yalin-oyun",
+   "title": "Rampa Krizi · İsraf Avı ilk sürüm",
+   "status": "done",
+   "phase": "Geliştirme",
+   "priority": "normal",
+   "description": "Tarih yaklaşıktır: konuşma notlarındaki güne göre.\n\nTermin geriye dönük verildi: gerçekleşen bitiş günü.",
+   "createdAt": "2026-11-16T06:00:00Z",
+   "startedAt": "2026-11-16T06:00:00Z",
+   "completedAt": "2026-11-16T07:00:00Z",
+   "dueAt": "2026-11-16T20:59:59Z",
+   "teamId": "operasyon"
+  },
+  {
+   "id": "p46",
+   "project": "yalin-oyun",
+   "title": "Rampa Krizi · Bölüm 1 tasarımı ve oynanabilir denemeler",
+   "status": "done",
+   "phase": "Geliştirme",
+   "priority": "normal",
+   "description": "Tarih yaklaşıktır: konuşma notlarındaki güne göre.\n\nTermin geriye dönük verildi: gerçekleşen bitiş günü.",
+   "createdAt": "2026-11-16T07:00:00Z",
+   "startedAt": "2026-11-16T07:00:00Z",
+   "completedAt": "2026-11-16T10:00:00Z",
+   "dueAt": "2026-11-16T20:59:59Z",
+   "teamId": "operasyon"
+  },
+  {
+   "id": "p47",
+   "project": "yalin-oyun",
+   "title": "Rampa Krizi · Hikâyeyi baştan kendim yazmak",
+   "status": "todo",
+   "phase": "Tasarım",
+   "priority": "normal",
+   "description": "Diyaloglar ve oyun dinamiği yeterince sürükleyici olmadı. Hikâyeyi ben yazacağım, oyunu Claude ondan üretecek.\n\nTarih yaklaşıktır: konuşma notlarındaki güne göre.",
+   "createdAt": "2026-11-16T10:00:00Z",
+   "plannedStart": "2026-11-22T05:00:00Z",
+   "dueAt": "2026-11-22T20:59:59Z",
+   "teamId": "operasyon"
+  },
+  {
+   "id": "p48",
+   "project": "yalin-araclar",
+   "title": "Yalın araçlar · Ajan mı, kural tabanlı mı? Karar",
+   "status": "todo",
+   "phase": "Fikir",
+   "priority": "normal",
+   "description": "Tarih yaklaşıktır: konuşma notlarındaki güne göre.",
+   "createdAt": "2026-11-09T07:00:00Z",
+   "plannedStart": "2026-11-21T05:00:00Z",
+   "dueAt": "2026-11-21T20:59:59Z",
+   "teamId": "operasyon"
+  },
+  {
+   "id": "p49",
+   "project": "optimizasyon",
+   "title": "\"Neden?\" motoru · Ayrıntılı tasarım",
+   "status": "todo",
+   "phase": "Fikir",
+   "priority": "normal",
+   "description": "Tarih yaklaşıktır: konuşma notlarındaki güne göre.",
+   "createdAt": "2026-11-12T07:00:00Z",
+   "plannedStart": "2026-11-22T05:00:00Z",
+   "dueAt": "2026-11-22T20:59:59Z",
+   "teamId": "operasyon"
+  },
+  {
+   "id": "p50",
+   "project": "ivme",
+   "title": "İvme · Pilot teslimi: süreç kuralları ve kabul kriterleri",
+   "status": "done",
+   "phase": "Geliştirme",
+   "priority": "normal",
+   "description": "Tarih yaklaşıktır: konuşma notlarındaki güne göre.\n\nTermin geriye dönük verildi: gerçekleşen bitiş günü.",
+   "createdAt": "2026-11-11T07:00:00Z",
+   "startedAt": "2026-11-11T07:00:00Z",
+   "completedAt": "2026-11-11T15:00:00Z",
+   "dueAt": "2026-11-11T20:59:59Z",
+   "teamId": "ekip"
+  },
+  {
+   "id": "p51",
+   "project": "ivme",
+   "title": "İvme · Canlı demo ivme.ysfdurak.com ve rehber",
+   "status": "done",
+   "phase": "Yayın",
+   "priority": "normal",
+   "description": "Termin geriye dönük verildi: gerçekleşen bitiş günü.",
+   "checklist": [
+    {
+     "id": "p51c1",
+     "text": "ivme-oneri-kaizen #1 · Canlı demo rehberi ve metin düzeltmeleri",
+     "done": true,
+     "doneAt": "2026-11-15T15:15:39Z"
+    }
+   ],
+   "createdAt": "2026-11-15T15:10:00Z",
+   "startedAt": "2026-11-15T15:10:00Z",
+   "completedAt": "2026-11-15T15:15:39Z",
+   "dueAt": "2026-11-15T20:59:59Z",
+   "teamId": "ekip"
+  },
+  {
+   "id": "p52",
+   "project": "ivme",
+   "title": "İvme · TR/EN arayüz, İngilizce demo, şifre işlemleri, para birimi",
+   "status": "done",
+   "phase": "Geliştirme",
+   "priority": "normal",
+   "description": "Termin geriye dönük verildi: gerçekleşen bitiş günü.",
+   "checklist": [
+    {
+     "id": "p52c1",
+     "text": "ivme-oneri-kaizen #2 · Türkçe / English arayüz ve İngilizce canlı demo",
+     "done": true,
+     "doneAt": "2026-11-16T11:08:26Z"
+    },
+    {
+     "id": "p52c2",
+     "text": "ivme-oneri-kaizen #3 · Geçici şifre ve şifre sıfırlama; İngilizce düzeltmeler",
+     "done": true,
+     "doneAt": "2026-11-16T14:04:35Z"
+    },
+    {
+     "id": "p52c3",
+     "text": "ivme-oneri-kaizen #4 · Para birimi ayarı (varsayılan Türk lirası)",
+     "done": true,
+     "doneAt": "2026-11-16T14:17:53Z"
+    },
+    {
+     "id": "p52c4",
+     "text": "ysfdurak.com #20 · İvme: English screenshots and currency setting",
+     "done": true,
+     "doneAt": "2026-11-16T14:36:39Z"
+    }
+   ],
+   "createdAt": "2026-11-15T16:37:57Z",
+   "startedAt": "2026-11-15T16:37:57Z",
+   "completedAt": "2026-11-16T14:36:39Z",
+   "dueAt": "2026-11-16T20:59:59Z",
+   "teamId": "ekip"
+  },
+  {
+   "id": "p53",
+   "project": "ivme",
+   "title": "İvme · Dış firmada pilot",
+   "status": "todo",
+   "phase": "Pilot",
+   "priority": "low",
+   "description": "Yalnızca bir şirket isterse.\n\nTarih yaklaşıktır: konuşma notlarındaki güne göre.",
+   "createdAt": "2026-11-15T07:00:00Z",
+   "plannedStart": "2026-11-24T05:00:00Z",
+   "dueAt": "2026-12-18T20:59:59Z",
+   "teamId": "ekip"
+  },
+  {
+   "id": "p54",
+   "project": "pusula",
+   "title": "Pusula · Tek React kaynağı, pilot sunucusu, Outlook bildirimleri",
+   "status": "done",
+   "phase": "Geliştirme",
+   "priority": "normal",
+   "description": "Termin geriye dönük verildi: gerçekleşen bitiş günü.",
+   "checklist": [
+    {
+     "id": "p54c1",
+     "text": "pusula-is-takip #1 · Pilot hazırlığı: yayın düzeltmesi, duman testi, okunabilirlik ve belgeler",
+     "done": true,
+     "doneAt": "2026-11-09T13:05:03Z"
+    },
+    {
+     "id": "p54c2",
+     "text": "pusula-is-takip #2 · Eski derlenmiş sürümü kaldır: uygulama okunabilir React kaynağından derleniyor",
+     "done": true,
+     "doneAt": "2026-11-09T15:11:52Z"
+    },
+    {
+     "id": "p54c3",
+     "text": "pusula-is-takip #3 · Outlook e-posta bildirimleri: atama, durum, tamamlama ve yorum",
+     "done": true,
+     "doneAt": "2026-11-09T15:39:18Z"
+    },
+    {
+     "id": "p54c4",
+     "text": "pusula-is-takip #4 · Pilot sunucusu: Microsoft girişi, SQLite, yedek, Docker",
+     "done": true,
+     "doneAt": "2026-11-09T17:18:27Z"
+    },
+    {
+     "id": "p54c5",
+     "text": "pusula-is-takip #5 · 0.7.0: Pilot önizlemesi, tekrarlanan işler, ekler, Excel, sabah özeti, sadeleştirme",
+     "done": true,
+     "doneAt": "2026-11-09T17:57:29Z"
+    },
+    {
+     "id": "p54c6",
+     "text": "pusula-is-takip #6 · Kapanış: zod güvenlik yükseltmesi, telefondan deneme QR kodları (0.7.1)",
+     "done": true,
+     "doneAt": "2026-11-09T18:48:03Z"
+    }
+   ],
+   "createdAt": "2026-11-09T13:04:08Z",
+   "startedAt": "2026-11-09T13:04:08Z",
+   "completedAt": "2026-11-09T18:48:03Z",
+   "dueAt": "2026-11-09T20:59:59Z",
+   "teamId": "ekip"
+  },
+  {
+   "id": "p55",
+   "project": "pusula",
+   "title": "Pusula · MCP kapısı, MCP App ve ziyaretçi demosu",
+   "status": "done",
+   "phase": "Geliştirme",
+   "priority": "normal",
+   "description": "Termin geriye dönük verildi: gerçekleşen bitiş günü.",
+   "checklist": [
+    {
+     "id": "p55c1",
+     "text": "pusula-is-takip #7 · MCP kapısı, MCP App, Claude bağlantısı, ziyaretçi demosu ve ölçüm",
+     "done": true,
+     "doneAt": "2026-11-12T15:45:42Z"
+    },
+    {
+     "id": "p55c2",
+     "text": "pusula-is-takip #8 · Claude bağlantısı: İzin ver sonrası yönlendirme düzeltmesi",
+     "done": true,
+     "doneAt": "2026-11-12T15:57:35Z"
+    }
+   ],
+   "createdAt": "2026-11-11T14:38:26Z",
+   "startedAt": "2026-11-11T14:38:26Z",
+   "completedAt": "2026-11-12T15:57:35Z",
+   "dueAt": "2026-11-12T20:59:59Z",
+   "teamId": "ekip"
+  },
+  {
+   "id": "p56",
+   "project": "pusula",
+   "title": "Pusula · Okunabilirlik, İngilizce arayüz, belgeler, SEO",
+   "status": "done",
+   "phase": "Geliştirme",
+   "priority": "normal",
+   "description": "Termin geriye dönük verildi: gerçekleşen bitiş günü.",
+   "checklist": [
+    {
+     "id": "p56c1",
+     "text": "pusula-is-takip #9 · Okunabilirlik ve erişilebilirlik",
+     "done": true,
+     "doneAt": "2026-11-15T15:36:09Z"
+    },
+    {
+     "id": "p56c2",
+     "text": "pusula-is-takip #10 · İngilizce arayüz",
+     "done": true,
+     "doneAt": "2026-11-16T12:01:05Z"
+    },
+    {
+     "id": "p56c3",
+     "text": "pusula-is-takip #11 · README: live server, MCP, version 0.7.1, English",
+     "done": true,
+     "doneAt": "2026-11-16T14:34:36Z"
+    },
+    {
+     "id": "p56c4",
+     "text": "pusula-is-takip #12 · SEO: demo arayüz sayfasına arama ve paylaşım etiketleri",
+     "done": true,
+     "doneAt": "2026-11-16T16:46:44Z"
+    }
+   ],
+   "createdAt": "2026-11-15T15:33:54Z",
+   "startedAt": "2026-11-15T15:33:54Z",
+   "completedAt": "2026-11-16T16:46:44Z",
+   "dueAt": "2026-11-16T20:59:59Z",
+   "teamId": "ekip"
+  },
+  {
+   "id": "p57",
+   "project": "pusula",
+   "title": "Pusula · Kendi kullanımım: bekleyen işler Claude'dan açıldı",
+   "status": "done",
+   "phase": "Kullanım",
+   "priority": "normal",
+   "description": "Bekleyen 6 iş Claude bağlantısıyla Pusula'ya eklendi.\n\nTermin geriye dönük verildi: gerçekleşen bitiş günü.",
+   "createdAt": "2026-11-16T16:20:00Z",
+   "startedAt": "2026-11-16T16:20:00Z",
+   "completedAt": "2026-11-16T16:25:00Z",
+   "dueAt": "2026-11-16T20:59:59Z",
+   "teamId": "ekip"
+  },
+  {
+   "id": "p58",
+   "project": "pusula",
+   "title": "Pusula · Sunucuda SEO güncellemesini yayınla",
+   "status": "todo",
+   "phase": "Yayın",
+   "priority": "high",
+   "description": "bash ~/ysfdurak.com/sunucu/kurulum-pusula.sh",
+   "createdAt": "2026-11-16T15:40:00Z",
+   "plannedStart": "2026-11-18T05:00:00Z",
+   "dueAt": "2026-11-18T20:59:59Z",
+   "teamId": "ekip"
+  },
+  {
+   "id": "p59",
+   "project": "pusula",
+   "title": "Pusula · Demo kullanım ölçümünü doğrula",
+   "status": "todo",
+   "phase": "Pilot",
+   "priority": "high",
+   "description": "Son 30 günde 0 ziyaretçi görünüyor; başka hesapla demo açıp sayının arttığını kontrol et.",
+   "createdAt": "2026-11-16T15:00:00Z",
+   "plannedStart": "2026-11-18T05:00:00Z",
+   "dueAt": "2026-11-18T20:59:59Z",
+   "teamId": "ekip"
+  },
+  {
+   "id": "p60",
+   "project": "pusula",
+   "title": "Pusula · Şirket içi pilot (3–5 kişi)",
+   "status": "todo",
+   "phase": "Pilot",
+   "priority": "normal",
+   "description": "Tarih yaklaşıktır: konuşma notlarındaki güne göre.",
+   "createdAt": "2026-11-12T07:00:00Z",
+   "plannedStart": "2026-11-19T05:00:00Z",
+   "dueAt": "2026-12-04T20:59:59Z",
+   "teamId": "ekip"
+  },
+  {
+   "id": "p61",
+   "project": "aday",
+   "title": "Aday Atölyesi · Kullanım, İK değerlendirmesi ve statik demo (0.17–0.18)",
+   "status": "done",
+   "phase": "Geliştirme",
+   "priority": "normal",
+   "description": "Termin geriye dönük verildi: gerçekleşen bitiş günü.",
+   "checklist": [
+    {
+     "id": "p61c1",
+     "text": "aday_atolyesi #1 · Aday Atölyesi 0.17–0.18: kullanım, İK değerlendirmesi ve kod düzeni",
+     "done": true,
+     "doneAt": "2026-11-09T15:25:03Z"
+    },
+    {
+     "id": "p61c2",
+     "text": "aday_atolyesi #2 · GitHub Pages statik demo (0.18.1)",
+     "done": true,
+     "doneAt": "2026-11-09T15:46:30Z"
+    }
+   ],
+   "createdAt": "2026-11-09T15:24:57Z",
+   "startedAt": "2026-11-09T15:24:57Z",
+   "completedAt": "2026-11-09T15:46:30Z",
+   "dueAt": "2026-11-09T20:59:59Z",
+   "teamId": "ekip"
+  },
+  {
+   "id": "p62",
+   "project": "aday",
+   "title": "Aday Atölyesi · Canlı demo aday.ysfdurak.com (0.19)",
+   "status": "done",
+   "phase": "Yayın",
+   "priority": "normal",
+   "description": "Termin geriye dönük verildi: gerçekleşen bitiş günü.",
+   "checklist": [
+    {
+     "id": "p62c1",
+     "text": "aday_atolyesi #3 · Canlı demo: Cloudflare vitrin modu (0.19.0)",
+     "done": true,
+     "doneAt": "2026-11-15T13:22:56Z"
+    },
+    {
+     "id": "p62c2",
+     "text": "aday_atolyesi #4 · Vitrin: örnek geri bildirim tarihi",
+     "done": true,
+     "doneAt": "2026-11-15T13:52:36Z"
+    },
+    {
+     "id": "p62c3",
+     "text": "aday_atolyesi #5 · Vitrin: paylaşılan Promise hatası ve hızlı 404 (0.19.1)",
+     "done": true,
+     "doneAt": "2026-11-15T14:02:27Z"
+    },
+    {
+     "id": "p62c4",
+     "text": "aday_atolyesi #6 · Eski GitHub Pages adresini canlı demoya yönlendir",
+     "done": true,
+     "doneAt": "2026-11-15T14:06:17Z"
+    },
+    {
+     "id": "p62c5",
+     "text": "aday_atolyesi #7 · Belgeler: kırık bağlantılar ve doğrulama kaydı",
+     "done": true,
+     "doneAt": "2026-11-15T14:08:31Z"
+    },
+    {
+     "id": "p62c6",
+     "text": "ysfdurak.com #3 · Aday Atölyesi: canlı demo ve güncel proje sayfası",
+     "done": true,
+     "doneAt": "2026-11-15T13:52:01Z"
+    }
+   ],
+   "createdAt": "2026-11-15T13:22:53Z",
+   "startedAt": "2026-11-15T13:22:53Z",
+   "completedAt": "2026-11-15T14:08:31Z",
+   "dueAt": "2026-11-15T20:59:59Z",
+   "teamId": "ekip"
+  },
+  {
+   "id": "p63",
+   "project": "aday",
+   "title": "Aday Atölyesi · İçerik, tasarım, İngilizce tur (0.20–0.21), SEO",
+   "status": "done",
+   "phase": "Geliştirme",
+   "priority": "normal",
+   "description": "Termin geriye dönük verildi: gerçekleşen bitiş günü.",
+   "checklist": [
+    {
+     "id": "p63c1",
+     "text": "aday_atolyesi #8 · 0.20.0: içerik, tasarım ve öğreticilik iyileştirmeleri",
+     "done": true,
+     "doneAt": "2026-11-15T14:43:17Z"
+    },
+    {
+     "id": "p63c2",
+     "text": "aday_atolyesi #9 · İngilizce tanıtım turu ve İngilizce vitrin vakası (0.21.0)",
+     "done": true,
+     "doneAt": "2026-11-16T12:01:00Z"
+    },
+    {
+     "id": "p63c3",
+     "text": "aday_atolyesi #10 · README: English section, version 0.21.1",
+     "done": true,
+     "doneAt": "2026-11-16T14:33:54Z"
+    },
+    {
+     "id": "p63c4",
+     "text": "aday_atolyesi #11 · SEO: çalışma alanı sayfasına arama ve paylaşım etiketleri",
+     "done": true,
+     "doneAt": "2026-11-16T16:46:09Z"
+    }
+   ],
+   "createdAt": "2026-11-15T14:41:11Z",
+   "startedAt": "2026-11-15T14:41:11Z",
+   "completedAt": "2026-11-16T16:46:09Z",
+   "dueAt": "2026-11-16T20:59:59Z",
+   "teamId": "ekip"
+  },
+  {
+   "id": "p64",
+   "project": "aday",
+   "title": "Aday Atölyesi · Pilot: 5–10 aday, 2–3 İK uzmanı",
+   "status": "todo",
+   "phase": "Pilot",
+   "priority": "normal",
+   "description": "Protokol hazır (docs/PILOT-PROTOCOL.md); henüz kimse davet edilmedi.",
+   "createdAt": "2026-11-16T14:00:00Z",
+   "plannedStart": "2026-11-21T05:00:00Z",
+   "dueAt": "2026-12-11T20:59:59Z",
+   "teamId": "ekip"
+  },
+  {
+   "id": "p65",
+   "project": "diyalog",
+   "title": "Diyalog Atölyesi · İlk sürüm ve GitHub deposu",
+   "status": "done",
+   "phase": "Geliştirme",
+   "priority": "normal",
+   "description": "Tarih yaklaşıktır: konuşma notlarındaki güne göre.\n\nTermin geriye dönük verildi: gerçekleşen bitiş günü.",
+   "createdAt": "2026-11-16T08:00:00Z",
+   "startedAt": "2026-11-16T08:00:00Z",
+   "completedAt": "2026-11-16T14:00:00Z",
+   "dueAt": "2026-11-16T20:59:59Z",
+   "teamId": "ekip"
+  },
+  {
+   "id": "p66",
+   "project": "diyalog",
+   "title": "Diyalog Atölyesi · Yayın: diyalog.ysfdurak.com",
+   "status": "doing",
+   "phase": "Yayın",
+   "priority": "high",
+   "description": "Caddy bloğu PR'ı açık (ysfdurak.com #19).",
+   "createdAt": "2026-11-16T14:18:28Z",
+   "startedAt": "2026-11-16T14:18:28Z",
+   "plannedStart": "2026-11-18T05:00:00Z",
+   "dueAt": "2026-11-18T20:59:59Z",
+   "teamId": "ekip"
+  },
+  {
+   "id": "p67",
+   "project": "emanet",
+   "title": "Emanet · Birleşik kapsam ve ilk geliştirme",
+   "status": "done",
+   "phase": "Geliştirme",
+   "priority": "normal",
+   "description": "Tarih yaklaşıktır: konuşma notlarındaki güne göre.\n\nTermin geriye dönük verildi: gerçekleşen bitiş günü.",
+   "createdAt": "2026-11-16T08:00:00Z",
+   "startedAt": "2026-11-16T08:00:00Z",
+   "completedAt": "2026-11-16T17:00:00Z",
+   "dueAt": "2026-11-16T20:59:59Z",
+   "teamId": "ekip"
+  },
+  {
+   "id": "p68",
+   "project": "emanet",
+   "title": "Emanet · GitHub ve sunucuya yayın",
+   "status": "todo",
+   "phase": "Yayın",
+   "priority": "normal",
+   "description": "Tarih yaklaşıktır: konuşma notlarındaki güne göre.",
+   "createdAt": "2026-11-16T17:00:00Z",
+   "plannedStart": "2026-11-19T05:00:00Z",
+   "dueAt": "2026-11-19T20:59:59Z",
+   "teamId": "ekip"
+  },
+  {
+   "id": "p69",
+   "project": "termin",
+   "title": "Termin Olasılığı · Kapsam dokümanı",
+   "status": "done",
+   "phase": "Tasarım",
+   "priority": "normal",
+   "description": "Tarih yaklaşıktır: konuşma notlarındaki güne göre.\n\nTermin geriye dönük verildi: gerçekleşen bitiş günü.",
+   "createdAt": "2026-11-16T13:00:00Z",
+   "startedAt": "2026-11-16T13:00:00Z",
+   "completedAt": "2026-11-16T15:00:00Z",
+   "dueAt": "2026-11-16T20:59:59Z",
+   "teamId": "ekip"
+  },
+  {
+   "id": "p70",
+   "project": "termin",
+   "title": "Termin Olasılığı · İlk sürüm",
+   "status": "todo",
+   "phase": "Geliştirme",
+   "priority": "normal",
+   "description": "Tarih yaklaşıktır: konuşma notlarındaki güne göre.",
+   "createdAt": "2026-11-16T15:00:00Z",
+   "plannedStart": "2026-11-23T05:00:00Z",
+   "dueAt": "2026-11-23T20:59:59Z",
+   "teamId": "ekip"
+  },
+  {
+   "id": "p71",
+   "project": "isbasi",
+   "title": "İşbaşı Simülasyonu · 5 rol için 1. hafta",
+   "status": "done",
+   "phase": "Geliştirme",
+   "priority": "normal",
+   "description": "Tarih yaklaşıktır: konuşma notlarındaki güne göre.\n\nTermin geriye dönük verildi: gerçekleşen bitiş günü.",
+   "createdAt": "2026-10-27T07:00:00Z",
+   "startedAt": "2026-10-27T07:00:00Z",
+   "completedAt": "2026-10-27T12:00:00Z",
+   "dueAt": "2026-10-27T20:59:59Z",
+   "teamId": "ekip"
+  },
+  {
+   "id": "p72",
+   "project": "isbasi",
+   "title": "İşbaşı Simülasyonu · 4 haftalık omurga",
+   "status": "cancelled",
+   "phase": "Geliştirme",
+   "priority": "normal",
+   "description": "Kullanıcıların döngüde kalacağından emin olmadığım için durduruldu.\n\nTarih yaklaşıktır: konuşma notlarındaki güne göre.",
+   "createdAt": "2026-10-27T12:00:00Z",
+   "closedAt": "2026-10-27T16:00:00Z",
+   "teamId": "ekip"
+  },
+  {
+   "id": "p73",
+   "project": "ats",
+   "title": "ATS · Kapsamı netleştir",
+   "status": "todo",
+   "phase": "Fikir",
+   "priority": "normal",
+   "description": "Tarih yaklaşıktır: konuşma notlarındaki güne göre.",
+   "createdAt": "2026-11-02T07:00:00Z",
+   "plannedStart": "2026-11-21T05:00:00Z",
+   "dueAt": "2026-11-21T20:59:59Z",
+   "teamId": "ekip"
+  },
+  {
+   "id": "p74",
+   "project": "bilgi-bankasi",
+   "title": "Bilgi bankası · Kapsamı netleştir",
+   "status": "todo",
+   "phase": "Fikir",
+   "priority": "normal",
+   "description": "Tarih yaklaşıktır: konuşma notlarındaki güne göre.",
+   "createdAt": "2026-11-13T07:00:00Z",
+   "plannedStart": "2026-11-21T05:00:00Z",
+   "dueAt": "2026-11-21T20:59:59Z",
+   "teamId": "ekip"
+  },
+  {
+   "id": "p75",
+   "project": "hikaye",
+   "title": "Hikâyeleştirme · Öğrenme yolu planı",
+   "status": "todo",
+   "phase": "Öğrenme",
+   "priority": "normal",
+   "description": "Tarih yaklaşıktır: konuşma notlarındaki güne göre.",
+   "createdAt": "2026-11-13T07:00:00Z",
+   "plannedStart": "2026-11-22T05:00:00Z",
+   "dueAt": "2026-11-22T20:59:59Z",
+   "teamId": "ekip"
+  },
+  {
+   "id": "p76",
+   "project": "butce",
+   "title": "Bütçe Sapma · İşteki Power BI maliyet dashboard'u (6 sayfa)",
+   "status": "done",
+   "phase": "Geliştirme",
+   "priority": "normal",
+   "description": "Aylık 2–3 saatlik işi yaklaşık 5 dakikaya indirdi. Gerçek veriyle yapıldığı için olduğu gibi gösterilemez. Bu otomasyon buradan çıktı. Tarihi kayıtlı değil.",
+   "createdAt": "",
+   "startedAt": "",
+   "completedAt": "",
+   "teamId": "veri"
+  },
+  {
+   "id": "p77",
+   "project": "butce",
+   "title": "Bütçe Sapma · Python ve VBA sürümleri",
+   "status": "done",
+   "phase": "Geliştirme",
+   "priority": "normal",
+   "description": "Tarih yaklaşıktır: konuşma notlarındaki güne göre.\n\nTermin geriye dönük verildi: gerçekleşen bitiş günü.",
+   "createdAt": "2026-11-09T11:03:47Z",
+   "startedAt": "2026-11-09T11:03:47Z",
+   "completedAt": "2026-11-13T17:06:04Z",
+   "dueAt": "2026-11-13T20:59:59Z",
+   "teamId": "veri"
+  },
+  {
+   "id": "p78",
+   "project": "butce",
+   "title": "Bütçe Sapma · Makrosuz Power Query yolu",
+   "status": "todo",
+   "phase": "Geliştirme",
+   "priority": "normal",
+   "description": "Tarih yaklaşıktır: konuşma notlarındaki güne göre.",
+   "createdAt": "2026-11-13T07:00:00Z",
+   "plannedStart": "2026-11-23T05:00:00Z",
+   "dueAt": "2026-11-23T20:59:59Z",
+   "teamId": "veri"
+  },
+  {
+   "id": "p79",
+   "project": "butce",
+   "title": "Bütçe Sapma · Bölüm/müdürlük bazında bütçe değişim görünümü",
+   "status": "todo",
+   "phase": "Geliştirme",
+   "priority": "normal",
+   "description": "Tarih yaklaşıktır: konuşma notlarındaki güne göre.",
+   "createdAt": "2026-11-13T07:00:00Z",
+   "plannedStart": "2026-11-23T05:00:00Z",
+   "dueAt": "2026-11-23T20:59:59Z",
+   "teamId": "veri"
+  },
+  {
+   "id": "p80",
+   "project": "shiftflow",
+   "title": "ShiftFlow · V1/V2 prototipler ve sıfırdan yeniden yazım",
+   "status": "done",
+   "phase": "Geliştirme",
+   "priority": "normal",
+   "description": "Tarih yaklaşıktır: konuşma notlarındaki güne göre.\n\nTermin geriye dönük verildi: gerçekleşen bitiş günü.",
+   "createdAt": "2026-11-10T07:00:00Z",
+   "startedAt": "2026-11-10T07:00:00Z",
+   "completedAt": "2026-11-10T16:00:00Z",
+   "dueAt": "2026-11-10T20:59:59Z",
+   "teamId": "veri"
+  },
+  {
+   "id": "p81",
+   "project": "shiftflow",
+   "title": "ShiftFlow · Pilot denemeleri",
+   "status": "doing",
+   "phase": "Pilot",
+   "priority": "normal",
+   "description": "Tarih yaklaşıktır: konuşma notlarındaki güne göre.",
+   "createdAt": "2026-11-10T07:00:00Z",
+   "startedAt": "2026-11-10T07:00:00Z",
+   "plannedStart": "2026-11-20T05:00:00Z",
+   "dueAt": "2026-11-20T20:59:59Z",
+   "teamId": "veri"
+  },
+  {
+   "id": "p82",
+   "project": "shiftflow",
+   "title": "ShiftFlow · Tarayıcı demo sürümü (site için)",
+   "status": "todo",
+   "phase": "Yayın",
+   "priority": "normal",
+   "description": "Tarih yaklaşıktır: konuşma notlarındaki güne göre.",
+   "createdAt": "2026-11-10T07:00:00Z",
+   "plannedStart": "2026-11-20T05:00:00Z",
+   "dueAt": "2026-11-20T20:59:59Z",
+   "teamId": "veri"
+  },
+  {
+   "id": "p83",
+   "project": "otopano",
+   "title": "Otopano · İlk sürüm (claude.ai)",
+   "status": "done",
+   "phase": "Geliştirme",
+   "priority": "normal",
+   "description": "Sitede yer alıp almayacağı ayrıca konuşulacak.\n\nTarih yaklaşıktır: konuşma notlarındaki güne göre.\n\nTermin geriye dönük verildi: gerçekleşen bitiş günü.",
+   "createdAt": "2026-11-03T07:00:00Z",
+   "startedAt": "2026-11-03T07:00:00Z",
+   "completedAt": "2026-11-03T18:00:00Z",
+   "dueAt": "2026-11-03T20:59:59Z",
+   "teamId": "veri"
+  },
+  {
+   "id": "p84",
+   "project": "olcu-elegi",
+   "title": "Ölçü Eleği · İlk sürüm (claude.ai)",
+   "status": "done",
+   "phase": "Geliştirme",
+   "priority": "normal",
+   "description": "Tarih yaklaşıktır: konuşma notlarındaki güne göre.\n\nTermin geriye dönük verildi: gerçekleşen bitiş günü.",
+   "createdAt": "2026-11-04T07:00:00Z",
+   "startedAt": "2026-11-04T07:00:00Z",
+   "completedAt": "2026-11-04T18:00:00Z",
+   "dueAt": "2026-11-04T20:59:59Z",
+   "teamId": "veri"
+  },
+  {
+   "id": "p85",
+   "project": "ortu",
+   "title": "Örtü · İlk sürüm (claude.ai)",
+   "status": "done",
+   "phase": "Geliştirme",
+   "priority": "normal",
+   "description": "Ayrıntılı çalışma gerekiyor.\n\nTarih yaklaşıktır: konuşma notlarındaki güne göre.\n\nTermin geriye dönük verildi: gerçekleşen bitiş günü.",
+   "createdAt": "2026-11-03T07:00:00Z",
+   "startedAt": "2026-11-03T07:00:00Z",
+   "completedAt": "2026-11-03T18:00:00Z",
+   "dueAt": "2026-11-03T20:59:59Z",
+   "teamId": "veri"
+  },
+  {
+   "id": "p86",
+   "project": "sunum",
+   "title": "Sunum Atölyesi · İlk sürüm (claude.ai)",
+   "status": "done",
+   "phase": "Geliştirme",
+   "priority": "normal",
+   "description": "Tarih yaklaşıktır: konuşma notlarındaki güne göre.\n\nTermin geriye dönük verildi: gerçekleşen bitiş günü.",
+   "createdAt": "2026-11-02T07:00:00Z",
+   "startedAt": "2026-11-02T07:00:00Z",
+   "completedAt": "2026-11-02T18:00:00Z",
+   "dueAt": "2026-11-02T20:59:59Z",
+   "teamId": "veri"
+  },
+  {
+   "id": "p87",
+   "project": "pit-duvari",
+   "title": "Pit Duvarı · İlk sürüm (claude.ai)",
+   "status": "done",
+   "phase": "Geliştirme",
+   "priority": "normal",
+   "description": "Tarih yaklaşıktır: konuşma notlarındaki güne göre.\n\nTermin geriye dönük verildi: gerçekleşen bitiş günü.",
+   "createdAt": "2026-11-04T07:00:00Z",
+   "startedAt": "2026-11-04T07:00:00Z",
+   "completedAt": "2026-11-04T18:00:00Z",
+   "dueAt": "2026-11-04T20:59:59Z",
+   "teamId": "veri"
+  },
+  {
+   "id": "p88",
+   "project": "pit-duvari",
+   "title": "Pit Duvarı · Streamlit arayüzü",
+   "status": "todo",
+   "phase": "Geliştirme",
+   "priority": "normal",
+   "description": "Tarih yaklaşıktır: konuşma notlarındaki güne göre.",
+   "createdAt": "2026-11-04T19:00:00Z",
+   "plannedStart": "2026-11-23T05:00:00Z",
+   "dueAt": "2026-11-23T20:59:59Z",
+   "teamId": "veri"
+  },
+  {
+   "id": "p89",
+   "project": "ortu",
+   "title": "Örtü · Ayrıntılı kapsam",
+   "status": "todo",
+   "phase": "Tasarım",
+   "priority": "normal",
+   "description": "Tarih yaklaşıktır: konuşma notlarındaki güne göre.",
+   "createdAt": "2026-11-03T19:00:00Z",
+   "plannedStart": "2026-11-21T05:00:00Z",
+   "dueAt": "2026-11-21T20:59:59Z",
+   "teamId": "veri"
+  },
+  {
+   "id": "p90",
+   "project": "pozisyon",
+   "title": "Pozisyon Uyum · Site veri projesi olarak değerlendir",
+   "status": "todo",
+   "phase": "Fikir",
+   "priority": "normal",
+   "description": "Tarih yaklaşıktır: konuşma notlarındaki güne göre.",
+   "createdAt": "2026-11-16T07:00:00Z",
+   "plannedStart": "2026-11-21T05:00:00Z",
+   "dueAt": "2026-11-21T20:59:59Z",
+   "teamId": "veri"
+  },
+  {
+   "id": "p91",
+   "project": "kesit",
+   "title": "Kesit SQL, Power BI ve Python yayını",
+   "status": "done",
+   "phase": "Geliştirme",
+   "priority": "normal",
+   "description": "Termin geriye dönük verildi: gerçekleşen bitiş günü.",
+   "createdAt": "2026-11-02T13:54:57Z",
+   "startedAt": "2026-11-02T13:54:57Z",
+   "completedAt": "2026-11-02T15:13:34Z",
+   "dueAt": "2026-11-02T20:59:59Z",
+   "teamId": "ogrenme"
+  },
+  {
+   "id": "p92",
+   "project": "kesit",
+   "title": "Kesit İstatistik ve İngilizce tanıtım turu",
+   "status": "done",
+   "phase": "Geliştirme",
+   "priority": "normal",
+   "description": "Termin geriye dönük verildi: gerçekleşen bitiş günü.",
+   "checklist": [
+    {
+     "id": "p92c1",
+     "text": "kesit-istatistik #1 · İngilizce tanıtım turu (?lang=en)",
+     "done": true,
+     "doneAt": "2026-11-16T12:01:48Z"
+    },
+    {
+     "id": "p92c2",
+     "text": "kesit-istatistik #2 · README: English section",
+     "done": true,
+     "doneAt": "2026-11-16T14:33:09Z"
+    }
+   ],
+   "createdAt": "2026-11-09T16:41:46Z",
+   "startedAt": "2026-11-09T16:41:46Z",
+   "completedAt": "2026-11-16T14:33:09Z",
+   "dueAt": "2026-11-16T20:59:59Z",
+   "teamId": "ogrenme"
+  },
+  {
+   "id": "p93",
+   "project": "kesit",
+   "title": "Kesit · 120 istatistik dersi için okuma sayfaları",
+   "status": "done",
+   "phase": "SEO",
+   "priority": "normal",
+   "description": "Termin geriye dönük verildi: gerçekleşen bitiş günü.",
+   "checklist": [
+    {
+     "id": "p93c1",
+     "text": "kesit-istatistik #3 · 120 ders için okuma sayfaları (arama motorları için)",
+     "done": true,
+     "doneAt": "2026-11-16T17:32:50Z"
+    }
+   ],
+   "createdAt": "2026-11-16T17:31:57Z",
+   "startedAt": "2026-11-16T17:31:57Z",
+   "completedAt": "2026-11-16T17:32:50Z",
+   "dueAt": "2026-11-16T20:59:59Z",
+   "teamId": "ogrenme"
+  },
+  {
+   "id": "p94",
+   "project": "kesit",
+   "title": "Kesit · Kullanıcı hesabı: cihazlar arası ilerleme ve kullanım istatistiği",
+   "status": "todo",
+   "phase": "Geliştirme",
+   "priority": "low",
+   "description": "Tarih yaklaşıktır: konuşma notlarındaki güne göre.",
+   "createdAt": "2026-11-16T07:00:00Z",
+   "plannedStart": "2026-11-24T05:00:00Z",
+   "dueAt": "2026-12-18T20:59:59Z",
+   "teamId": "ogrenme"
+  },
+  {
+   "id": "p95",
+   "project": "ingilizce",
+   "title": "İngilizce Atölyesi · Uygulama (eski adıyla Kelime Atölyesi)",
+   "status": "done",
+   "phase": "Geliştirme",
+   "priority": "normal",
+   "description": "Tarih yaklaşıktır: konuşma notlarındaki güne göre.\n\nTermin geriye dönük verildi: gerçekleşen bitiş günü.",
+   "createdAt": "2026-11-09T09:00:00Z",
+   "startedAt": "2026-11-09T09:00:00Z",
+   "completedAt": "2026-11-09T10:07:59Z",
+   "dueAt": "2026-11-09T20:59:59Z",
+   "teamId": "ogrenme"
+  },
+  {
+   "id": "p96",
+   "project": "ingilizce",
+   "title": "İngilizce Atölyesi · Yeni adres ingilizce-atolyesi.ysfdurak.com",
+   "status": "done",
+   "phase": "Yayın",
+   "priority": "normal",
+   "description": "Termin geriye dönük verildi: gerçekleşen bitiş günü.",
+   "checklist": [
+    {
+     "id": "p96c1",
+     "text": "ingilizce-ogrenme-atolyesi #1 · Cloudflare Workers yayın ayarı",
+     "done": true,
+     "doneAt": "2026-11-15T14:06:39Z"
+    },
+    {
+     "id": "p96c2",
+     "text": "ingilizce-ogrenme-atolyesi #2 · Yeni adrese taşıma: ingilizce-atolyesi.ysfdurak.com",
+     "done": true,
+     "doneAt": "2026-11-15T14:18:10Z"
+    },
+    {
+     "id": "p96c3",
+     "text": "ingilizce-ogrenme-atolyesi #3 · Site haritası tarihleri",
+     "done": true,
+     "doneAt": "2026-11-15T14:45:15Z"
+    },
+    {
+     "id": "p96c4",
+     "text": "ingilizce-ogrenme-atolyesi #4 · Erişilebilirlik: renk karşıtlığı, sayfa yapısı ve form etiketleri",
+     "done": true,
+     "doneAt": "2026-11-15T15:16:42Z"
+    },
+    {
+     "id": "p96c5",
+     "text": "ysfdurak.com #4 · İngilizce Atölyesi: tam proje sayfası",
+     "done": true,
+     "doneAt": "2026-11-15T14:00:42Z"
+    },
+    {
+     "id": "p96c6",
+     "text": "ysfdurak.com #5 · İngilizce Atölyesi: yeni adres (ingilizce-atolyesi.ysfdurak.com)",
+     "done": true,
+     "doneAt": "2026-11-15T14:38:52Z"
+    }
+   ],
+   "createdAt": "2026-11-15T14:00:39Z",
+   "startedAt": "2026-11-15T14:00:39Z",
+   "completedAt": "2026-11-15T15:16:42Z",
+   "dueAt": "2026-11-15T20:59:59Z",
+   "teamId": "ogrenme"
+  },
+  {
+   "id": "p97",
+   "project": "kivilcim",
+   "title": "Kıvılcım · 50 oyuna genişletme ve kapanış",
+   "status": "done",
+   "phase": "Geliştirme",
+   "priority": "normal",
+   "description": "Termin geriye dönük verildi: gerçekleşen bitiş günü.",
+   "createdAt": "2026-11-09T16:05:30Z",
+   "startedAt": "2026-11-09T16:05:30Z",
+   "completedAt": "2026-11-09T18:37:34Z",
+   "dueAt": "2026-11-09T20:59:59Z",
+   "teamId": "ogrenme"
+  },
+  {
+   "id": "p98",
+   "project": "kivilcim",
+   "title": "Kıvılcım · Kullanıcı hesabı (sunucuya geçince)",
+   "status": "todo",
+   "phase": "Geliştirme",
+   "priority": "low",
+   "description": "Tarih yaklaşıktır: konuşma notlarındaki güne göre.",
+   "createdAt": "2026-11-09T19:00:00Z",
+   "plannedStart": "2026-11-24T05:00:00Z",
+   "dueAt": "2026-12-18T20:59:59Z",
+   "teamId": "ogrenme"
+  },
+  {
+   "id": "p99",
+   "project": "unite",
+   "title": "Ünite Atölyesi · İlk sürüm (claude.ai)",
+   "status": "done",
+   "phase": "Geliştirme",
+   "priority": "normal",
+   "description": "Tarih yaklaşıktır: konuşma notlarındaki güne göre.\n\nTermin geriye dönük verildi: gerçekleşen bitiş günü.",
+   "createdAt": "2026-10-27T07:00:00Z",
+   "startedAt": "2026-10-27T07:00:00Z",
+   "completedAt": "2026-10-28T07:00:00Z",
+   "dueAt": "2026-10-28T20:59:59Z",
+   "teamId": "ogrenme"
+  },
+  {
+   "id": "p100",
+   "project": "unite",
+   "title": "Ünite Atölyesi · API bağlantısı kararı",
+   "status": "todo",
+   "phase": "Fikir",
+   "priority": "normal",
+   "description": "Tarih yaklaşıktır: konuşma notlarındaki güne göre.",
+   "createdAt": "2026-10-28T18:00:00Z",
+   "plannedStart": "2026-11-21T05:00:00Z",
+   "dueAt": "2026-11-21T20:59:59Z",
+   "teamId": "ogrenme"
+  },
+  {
+   "id": "p101",
+   "project": "havuz",
+   "title": "Fikir · Muhtar (komedi oyunu)",
+   "status": "todo",
+   "phase": "Fikir",
+   "priority": "low",
+   "description": "Tarih yaklaşıktır: konuşma notlarındaki güne göre.",
+   "createdAt": "2026-11-16T07:00:00Z",
+   "plannedStart": "2026-11-24T05:00:00Z",
+   "dueAt": "2026-11-24T20:59:59Z",
+   "teamId": "ogrenme"
+  },
+  {
+   "id": "p102",
+   "project": "havuz",
+   "title": "Fikir · Apartman (yönetici komedi oyunu)",
+   "status": "todo",
+   "phase": "Fikir",
+   "priority": "low",
+   "description": "Tarih yaklaşıktır: konuşma notlarındaki güne göre.",
+   "createdAt": "2026-11-16T07:00:00Z",
+   "plannedStart": "2026-11-24T05:00:00Z",
+   "dueAt": "2026-11-24T20:59:59Z",
+   "teamId": "ogrenme"
+  },
+  {
+   "id": "p103",
+   "project": "havuz",
+   "title": "Fikir · Son Otobüs (hikâye oyunu)",
+   "status": "todo",
+   "phase": "Fikir",
+   "priority": "low",
+   "description": "Tarih yaklaşıktır: konuşma notlarındaki güne göre.",
+   "createdAt": "2026-11-16T07:00:00Z",
+   "plannedStart": "2026-11-24T05:00:00Z",
+   "dueAt": "2026-11-24T20:59:59Z",
+   "teamId": "ogrenme"
+  },
+  {
+   "id": "p104",
+   "project": "havuz",
+   "title": "Fikir · Sorgu Haritası (SQL sorgu haritası)",
+   "status": "todo",
+   "phase": "Fikir",
+   "priority": "low",
+   "description": "Tarih yaklaşıktır: konuşma notlarındaki güne göre.",
+   "createdAt": "2026-11-16T07:00:00Z",
+   "plannedStart": "2026-11-24T05:00:00Z",
+   "dueAt": "2026-11-24T20:59:59Z",
+   "teamId": "ogrenme"
+  },
+  {
+   "id": "p105",
+   "project": "havuz",
+   "title": "Fikir · Kıyas (iki rapor sürümünü karşılaştırma)",
+   "status": "todo",
+   "phase": "Fikir",
+   "priority": "low",
+   "description": "Tarih yaklaşıktır: konuşma notlarındaki güne göre.",
+   "createdAt": "2026-11-16T07:00:00Z",
+   "plannedStart": "2026-11-24T05:00:00Z",
+   "dueAt": "2026-11-24T20:59:59Z",
+   "teamId": "ogrenme"
+  },
+  {
+   "id": "p106",
+   "project": "havuz",
+   "title": "Fikir · Kesit Excel",
+   "status": "todo",
+   "phase": "Fikir",
+   "priority": "low",
+   "description": "Tarih yaklaşıktır: konuşma notlarındaki güne göre.",
+   "createdAt": "2026-11-16T07:00:00Z",
+   "plannedStart": "2026-11-24T05:00:00Z",
+   "dueAt": "2026-11-24T20:59:59Z",
+   "teamId": "ogrenme"
+  },
+  {
+   "id": "p107",
+   "project": "havuz",
+   "title": "Fikir · Power BI Belgeleyici",
+   "status": "todo",
+   "phase": "Fikir",
+   "priority": "low",
+   "description": "Tarih yaklaşıktır: konuşma notlarındaki güne göre.",
+   "createdAt": "2026-11-16T07:00:00Z",
+   "plannedStart": "2026-11-24T05:00:00Z",
+   "dueAt": "2026-11-24T20:59:59Z",
+   "teamId": "ogrenme"
+  },
+  {
+   "id": "p108",
+   "project": "havuz",
+   "title": "Fikir · Sentetik Veri Atölyesi",
+   "status": "todo",
+   "phase": "Fikir",
+   "priority": "low",
+   "description": "Tarih yaklaşıktır: konuşma notlarındaki güne göre.",
+   "createdAt": "2026-11-16T07:00:00Z",
+   "plannedStart": "2026-11-24T05:00:00Z",
+   "dueAt": "2026-11-24T20:59:59Z",
+   "teamId": "ogrenme"
+  }
+ ],
+ "decisions": [
+  {
+   "id": "k1",
+   "project": "site",
+   "title": "Her projeye vaka sayfası; yapay zekâ desteği açıkça yazılır",
+   "reason": "Mülakatta en çok sorgulanacak yer projenin kime ait olduğu. Problemi ve kararları ben verdim, kodu Claude ile yazdım.",
+   "impact": "Proje sayfalarına Rolüm, Sonuçlar, Geri bildirim → değişiklik, Öğrendiklerim bölümleri.",
+   "date": "2026-11-16"
+  },
+  {
+   "id": "k2",
+   "project": "site",
+   "title": "Kesinti izleme sunucunun dışında (GitHub Actions)",
+   "reason": "Sunucu çökerse izleyen de çökmesin; ücretsiz, ayarlar kodda.",
+   "impact": "Yeni proje eklenince kendiliğinden izleniyor.",
+   "date": "2026-11-16"
+  },
+  {
+   "id": "k3",
+   "project": "site",
+   "title": "Olist teslimat analizi kendi becerimin kanıtı olarak sunulmayacak",
+   "reason": "Analizi baştan sona Claude hazırladı.",
+   "impact": "Veri tarafında asıl vaka işteki maliyet dashboard'um olacak.",
+   "date": "2026-11-16"
+  },
+  {
+   "id": "k4",
+   "project": "site",
+   "title": "Sitede yalnızca bitmiş ve pilotu tamamlanmış projeler",
+   "reason": "Yarım proje portföyün güvenilirliğini düşürür.",
+   "impact": "ShiftFlow pilottan sonra; Bütçe Sapma ve Otopano ayrıca konuşulacak.",
+   "date": "2026-11-16"
+  },
+  {
+   "id": "k5",
+   "project": "mcp",
+   "title": "Yeni projeler baştan MCP düşünülerek, ikili yapıyla geliştirilecek",
+   "reason": "Web ve MCP aynı çekirdeği kullanınca kurallar ve sayılar tutarlı kalıyor.",
+   "impact": "İlk uygulama Pusula; Duruş'ta MCP yerine uygulama içi senaryo seçildi.",
+   "date": "2026-11-11"
+  },
+  {
+   "id": "k6",
+   "project": "vz",
+   "title": "İki sürüm, iki dilde ayrı kod, ortak test dosyaları",
+   "reason": "C#'ı tarayıcıda çalıştırmak 5–10 MB indirme demekti.",
+   "impact": "Her gönderimde iki sürümün aynı sonucu ve aynı paketi ürettiği denetleniyor.",
+   "date": "2026-11-16"
+  },
+  {
+   "id": "k7",
+   "project": "durus",
+   "title": "Duruş'a MCP yok; senaryo karşılaştırması uygulamanın içinde",
+   "reason": "Kullanıcının asıl istediği \"şunu değiştirsem ne olur?\" sorusu.",
+   "impact": "\"Senaryo dene\" özelliği eklendi.",
+   "date": "2026-11-15"
+  },
+  {
+   "id": "k8",
+   "project": "destek",
+   "title": "Adam-saat ve verimlilik programdan tamamen çıkarıldı",
+   "reason": "Raporlar kayıt ve kişi sayısıyla çalışacak.",
+   "impact": "Dashboard ve raporlar sadeleşti.",
+   "date": "2026-11-11"
+  },
+  {
+   "id": "k9",
+   "project": "destek",
+   "title": "Talep havuzu yok; geriye dönük giriş süresi bir ayar",
+   "reason": "Talepler WhatsApp'tan geliyor, kayıt ertesi gün ya da sonraki hafta giriliyor.",
+   "impact": "Varsayılan 7 gün, 0–60 arası.",
+   "date": "2026-11-12"
+  },
+  {
+   "id": "k10",
+   "project": "malkabul",
+   "title": "Tedarikçi yalnızca gün seçer; atama ilk gelen önce",
+   "reason": "Saat seçimi kapasite planını bozuyor.",
+   "impact": "Öncelikli sevkiyat türleri önce atanır.",
+   "date": "2026-11-15"
+  },
+  {
+   "id": "k11",
+   "project": "wdl",
+   "title": "Karşılıklı raf yüzleri için varsayılan Model A (tek/çift)",
+   "reason": "En yaygın düzen.",
+   "impact": "Model B adres oluştururken seçilebilir.",
+   "date": "2026-11-12"
+  },
+  {
+   "id": "k12",
+   "project": "yalin-oyun",
+   "title": "Bölüm 1 zaman etüdü ve kapasite üzerine; VSM son bölüme",
+   "reason": "VSM merkezli bölüm 1 fazla yoğundu.",
+   "impact": "Programlar gerçek adımlarıyla oyunda yer alacak.",
+   "date": "2026-11-16"
+  },
+  {
+   "id": "k13",
+   "project": "optimizasyon",
+   "title": "Rampa çizelgeleme optimizasyonu yapılmayacak",
+   "reason": "Kontrolüm dışındaki değişken çok fazla.",
+   "impact": "",
+   "date": "2026-11-12"
+  },
+  {
+   "id": "k14",
+   "project": "ivme",
+   "title": "Öneri içeriği dış yapay zekâya gönderilmez",
+   "reason": "Maskelenmiş olsa bile önerinin kendisi şirket için hassas.",
+   "impact": "MCP yalnızca şirketin kendi yapay zekâsına bağlanan bir seçenek; iki sürüm aynı çekirdekte.",
+   "date": "2026-11-14"
+  },
+  {
+   "id": "k15",
+   "project": "ivme",
+   "title": "Uygulanamayan öneri kazanç adımına geçmez",
+   "reason": "Kazanç raporu şişmesin.",
+   "impact": "Ayrı statüde kapanır.",
+   "date": "2026-11-14"
+  },
+  {
+   "id": "k16",
+   "project": "pusula",
+   "title": "Önce Google, sonra Microsoft girişi",
+   "reason": "Portföy demosu herkesin açabileceği bir girişle başlamalı.",
+   "impact": "Microsoft (Entra) şirket kurulumu için hazır.",
+   "date": "2026-11-12"
+  },
+  {
+   "id": "k17",
+   "project": "aday",
+   "title": "Tek toplam puan yok",
+   "reason": "Sınav, tercih ve senaryo farklı türde kanıt; birleştirmek verinin taşımadığı bir kesinlik iddia eder.",
+   "impact": "İK her ölçütü 0–3 ve yazılı dayanakla değerlendirir.",
+   "date": "2026-11-15"
+  },
+  {
+   "id": "k18",
+   "project": "diyalog",
+   "title": "Aday Atölyesi'nin modülü değil, ayrı uygulama",
+   "reason": "Odakları farklı.",
+   "impact": "İki uygulama birbirine bağlantı verir.",
+   "date": "2026-11-16"
+  },
+  {
+   "id": "k19",
+   "project": "emanet",
+   "title": "Ziyaretçi çağrı verisi yükleyemez; yerel içe aktarma",
+   "reason": "Veri hiçbir yere çıkmamalı.",
+   "impact": "Gerçek çağrılarla deneme kendi makinede/sunucuda.",
+   "date": "2026-11-16"
+  },
+  {
+   "id": "k20",
+   "project": "butce",
+   "title": "Python ve VBA sürümleri işlevce eşdeğer kalacak",
+   "reason": "Her kullanıcıda Power BI yok; Excel her yerde var.",
+   "impact": "",
+   "date": "2026-11-13"
+  },
+  {
+   "id": "k21",
+   "project": "kesit",
+   "title": "Kesit ana sayfası yalnızca Kesit'i gösterir",
+   "reason": "Diğer projeler kişisel sitede.",
+   "impact": "Kesit sayfasında yalnızca alt bilgiden bağlantı.",
+   "date": "2026-11-12"
+  },
+  {
+   "id": "k22",
+   "project": "ingilizce",
+   "title": "Arayüz Türkçe kalır",
+   "reason": "Amaç Türklere İngilizce öğretmek.",
+   "impact": "İngilizce sitede \"Türkçe konuşanlar için\" notu.",
+   "date": "2026-11-15"
+  }
+ ],
+ "blockers": [
+  {
+   "id": "e1",
+   "project": "site",
+   "task": "p12",
+   "title": "Sunucu güncellemesi ve demo kontrolü bitmeden yayınlanmayacak",
+   "owner": "Yusuf Durak",
+   "resolved": false
+  },
+  {
+   "id": "e2",
+   "project": "karar-odasi",
+   "task": "p42",
+   "title": "Raf ve ekipman ölçüleri için gereken standartlar (EN 15620 vb.) ücretli",
+   "owner": "Yusuf Durak",
+   "resolved": false
+  },
+  {
+   "id": "e3",
+   "project": "yalin-oyun",
+   "task": "p47",
+   "title": "Önce diğer projeler bitecek",
+   "owner": "Yusuf Durak",
+   "resolved": false
+  }
+ ]
+}
