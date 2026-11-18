@@ -12,7 +12,7 @@ const runtime = '/src/i18n.js';
 //   npm run build:pilot  → dist-pilot/index.html  (sunucu modu, aynı alan adındaki /api/workspace)
 // Güvenlik politikası (CSP) yalnızca derlemede eklenir; geliştirme sunucusunu engellememesi için.
 const csp = (connect) =>
-  `default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src ${connect}; font-src 'none'; base-uri 'none'; form-action 'none'`;
+  `default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src ${connect}; font-src data:; base-uri 'none'; form-action 'none'`;
 
 export default defineConfig(({ mode }) => {
   const pilot = mode === 'pilot';
