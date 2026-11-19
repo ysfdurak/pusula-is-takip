@@ -101,3 +101,5 @@
 .queue-tabs>button{min-height:40px;padding:9px 12px;font-size:13px}
 .queue-tabs>button.main{min-height:44px;padding:10px 16px;font-size:14px;font-weight:600}
 @media (width<=700px){.queue-tabs{flex-wrap:wrap;gap:6px}.queue-tabs>button{min-height:44px;font-size:14px}.queue-tabs>button.main{flex:1 1 calc(50% - 3px);justify-content:center;min-height:48px;font-size:15px}}
+/* Büyük yazı / dar ekran: rol seçimi kırpılmasın; etiket üstte, seçim ve sıfırla düğmesi alt satırda tam genişlik. */
+@media (width<=700px){.design-banner>div:last-child{min-width:0;align-items:flex-end;gap:8px}.design-banner label{min-width:0;flex-wrap:wrap;gap:4px 10px}.design-banner select{flex:1 1 180px;max-width:100%}}
