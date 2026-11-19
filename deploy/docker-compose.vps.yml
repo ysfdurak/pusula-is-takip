@@ -1,6 +1,8 @@
 # VPS kurulumu: Pusula + Caddy (otomatik HTTPS). Ayrıntı: docs/SUNUCU_KURULUMU.md
 #   cd deploy && docker compose -f docker-compose.vps.yml up -d --build
 # Pusula dışarıya açılmaz; yalnızca Caddy 80/443 portlarını dinler.
+# Proje adı açık (aynı klasördeki başka compose dosyalarıyla karışmasın); birim adları eski kurulumla aynı.
+name: pusula
 services:
   pusula:
     build: ..
@@ -49,6 +51,9 @@ services:
         max-size: "10m"
         max-file: "3"
 volumes:
-  pusula-data: {}
-  caddy-data: {}
-  caddy-config: {}
+  pusula-data:
+    name: deploy_pusula-data
+  caddy-data:
+    name: deploy_caddy-data
+  caddy-config:
+    name: deploy_caddy-config
