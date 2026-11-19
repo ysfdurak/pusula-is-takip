@@ -217,3 +217,19 @@ test('Pusula\'dan çıkarılan kişinin anahtarı çalışmaz', async () => {
     body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'tools/list' }) });
   assert.equal(r.status, 403);
 });
+
+test('istemci kaydı sınırı kalıcı olarak doldurulamaz: kullanılmamış eski kayıtlar silinir', async () => {
+  const { base, store } = await start();
+  const reg = () => fetch(base + '/oauth/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ redirect_uris: [CALLBACK], token_endpoint_auth_method: 'none' }) });
+  const fill = (created) => { const ins = store.db.prepare('INSERT INTO oauth_clients (id, name, redirect_uris, created) VALUES (?, ?, ?, ?)'); for (let i = 0; i < 500; i++) ins.run(`spam-${created}-${i}`, 'spam', '[]', created); };
+  // Saldırgan 500 kayıtla sınırı doldurdu; yeni kayıtlar bir saat boyunca reddedilir.
+  fill(Date.now());
+  assert.equal((await reg()).status, 400);
+  // Bir saat sonra kullanılmamış kayıtlar temizlenir; Claude yeniden bağlanabilir. Kullanılan kayıt silinmez.
+  store.db.prepare('UPDATE oauth_clients SET created = ?').run(Date.now() - 2 * 60 * 60 * 1000);
+  store.db.prepare("INSERT INTO oauth_clients (id, name, redirect_uris, created) VALUES ('spam-x', 'kullanılan', '[]', 0)").run();
+  store.db.prepare("INSERT INTO oauth_tokens (hash, kind, client_id, email, resource, grant_id, expires, created) VALUES ('h', 'refresh', 'spam-x', 'a@b', 'r', 'g', 0, 0)").run();
+  assert.equal((await reg()).status, 201);
+  assert.equal(store.db.prepare("SELECT COUNT(*) AS n FROM oauth_clients WHERE id = 'spam-x'").get().n, 1, 'anahtarı olan istemci kalır');
+  assert.equal(store.db.prepare("SELECT COUNT(*) AS n FROM oauth_clients WHERE id LIKE 'spam-%'").get().n, 1);
+});

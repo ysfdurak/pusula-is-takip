@@ -26,6 +26,7 @@ const REFRESH_TTL = 30 * 864e5;
 const CODE_TTL = 10 * 60e3;
 const PENDING_TTL = 10 * 60e3;
 const MAX_CLIENTS = 500;
+const UNUSED_CLIENT_MS = 60 * 60 * 1000;
 
 const token = () => randomBytes(32).toString('base64url');
 const hash = (value) => createHash('sha256').update(String(value)).digest('base64url');
@@ -145,6 +146,10 @@ export function createOAuthServer({ db, origin, basePath = '', session, isAllowe
     if (body.token_endpoint_auth_method && body.token_endpoint_auth_method !== 'none') {
       return oauthError(res, 400, 'invalid_client_metadata', 'Yalnızca açık istemci (token_endpoint_auth_method: none) desteklenir; PKCE zorunludur.');
     }
+    // Hiç kullanılmamış (kod ya da anahtar almamış) ve bir saatten eski kayıtlar silinir. Böylece sınır
+    // otomatik kayıtlarla kalıcı olarak doldurulamaz; Claude'un yeni bağlantısı en geç bir saat sonra yeniden açılır.
+    db.prepare(`DELETE FROM oauth_clients WHERE created < ? AND id NOT IN (SELECT client_id FROM oauth_tokens)
+      AND id NOT IN (SELECT client_id FROM oauth_codes)`).run(now() - UNUSED_CLIENT_MS);
     if (db.prepare('SELECT COUNT(*) AS n FROM oauth_clients').get().n >= MAX_CLIENTS) {
       return oauthError(res, 400, 'invalid_client_metadata', 'İstemci kaydı sınırına ulaşıldı.');
     }
