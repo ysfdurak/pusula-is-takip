@@ -142,6 +142,17 @@ test('uçtan uca: resmi MCP istemcisi kayıt olur, kullanıcı izin verir, araç
   const grant = list.match(/name="grant" value="([^"]+)"/)[1];
   await fetch(base + '/oauth/baglantilar', { method: 'POST', headers: { Cookie: cookie, Origin: base, 'Content-Type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams({ grant }) });
   assert.equal((await call(refreshed.access_token)).status, 401);
+  // Kabul: bağlantısı kaldırılan entegrasyon yazamaz (iş açma reddedilir, iş oluşmaz) ve yenileme anahtarıyla yeni erişim alamaz.
+  const writes = () => store.db.prepare("SELECT COUNT(*) AS n FROM audit WHERE action LIKE 'mcp:%'").get().n;
+  const before = writes();
+  assert.ok(before >= 1, 'bağlıyken yapılan yazma denetim kaydında');
+  const write = await fetch(base + '/mcp', { method: 'POST', headers: { Authorization: `Bearer ${refreshed.access_token}`, 'Content-Type': 'application/json', Accept: 'application/json, text/event-stream' },
+    body: JSON.stringify({ jsonrpc: '2.0', id: 2, method: 'tools/call', params: { name: 'is_olustur', arguments: { baslik: 'Kaldırılan bağlantıyla iş' } } }) });
+  assert.equal(write.status, 401, 'yazma çağrısı reddedilir');
+  assert.equal(writes(), before, 'yeni yazma kaydı yok: iş oluşmadı');
+  const reMint = await (await fetch(base + '/oauth/token', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({ grant_type: 'refresh_token', refresh_token: refreshed.refresh_token, client_id: provider.client.client_id }) })).json();
+  assert.equal(reMint.error, 'invalid_grant', 'yenileme anahtarı da geçersiz');
   const audits = store.db.prepare("SELECT action FROM audit WHERE action LIKE 'oauth_%'").all().map((r) => r.action);
   assert.deepEqual(audits, ['oauth_grant', 'oauth_revoke']);
 });
