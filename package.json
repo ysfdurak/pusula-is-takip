@@ -23,7 +23,7 @@
     "test:mcp-app": "npm run build:mcp-app && vite build --config vite.mcp-host.config.js && node --disable-warning=ExperimentalWarning tests/e2e/mcpApp.mjs"
   },
   "dependencies": {
-    "@modelcontextprotocol/ext-apps": "^1.7.5",
+    "@modelcontextprotocol/ext-apps": "^2.0.4",
     "@modelcontextprotocol/sdk": "^1.32.2",
     "zod": "^4.6.7"
   },
