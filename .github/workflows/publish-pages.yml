@@ -46,7 +46,7 @@ jobs:
           mkdir -p _site/pilot-onizleme
           cp dist-preview/index.html _site/pilot-onizleme/index.html
           touch _site/.nojekyll
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: _site
   deploy:
