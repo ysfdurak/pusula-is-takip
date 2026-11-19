@@ -26,6 +26,9 @@ Telefon kamerasıyla okutun; uygulama tarayıcıda açılır, kurulum gerekmez. 
 
 ![Benim panom](docs/img/benim-panom.png)
 
+
+**Projeyi anlatırken:** Mülakatta sorulabilecek 10 soru, kısa cevaplar ve verilen kararlar (sorun → karar → bedel): [docs/MULAKAT.md](docs/MULAKAT.md).
+
 ## Ne çözer?
 
 Operasyon ekiplerinde işler WhatsApp, e-posta ve Excel arasında dağılır. Kimin neyi üstlendiği belirsizleşir, geciken iş ancak iş işten geçince fark edilir. Pusula bunun için:
