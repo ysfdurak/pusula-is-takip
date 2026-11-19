@@ -103,3 +103,6 @@
 @media (width<=700px){.queue-tabs{flex-wrap:wrap;gap:6px}.queue-tabs>button{min-height:44px;font-size:14px}.queue-tabs>button.main{flex:1 1 calc(50% - 3px);justify-content:center;min-height:48px;font-size:15px}}
 /* Büyük yazı / dar ekran: rol seçimi kırpılmasın; etiket üstte, seçim ve sıfırla düğmesi alt satırda tam genişlik. */
 @media (width<=700px){.design-banner>div:last-child{min-width:0;align-items:flex-end;gap:8px}.design-banner label{min-width:0;flex-wrap:wrap;gap:4px 10px}.design-banner select{flex:1 1 180px;max-width:100%}}
+/* Büyük yazı / dar ekran: çalışma alanı adı ve ekip kapsamı seçimi kırpılmasın. Seçim kalan genişliği alır;
+   ekip kapsamında etiket üstte, seçim alt satırda tam genişlikte. */
+@media (width<=700px){.topbar{flex-wrap:wrap;height:auto;min-height:66px;row-gap:4px}.mobile-brand{flex:1 1 150px}.mobile-brand select{flex:1 1 auto;width:auto;max-width:100%}.team-context label{flex-wrap:wrap}.team-context label select{flex:1 1 100%}}
