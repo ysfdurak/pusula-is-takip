@@ -2071,7 +2071,7 @@ export function App({ demo = false, preview = false }) {
                             ['week', '7 günlük plan'],
                           ].map(([e, n]) => (
                             <button
-                              className={focusView === e ? 'active' : ''}
+                              className={[focusView === e ? 'active' : '', e === 'today' || e === 'board' ? 'main' : ''].filter(Boolean).join(' ')}
                               aria-pressed={focusView === e}
                               onClick={() => {
                                 if (e === 'pool' && page === 'mine') {
