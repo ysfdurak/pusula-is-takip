@@ -86,7 +86,7 @@ claude.ai'deki özel bağlayıcı sabit anahtar kabul etmez; MCP standardındaki
 | Yenileme anahtarı her kullanımda değişir | Çalınan eski bir yenileme anahtarı işe yaramaz |
 | Anahtar yalnızca bu sunucunun `/mcp` adresi için (resource, RFC 8707) | Başka bir hizmete karşı kullanılamaz |
 | Her istekte üyelik kontrolü | Pusula'dan çıkarılan kişinin anahtarı hemen çalışmaz |
-| Bağlı uygulamalar sayfası (`/oauth/baglantilar`) | Kullanıcı bağlantıyı kendisi kaldırır; anahtar sunucuda hemen geçersiz olur |
+| Bağlı uygulamalar sayfası (`/oauth/baglantilar`) | Kullanıcı bağlantıyı kendisi kaldırır; anahtar sunucuda hemen geçersiz olur. Sayfa her bağlantının son kullanımını, son 5 işlemini (okuma/yazma) ve neler yapıp yapamadığını gösterir; argümanlar kaydedilmez |
 | İzin ve kaldırma denetim kaydında (`oauth_grant`, `oauth_revoke`) | Kim, hangi uygulamaya, ne zaman izin verdi |
 
 **Kişisel erişim anahtarı (yalnızca deneme):** MCP Inspector ya da yerel testler için `MCP_TOKENS="eposta:anahtar"` (en az 32 karakter, `openssl rand -hex 32`) tanımlanabilir. Üretimde gerekmez.

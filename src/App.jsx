@@ -23,6 +23,7 @@ import {
   LayersIcon,
   LoaderCircleIcon,
   LogOutIcon,
+  PlugIcon,
   PlusIcon,
   RefreshCwIcon,
   RotateCcwIcon,
@@ -1816,6 +1817,16 @@ export function App({ demo = false, preview = false }) {
                   <strong>{memberName(user) || 'Pusula'}</strong>
                   <small>{ROLE_LABELS[role]}</small>
                 </span>
+                {!demo && (
+                  <a
+                    className="account-logout"
+                    href="/oauth/baglantilar"
+                    title="Bağlı uygulamalar (Claude vb.)"
+                    aria-label="Bağlı uygulamalar (Claude vb.)"
+                  >
+                    <PlugIcon size={16} />
+                  </a>
+                )}
                 {!demo && (
                   <a
                     className="account-logout"

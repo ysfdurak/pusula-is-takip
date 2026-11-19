@@ -39,6 +39,7 @@
 /*$vite$:1*/
 /* Sunucu modunda oturumu kapat bağlantısı */
 .account-logout{margin-left:auto;display:grid;place-items:center;width:30px;height:30px;border-radius:8px;color:#d9e6c8}
+.account-logout+.account-logout{margin-left:2px}
 .account-logout:hover,.account-logout:focus-visible{background:rgba(255,255,255,.12);color:#fff}
 
 /* Kanban kartı: ikincil işlemler "Diğer" menüsünde */

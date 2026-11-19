@@ -5,7 +5,7 @@ import { processOutbox } from './mail/outbox.js';
 import { runDigest } from './mail/digest.js';
 import { randomToken } from './auth.js';
 import { createHash, randomUUID, timingSafeEqual } from 'node:crypto';
-import { createMcpHandler } from './mcp.js';
+import { createMcpHandler, MCP_TOOL_KINDS } from './mcp.js';
 import { createOAuthServer } from './oauth.js';
 import { createDemoSandboxes } from './demo.js';
 import { createAnalytics } from './analytics.js';
@@ -108,6 +108,7 @@ export function createApp({ config, store, auth, html, mailer = null, log = () =
         basePath: new URL(config.appUrl).pathname.replace(/\/$/, ''),
         session: (req) => store.sessions.get(cookieValue(req), config.sessionIdleMinutes),
         isAllowed: (email) => admins.has(email) || isMember(email),
+        tools: MCP_TOOL_KINDS,
         http: { headers: (...a) => headers(...a), json: (...a) => json(...a), page: (...a) => page(...a), redirect: (...a) => redirect(...a), readBody: (...a) => readBody(...a) },
         audit: (email, action, detail) => {
           store.audit(email, action, detail);
@@ -530,6 +531,9 @@ ${link ? `<p style="margin:20px 0 0"><a href="${escapeHtml(link.href)}" style="d
       }
       try {
         const body = await readJson(req);
+        // Bağlı uygulamalar sayfası için son kullanım ve araç adı (argümanlar yazılmaz).
+        const grant = oauth?.verifyAccessToken(String(req.headers.authorization || '').replace(/^Bearer\s+/i, ''))?.grantId;
+        if (grant) for (const m of Array.isArray(body) ? body : [body]) oauth.recordUse(grant, m?.method === 'tools/call' ? m.params?.name : null);
         return await mcp.handle(req, res, email, body);
       } catch (err) {
         if (err.status) return json(res, err.status, { error: err.message });

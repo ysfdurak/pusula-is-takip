@@ -137,8 +137,18 @@ test('uçtan uca: resmi MCP istemcisi kayıt olur, kullanıcı izin verir, araç
   assert.equal((await call(old.access_token)).status, 401);
   assert.equal((await call(refreshed.access_token)).status, 200);
 
-  // 7) Bağlı uygulamalar sayfasından kaldırınca anahtar hemen çalışmaz
+  // 6b) Bağlı uygulamalar: son kullanım, son işlemler (okuma/yazma etiketiyle) ve bağlantının yapabildikleri görünür
   const list = await (await fetch(base + '/oauth/baglantilar', { headers: { Cookie: cookie } })).text();
+  assert.match(list, /Son kullanım: \d{2}\.\d{2}\.\d{4}/);
+  assert.match(list, /İş açma <span[^>]*>yazma<\/span>/, 'yapılan yazma işlemi listede');
+  assert.match(list, /Bu bağlantı neler yapabilir\?/);
+  assert.match(list, /İşleri listeleme/);
+  assert.match(list, /Yapamaz: üye ve rol yönetimi/);
+  assert.doesNotMatch(list, /OAuth ile açılan iş/, 'argümanlar (iş başlığı) yazılmaz');
+  const usage = store.db.prepare('SELECT tool FROM oauth_usage').all().map((r) => r.tool);
+  assert.ok(usage.includes('is_olustur'));
+
+  // 7) Bağlı uygulamalar sayfasından kaldırınca anahtar hemen çalışmaz
   const grant = list.match(/name="grant" value="([^"]+)"/)[1];
   await fetch(base + '/oauth/baglantilar', { method: 'POST', headers: { Cookie: cookie, Origin: base, 'Content-Type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams({ grant }) });
   assert.equal((await call(refreshed.access_token)).status, 401);
@@ -155,6 +165,7 @@ test('uçtan uca: resmi MCP istemcisi kayıt olur, kullanıcı izin verir, araç
   assert.equal(reMint.error, 'invalid_grant', 'yenileme anahtarı da geçersiz');
   const audits = store.db.prepare("SELECT action FROM audit WHERE action LIKE 'oauth_%'").all().map((r) => r.action);
   assert.deepEqual(audits, ['oauth_grant', 'oauth_revoke']);
+  assert.equal(store.db.prepare('SELECT COUNT(*) AS n FROM oauth_usage').get().n, 0, 'kaldırılan bağlantının kullanım kaydı da silinir');
 });
 
 test('saldırı denemeleri: yanlış PKCE, yanlış dönüş adresi, başka kaynak, başkasının izin isteği, red', async () => {

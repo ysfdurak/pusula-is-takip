@@ -55,7 +55,7 @@ export function validRedirectUri(value) {
  * @param {(email, action, detail) => void} o.audit
  * @param {() => number} [o.now]
  */
-export function createOAuthServer({ db, origin, basePath = '', session, isAllowed, http, audit, now = () => Date.now() }) {
+export function createOAuthServer({ db, origin, basePath = '', session, isAllowed, http, audit, now = () => Date.now(), tools = {} }) {
   db.exec(`
     CREATE TABLE IF NOT EXISTS oauth_clients (id TEXT PRIMARY KEY, name TEXT NOT NULL, redirect_uris TEXT NOT NULL, created INTEGER NOT NULL);
     CREATE TABLE IF NOT EXISTS oauth_pending (id TEXT PRIMARY KEY, email TEXT NOT NULL, params TEXT NOT NULL, created INTEGER NOT NULL);
@@ -63,6 +63,8 @@ export function createOAuthServer({ db, origin, basePath = '', session, isAllowe
       challenge TEXT NOT NULL, resource TEXT NOT NULL, created INTEGER NOT NULL);
     CREATE TABLE IF NOT EXISTS oauth_tokens (hash TEXT PRIMARY KEY, kind TEXT NOT NULL, client_id TEXT NOT NULL, email TEXT NOT NULL,
       resource TEXT NOT NULL, grant_id TEXT NOT NULL, expires INTEGER NOT NULL, created INTEGER NOT NULL);
+    CREATE TABLE IF NOT EXISTS oauth_usage (grant_id TEXT NOT NULL, time INTEGER NOT NULL, tool TEXT);
+    CREATE INDEX IF NOT EXISTS oauth_usage_grant ON oauth_usage (grant_id, time);
   `);
 
   const issuer = origin + basePath;
@@ -96,9 +98,22 @@ export function createOAuthServer({ db, origin, basePath = '', session, isAllowe
   /** Erişim anahtarını doğrular; geçerliyse kullanıcının e-postası. */
   function verifyAccessToken(value) {
     if (!value) return null;
-    const row = db.prepare("SELECT email, client_id, resource, expires FROM oauth_tokens WHERE hash = ? AND kind = 'access'").get(hash(value));
+    const row = db.prepare("SELECT email, client_id, resource, grant_id, expires FROM oauth_tokens WHERE hash = ? AND kind = 'access'").get(hash(value));
     if (!row || row.expires <= now() || row.resource !== resource) return null;
-    return { email: row.email, clientId: row.client_id };
+    return { email: row.email, clientId: row.client_id, grantId: row.grant_id };
+  }
+
+  /**
+   * Bağlantının kullanımını yazar: araç çağrısıysa aracın adı, değilse (bağlanma, araç listesi) yalnız zaman.
+   * Bağlantı başına son 50 kayıt tutulur; ardışık araçsız istekler tek satırda birleşir. Argümanlar yazılmaz.
+   */
+  function recordUse(grantId, tool = null) {
+    if (!grantId) return;
+    const t = now();
+    const last = db.prepare('SELECT rowid, tool FROM oauth_usage WHERE grant_id = ? ORDER BY time DESC, rowid DESC LIMIT 1').get(grantId);
+    if (!tool && last && !last.tool) db.prepare('UPDATE oauth_usage SET time = ? WHERE rowid = ?').run(t, last.rowid);
+    else db.prepare('INSERT INTO oauth_usage (grant_id, time, tool) VALUES (?, ?, ?)').run(grantId, t, tool ? String(tool).slice(0, 60) : null);
+    db.prepare('DELETE FROM oauth_usage WHERE grant_id = ? AND rowid NOT IN (SELECT rowid FROM oauth_usage WHERE grant_id = ? ORDER BY time DESC, rowid DESC LIMIT 50)').run(grantId, grantId);
   }
 
   function purge() {
@@ -298,21 +313,45 @@ export function createOAuthServer({ db, origin, basePath = '', session, isAllowe
       if (!requestOrigin || requestOrigin !== origin) return page(res, 403, 'İstek reddedildi', 'İstek başka bir siteden geldi.');
       const form = await readBody(req, 'form');
       const removed = db.prepare('DELETE FROM oauth_tokens WHERE grant_id = ? AND email = ?').run(String(form.grant || ''), user.email);
-      if (removed.changes) audit(user.email, 'oauth_revoke', String(form.grant).slice(0, 8));
+      if (removed.changes) {
+        db.prepare('DELETE FROM oauth_usage WHERE grant_id = ?').run(String(form.grant));
+        audit(user.email, 'oauth_revoke', String(form.grant).slice(0, 8));
+      }
     }
     const rows = db
       .prepare(
         "SELECT t.grant_id, c.name, MIN(t.created) AS since FROM oauth_tokens t JOIN oauth_clients c ON c.id = t.client_id WHERE t.email = ? AND t.kind = 'refresh' AND t.expires > ? GROUP BY t.grant_id, c.name ORDER BY since DESC",
       )
       .all(user.email, now());
+    const when = (t) => new Date(t).toLocaleString('tr-TR', { timeZone: 'Europe/Istanbul', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    const kinds = Object.entries(tools);
+    const names = (k) => kinds.filter(([, v]) => v[1] === k).map(([, v]) => escapeHtml(v[0])).join(' · ');
+    const tag = (k) => k === 'write'
+      ? '<span style="background:#fdf1e3;color:#8a4b0f;border-radius:4px;padding:0 6px;font-size:12px">yazma</span>'
+      : '<span style="background:#e9f3ee;color:#2c6549;border-radius:4px;padding:0 6px;font-size:12px">okuma</span>';
+    // Ne yapabilir: araç listesinden (okuma/yazma), ne yapamaz: izin ekranındaki sınırlar.
+    const scope = kinds.length
+      ? `<details style="margin-top:6px"><summary style="cursor:pointer;font-size:13px">Bu bağlantı neler yapabilir?</summary>
+<p style="margin:6px 0 2px;font-size:13px">${tag('read')} ${names('read')}</p>
+<p style="margin:2px 0;font-size:13px">${tag('write')} ${names('write')}</p>
+<p style="margin:2px 0 0;font-size:13px;color:#5d6f66">Yapamaz: üye ve rol yönetimi, çalışma kuralları, silme, ekler. Yalnız senin görebildiğin işlerde, senin yetkinle çalışır.</p></details>`
+      : '';
+    const recent = (grantId) => db.prepare('SELECT time, tool FROM oauth_usage WHERE grant_id = ? AND tool IS NOT NULL ORDER BY time DESC, rowid DESC LIMIT 5').all(grantId);
+    const lastUsed = (grantId) => db.prepare('SELECT MAX(time) AS t FROM oauth_usage WHERE grant_id = ?').get(grantId)?.t;
     const list = rows.length
       ? rows
-          .map(
-            (r) => `<li style="display:flex;justify-content:space-between;align-items:center;gap:12px;padding:8px 0;border-top:1px solid #eef0ea">
-<span><b>${escapeHtml(r.name)}</b><br><small style="color:#5d6f66">Bağlantı: ${new Date(r.since).toLocaleDateString('tr-TR')}</small></span>
+          .map((r) => {
+            const used = lastUsed(r.grant_id);
+            const ops = recent(r.grant_id);
+            const opsHtml = ops.length
+              ? `<ul style="margin:6px 0 0;padding-left:18px;font-size:13px">${ops.map((o) => `<li>${when(o.time)} · ${escapeHtml(tools[o.tool]?.[0] ?? o.tool)} ${tag(tools[o.tool]?.[1] ?? 'read')}</li>`).join('')}</ul>`
+              : '<p style="margin:6px 0 0;font-size:13px;color:#5d6f66">Henüz bir işlem yapmadı.</p>';
+            return `<li style="padding:10px 0;border-top:1px solid #eef0ea"><div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+<span><b>${escapeHtml(r.name)}</b><br><small style="color:#5d6f66">Bağlantı: ${new Date(r.since).toLocaleDateString('tr-TR')} · Son kullanım: ${used ? when(used) : 'henüz kullanılmadı'}</small></span>
 <form method="post" action="${basePath}/oauth/baglantilar" style="margin:0"><input type="hidden" name="grant" value="${escapeHtml(r.grant_id)}">
-<button type="submit" style="background:transparent;border:1px solid #c9d1c4;border-radius:6px;padding:6px 12px;cursor:pointer">Kaldır</button></form></li>`,
-          )
+<button type="submit" style="background:transparent;border:1px solid #c9d1c4;border-radius:6px;padding:6px 12px;cursor:pointer">Kaldır</button></form></div>
+<p style="margin:8px 0 0;font-size:13px;font-weight:bold">Son işlemler</p>${opsHtml}${scope}</li>`;
+          })
           .join('')
       : '<li style="color:#5d6f66">Bağlı uygulama yok.</li>';
     headers(res, { 'Content-Type': 'text/html; charset=utf-8', 'Content-Security-Policy': "default-src 'none'; style-src 'unsafe-inline'; form-action 'self'; frame-ancestors 'none'" });
@@ -351,5 +390,5 @@ export function createOAuthServer({ db, origin, basePath = '', session, isAllowe
     return false;
   }
 
-  return { handle, verifyAccessToken, purge, resource, resourceMetadataUrl };
+  return { handle, verifyAccessToken, recordUse, purge, resource, resourceMetadataUrl };
 }

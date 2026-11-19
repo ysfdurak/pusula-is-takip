@@ -80,6 +80,26 @@ const TOOLS = [
 ];
 
 export const MCP_TOOL_NAMES = [...TOOLS.map(([name]) => name), 'panom', 'geri_bildirim_gonder'];
+
+/** Bağlı uygulamalar sayfası için: aracın Türkçe adı ve okuma mı yazma mı olduğu. */
+export const MCP_TOOL_KINDS = {
+  calisma_alanlarim: ['Çalışma alanlarını listeleme', 'read'],
+  gundemim: ['Gündemini okuma (geciken, bugün, bu hafta)', 'read'],
+  isleri_listele: ['İşleri listeleme', 'read'],
+  is_detayi: ['İş ayrıntısını okuma', 'read'],
+  ekip_durumu: ['Ekip durumunu okuma', 'read'],
+  engelleri_listele: ['Engelleri listeleme', 'read'],
+  proje_durumu: ['Proje durumunu okuma', 'read'],
+  panom: ['Panoyu gösterme', 'read'],
+  kullanim_istatistikleri: ['Kullanım istatistiklerini okuma (yönetici)', 'read'],
+  is_olustur: ['İş açma', 'write'],
+  durum_degistir: ['İş durumunu değiştirme', 'write'],
+  sorumlu_ata: ['Sorumlu atama', 'write'],
+  termin_degistir: ['Termin değiştirme (gerekçeyle)', 'write'],
+  kontrol_maddesi_isaretle: ['Kontrol maddesi işaretleme', 'write'],
+  yorum_ekle: ['Yorum ekleme', 'write'],
+  geri_bildirim_gonder: ['Pusula ekibine geri bildirim gönderme', 'write'],
+};
 /** Yalnızca Pusula yöneticisine (PUSULA_ADMINS) görünen araçlar */
 export const ADMIN_TOOL_NAMES = ['kullanim_istatistikleri'];
 
