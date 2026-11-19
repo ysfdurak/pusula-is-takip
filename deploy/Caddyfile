@@ -2,5 +2,14 @@
 # Alan adını kendi adresinle değiştir. Ayrıntı: docs/SUNUCU_KURULUMU.md
 pusula.ysfdurak.com {
 	encode zstd gzip
+	# Güvenlik başlıkları (uygulama kendi CSP'sini gönderir; ? = uygulama göndermediyse ekle)
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options "nosniff"
+		?Referrer-Policy "strict-origin-when-cross-origin"
+		?Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=()"
+		?X-Frame-Options "DENY"
+		-Server
+	}
 	reverse_proxy pusula:8080
 }

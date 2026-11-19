@@ -2,6 +2,10 @@
 # Caddy (HTTPS) ve gece yedeği ortak altyapıda: github.com/ysfdurak/ysfdurak.com → sunucu/
 #   cd deploy && docker compose -f docker-compose.ortak.yml up -d --build
 # Pusula hiçbir portu dışarı açmaz; ortak Caddy "web" ağı üzerinden pusula:8080'e ulaşır.
+# Proje adı açık: Destek de "deploy" klasöründen çalışır; adsız kalırsa Docker ikisini tek proje sanar ve
+# birinin "down" ya da "--remove-orphans" komutu ötekini durdurabilir. Birim adı eski kurulumdaki adla aynı tutuldu
+# (deploy_pusula-data), veri kaybolmaz. Kurulumdan önce kontrol: sudo docker volume ls | grep pusula
+name: pusula
 services:
   pusula:
     build: ..
@@ -10,6 +14,22 @@ services:
     volumes:
       - pusula-data:/data
     restart: unless-stopped
+    # Sertleştirme (Kasım 2026 güvenlik taraması): kök dosya sistemi salt okunur, yazma yalnız /data ve /tmp'de;
+    # Linux yetkileri kapalı, yetki yükseltme yok; bellek, süreç ve kayıt boyutu sınırlı.
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    mem_limit: 512m
+    pids_limit: 256
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
     networks:
       - web
 
@@ -18,4 +38,5 @@ networks:
     external: true
 
 volumes:
-  pusula-data: {}
+  pusula-data:
+    name: deploy_pusula-data

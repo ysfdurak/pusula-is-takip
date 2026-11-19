@@ -543,7 +543,8 @@ ${link ? `<p style="margin:20px 0 0"><a href="${escapeHtml(link.href)}" style="d
 
     // Arayüz (tek dosya)
     if (req.method === 'GET' && (path === '/' || path === '/index.html')) {
-      headers(res, { 'Content-Type': 'text/html; charset=utf-8' });
+      // Tek dosyalık derleme betiği satır içinde taşır ('unsafe-inline'); dış adrese bağlantı ve çerçevelenme kapalı.
+      headers(res, { 'Content-Type': 'text/html; charset=utf-8', 'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self'; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'", 'Permissions-Policy': 'camera=(), microphone=(), geolocation=(), payment=(), usb=()' });
       res.statusCode = 200;
       return res.end(pageHtml);
     }

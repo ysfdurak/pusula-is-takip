@@ -10,5 +10,21 @@ services:
     volumes:
       - pusula-data:/data
     restart: unless-stopped
+    # Sertleştirme (Kasım 2026 güvenlik taraması): kök dosya sistemi salt okunur, yazma yalnız /data ve /tmp'de;
+    # Linux yetkileri kapalı, yetki yükseltme yok; bellek, süreç ve kayıt boyutu sınırlı.
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    mem_limit: 512m
+    pids_limit: 256
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 volumes:
   pusula-data: {}

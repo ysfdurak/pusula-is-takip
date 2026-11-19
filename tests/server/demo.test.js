@@ -130,3 +130,16 @@ test('süre dolunca alan, verisi ve oturumu silinir; sınır dolunca yeni alan a
   // Yeniden giren yeni alan alır
   assert.equal((await login(AYSE)).status, 200);
 });
+
+test('güvenlik başlıkları: ana sayfa CSP ile gelir, dış adrese bağlantı ve çerçevelenme kapalı', async () => {
+  const { base, login, cookieOf } = await start();
+  const cookie = cookieOf(await login(AYSE));
+  const r = await fetch(base + '/', { headers: { Cookie: cookie } });
+  const csp = r.headers.get('content-security-policy') || '';
+  assert.match(csp, /default-src 'self'/);
+  assert.match(csp, /connect-src 'self'(;|$)/);
+  assert.match(csp, /frame-ancestors 'none'/);
+  assert.match(csp, /object-src 'none'/);
+  assert.equal(r.headers.get('x-content-type-options'), 'nosniff');
+  assert.match(r.headers.get('permissions-policy') || '', /camera=\(\)/);
+});
