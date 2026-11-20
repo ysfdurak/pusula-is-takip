@@ -383,7 +383,13 @@ ${link ? `<p style="margin:20px 0 0"><a href="${escapeHtml(link.href)}" style="d
     }
     if (path === '/auth/callback' && req.method === 'GET' && auth) {
       if (url.searchParams.get('error')) {
-        return page(res, 400, 'Giriş tamamlanamadı', url.searchParams.get('error_description') || url.searchParams.get('error'), { href: `${basePath}/auth/login`, text: 'Yeniden dene' });
+        // Adres çubuğundaki serbest metin sayfaya yazılmaz: başkası Pusula adresinde sahte bir uyarı gösteremesin.
+        const code = String(url.searchParams.get('error')).slice(0, 60);
+        log(`Giriş sağlayıcısı hata döndü: ${code}`);
+        const message = /^[a-z_]+$/.test(code)
+          ? `Giriş hesabı sağlayıcısı girişi tamamlamadı (kod: ${code}). İzin ekranını kapattıysan ya da hesap seçmediysen yeniden dene.`
+          : 'Giriş hesabı sağlayıcısı girişi tamamlamadı. İzin ekranını kapattıysan ya da hesap seçmediysen yeniden dene.';
+        return page(res, 400, 'Giriş tamamlanamadı', message, { href: `${basePath}/auth/login`, text: 'Yeniden dene' });
       }
       const state = url.searchParams.get('state');
       const saved = state && readCookie(req, LOGIN_COOKIE) === state ? store.loginStates.take(state) : null;

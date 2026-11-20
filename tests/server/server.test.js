@@ -325,3 +325,16 @@ test('ayarlar: üretimde dev girişi ve http adres reddedilir; eksik Microsoft b
   assert.match(loadConfig({ APP_URL: 'https://p.test/pusula/', ENTRA_TENANT_ID: 't', ENTRA_CLIENT_ID: 'c', ENTRA_CLIENT_SECRET: 's' }).errors.join(), /kökü olmalı/);
   assert.deepEqual(loadConfig({ APP_URL: 'http://localhost:8080/', AUTH_MODE: 'dev' }).errors, []);
 });
+
+test('giriş hata sayfası adres çubuğundaki serbest metni yazmaz (sahte uyarı gösterilemez)', async () => {
+  const s = await start();
+  const sahte = 'Hesabınız askıya alındı. Hemen 0555 000 00 00 numarasını arayın';
+  const r = await fetch(`${s.base}/auth/callback?error=access_denied&error_description=${encodeURIComponent(sahte)}`, { redirect: 'manual' });
+  assert.equal(r.status, 400);
+  const html = await r.text();
+  assert.ok(!html.includes('askıya'), 'error_description sayfaya yazılmamalı');
+  assert.match(html, /kod: access_denied/);
+  const bozuk = await (await fetch(`${s.base}/auth/callback?error=${encodeURIComponent('<b>x</b> metin')}`, { redirect: 'manual' })).text();
+  assert.ok(!bozuk.includes('metin') && !bozuk.includes('kod:'), 'biçimi tutmayan hata kodu gösterilmez');
+  await s.close();
+});

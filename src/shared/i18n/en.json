@@ -1172,5 +1172,7 @@
  "Zamanında tamamlanan ": "Completed on time ",
  "Zorunlu kontrol adımlarını tamamla.": "Complete the required checklist steps.",
  "Zorunluluk kapalıysa süre sınırı tanımlı olsa da terminsiz iş kaydedilebilir.": "If not mandatory, a task without a due date can be saved even when a duration limit is set.",
- "Bağlı uygulamalar (Claude vb.)": "Connected apps (Claude etc.)"
+ "Bağlı uygulamalar (Claude vb.)": "Connected apps (Claude etc.)",
+ "Giriş hesabı sağlayıcısı girişi tamamlamadı (kod: {0}). İzin ekranını kapattıysan ya da hesap seçmediysen yeniden dene.": "The sign-in provider didn’t complete the sign-in (code: {0}). If you closed the consent screen or didn’t pick an account, try again.",
+ "Giriş hesabı sağlayıcısı girişi tamamlamadı. İzin ekranını kapattıysan ya da hesap seçmediysen yeniden dene.": "The sign-in provider didn’t complete the sign-in. If you closed the consent screen or didn’t pick an account, try again."
 }
