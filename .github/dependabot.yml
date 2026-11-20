@@ -12,6 +12,12 @@ updates:
     groups:
       kucuk-guncellemeler:
         update-types: ["minor", "patch"]
+    # ext-apps 2, MCP SDK 2'nin bölünmüş paketlerini (@modelcontextprotocol/client, server, node) ister;
+    # Pusula SDK 1.x kullanıyor. İkisi birlikte, ayrı bir iş olarak geçirilecek (tel protokolü değişmedi,
+    # 1.x istemci 2.x sunucularla çalışır). Kasım 2026: 2.0.4 ile MCP App tarayıcı testi zaman aşımına uğradı.
+    ignore:
+      - dependency-name: "@modelcontextprotocol/ext-apps"
+        update-types: ["version-update:semver-major"]
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
