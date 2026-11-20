@@ -16,6 +16,7 @@ Tarayıcı ──(oturum çerezi)──▶ /api/workspace ───────�
 - **İnce komutlar.** Web arayüzü tüm çalışma alanını kaydeder. MCP ise "tek iş, tek değişiklik" komutlarını kullanır (`src/shared/taskCommands.js`). Arada başka biri kaydederse komut güncel veriyle bir kez yeniden dener; kimsenin değişikliği ezilmez.
 - **Durumsuz.** Her istek bağımsızdır, sunucu MCP oturumu tutmaz (yalnızca `POST /mcp`).
 - **Denetim kaydı.** Her yazma işlemi `mcp:<araç>` adıyla denetim kaydına (audit) düşer.
+- **SDK sürümü (20 Kasım 2026).** Sunucu MCP SDK 2'yi kullanır: `@modelcontextprotocol/server` (`McpServer`), `@modelcontextprotocol/node` (`NodeStreamableHTTPServerTransport`) ve `@modelcontextprotocol/ext-apps` 2. SDK 2'de araç girdi şeması `z.object({...})` olarak verilir (ham alan nesnesi değil). Tel protokolü değişmedi: testler bilerek eski SDK 1 istemcisiyle bağlanır, böylece 1.x istemcilerin (eski Claude sürümleri, Inspector) çalıştığı da sınanır. Deneme host'u (`tools/mcp-host`) `AppBridge` ile uyum için SDK 2 istemcisini (`@modelcontextprotocol/client`) kullanır.
 
 ## Araçlar
 

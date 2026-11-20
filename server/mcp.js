@@ -7,8 +7,8 @@
 //
 // Bilerek MCP'ye açılmayanlar: üye ve rol yönetimi, çalışma kuralları, iş silme, ek dosya.
 // Yapay zekânın yanlış yorumlamasının bedeli yüksek olan işlemler yalnızca web arayüzünden yapılır.
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
+import { McpServer } from '@modelcontextprotocol/server';
+import { NodeStreamableHTTPServerTransport } from '@modelcontextprotocol/node';
 import { z } from 'zod';
 import { RESOURCE_MIME_TYPE, registerAppResource, registerAppTool } from '@modelcontextprotocol/ext-apps/server';
 import { createTaskCommands } from '../src/shared/taskCommands.js';
@@ -127,7 +127,8 @@ export function createMcpHandler({ service, newId, audit, afterWrite = () => {},
       { instructions: 'Pusula, Türkçe bir iş ve ekip takip sistemidir. Tarihler Türkiye saatine göredir. Kullanıcı yalnızca yetkisi olan işleri görür ve değiştirebilir. Bir işlem reddedilirse hata mesajını kullanıcıya olduğu gibi aktar.' },
     );
     for (const [name, description, inputSchema, annotations, run] of TOOLS) {
-      server.registerTool(name, { description, inputSchema, annotations }, async (args) => {
+      // SDK 2: girdi şeması ham alan nesnesi değil, z.object(...) olmalı.
+      server.registerTool(name, { description, inputSchema: z.object(inputSchema), annotations }, async (args) => {
         try {
           const result = run(commands, actor, args);
           onTool(actor, name);
@@ -164,7 +165,7 @@ export function createMcpHandler({ service, newId, audit, afterWrite = () => {},
         title: 'Benim panom',
         description:
           'Kullanıcının Pusula panosunu etkileşimli olarak gösterir: geciken, bugün ve bu hafta termini olan işler; ekip yöneticisiyse sorumlu bekleyen ekip işleri. Kullanıcı işleri panodan başlatıp tamamlayabilir. "Panomu göster", "işlerime bakalım" gibi istekler için bunu kullan; yalnızca bilgi gerekiyorsa gundemim yeterlidir.',
-        inputSchema: { calismaAlani: ws },
+        inputSchema: z.object({ calismaAlani: ws }),
         annotations: READ,
         _meta: { ui: { resourceUri: BOARD_URI } },
       },
@@ -212,11 +213,11 @@ export function createMcpHandler({ service, newId, audit, afterWrite = () => {},
         {
           description:
             "Kullanıcının Pusula hakkındaki görüşünü uygulamanın geliştiricisine iletir. Yalnızca kullanıcı açıkça geri bildirim vermek istediğinde ve onun sözleriyle kullan; kendin yorum ekleme. E-posta yalnızca kullanıcı 'bana dönebilirsiniz' derse paylaşılır (iletisim: true).",
-          inputSchema: {
+          inputSchema: z.object({
             metin: z.string().max(2000).describe('Kullanıcının kendi sözleri'),
             puan: z.number().int().min(1).max(5).optional().describe('Kullanıcı bir puan verdiyse 1-5'),
             iletisim: z.boolean().optional().describe('Kullanıcı e-postayla dönülmesini isterse true'),
-          },
+          }),
           annotations: WRITE,
         },
         async (args) => reply(() => (onTool(actor, 'geri_bildirim_gonder'), feedback(actor, { message: args.metin, rating: args.puan, contact: args.iletisim === true, screen: 'claude' }))),
@@ -228,7 +229,7 @@ export function createMcpHandler({ service, newId, audit, afterWrite = () => {},
         {
           description:
             'Yalnızca Pusula yöneticisi için: ziyaretçi demo alanlarının kullanım özeti. Kaç kişi denedi, kaçı geri döndü, hangi özellikleri web ve Claude üzerinden kullandılar, huni ve geri bildirimler (puan ve metin).',
-          inputSchema: {},
+          inputSchema: z.object({}),
           annotations: READ,
         },
         async () => reply(() => stats()),
@@ -239,7 +240,7 @@ export function createMcpHandler({ service, newId, audit, afterWrite = () => {},
   /** /mcp isteğini işler. `actor` kimliği doğrulanmış kullanıcının e-postasıdır. */
   async function handle(req, res, actor, body) {
     const server = buildServer(actor);
-    const transport = new StreamableHTTPServerTransport({ sessionIdGenerator: undefined, enableJsonResponse: true });
+    const transport = new NodeStreamableHTTPServerTransport({ sessionIdGenerator: undefined, enableJsonResponse: true });
     res.on('close', () => {
       transport.close();
       server.close();

@@ -4,8 +4,8 @@
 //   3) HTML'i yalıtılmış iframe'de aç (sandbox="allow-scripts": sayfa host'un çerezlerine ve DOM'una erişemez)
 //   4) AppBridge: iframe ile postMessage üzerinden konuşur; iframe'in araç çağrılarını sunucuya iletir
 //   5) Aracı çağır ve sonucunu iframe'e gönder → pano çizilir
-import { Client } from '@modelcontextprotocol/sdk/client/index.js';
-import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
+// ext-apps 2'nin AppBridge'i MCP SDK 2 istemcisiyle çalışır (@modelcontextprotocol/client).
+import { Client, StreamableHTTPClientTransport } from '@modelcontextprotocol/client';
 import { AppBridge, PostMessageTransport, getToolUiResourceUri } from '@modelcontextprotocol/ext-apps/app-bridge';
 
 const $log = document.getElementById('log');
