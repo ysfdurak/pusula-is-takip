@@ -41,7 +41,7 @@
   },
   {
    "id": "vz",
-   "name": "Video Zaman Etüdü",
+   "name": "Video İş Etüdü",
    "goal": "Videodan zaman etüdü: adım ölçümü, standart süre, yalın araçlar, Excel çıktısı.",
    "scope": "Tarayıcı (sunucusuz) ve Windows masaüstü; TR/EN",
    "excluded": "Video yükleme ve merkezi kayıt (video cihazdan çıkmaz)",
