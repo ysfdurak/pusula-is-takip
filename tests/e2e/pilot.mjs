@@ -50,7 +50,8 @@ try {
   await page.click('.sidebar nav button:has-text("İş listesi")');
   check(await page.isVisible('text=Rampa 3 kontrolü'), 'Sunucu yeniden başladıktan sonra iş ve oturum korunuyor');
 
-  await page.click('.account-logout');
+  check((await page.locator('.account-apps').count()) === 0, 'MCP kapalıyken "Bağlı uygulamalar" bağlantısı görünmüyor');
+  await page.click('.account-logout[href$="/auth/logout"]');
   await page.click('button:has-text("Oturumu kapat")');
   await page.waitForSelector('text=Oturum kapatıldı');
   const api = (await page.context().request.get(base + '/api/workspace')).status();

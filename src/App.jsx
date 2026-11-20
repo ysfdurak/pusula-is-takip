@@ -323,6 +323,7 @@ export function App({ demo = false, preview = false }) {
   }
   let myNotifications = notifications.filter((notification) => notification.recipient === user);
   let unreadCount = myNotifications.filter((notification) => !notification.read_at).length;
+  const [mcpEnabled, setMcpEnabled] = useState(false);
   async function fetchWorkspace(t, n = '', f = '') {
     if (demo) {
       return demoGet(t, n, f);
@@ -670,6 +671,7 @@ export function App({ demo = false, preview = false }) {
       try {
         let e = new URLSearchParams(window.location.search);
         let nextWorkspace = await fetchWorkspace('');
+        setMcpEnabled(nextWorkspace.mcpEnabled === true);
         applySnapshot(nextWorkspace, '');
         let n = e.get('workspace') || nextWorkspace.workspaces[0]?.id;
         if (n) {
@@ -1817,9 +1819,9 @@ export function App({ demo = false, preview = false }) {
                   <strong>{memberName(user) || 'Pusula'}</strong>
                   <small>{ROLE_LABELS[role]}</small>
                 </span>
-                {!demo && (
+                {!demo && mcpEnabled && (
                   <a
-                    className="account-logout"
+                    className="account-logout account-apps"
                     href="/oauth/baglantilar"
                     title="Bağlı uygulamalar (Claude vb.)"
                     aria-label="Bağlı uygulamalar (Claude vb.)"

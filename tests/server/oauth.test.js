@@ -137,6 +137,9 @@ test('uçtan uca: resmi MCP istemcisi kayıt olur, kullanıcı izin verir, araç
   assert.equal((await call(old.access_token)).status, 401);
   assert.equal((await call(refreshed.access_token)).status, 200);
 
+  // 6a) Arayüz "Bağlı uygulamalar" bağlantısını MCP açık olduğu için gösterir
+  assert.equal((await (await fetch(base + '/api/workspace', { headers: { Cookie: cookie } })).json()).mcpEnabled, true);
+
   // 6b) Bağlı uygulamalar: son kullanım, son işlemler (okuma/yazma etiketiyle) ve bağlantının yapabildikleri görünür
   const list = await (await fetch(base + '/oauth/baglantilar', { headers: { Cookie: cookie } })).text();
   assert.match(list, /Son kullanım: \d{2}\.\d{2}\.\d{4}/);

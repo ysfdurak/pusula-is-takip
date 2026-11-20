@@ -434,7 +434,8 @@ ${link ? `<p style="margin:20px 0 0"><a href="${escapeHtml(link.href)}" style="d
       }
       try {
         if (req.method === 'GET') {
-          return json(res, 200, service.get(email, url.searchParams.get('id') || '', url.searchParams.get('task') || '', url.searchParams.get('file') || ''));
+          // mcpEnabled: arayüz "Bağlı uygulamalar" bağlantısını yalnız MCP kapısı açıkken gösterir.
+          return json(res, 200, { ...service.get(email, url.searchParams.get('id') || '', url.searchParams.get('task') || '', url.searchParams.get('file') || ''), mcpEnabled: !!mcp });
         }
         if (req.method !== 'POST') return json(res, 405, { error: 'Yöntem desteklenmiyor.' });
         // Başka sitelerden gelen istekleri reddet (CSRF): kaynak bilgisi varsa uygulama adresiyle aynı olmalı.
