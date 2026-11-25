@@ -132,3 +132,21 @@ test('yönetici sayfası: yalnızca PUSULA_ADMINS; geri bildirim metni HTML olar
   assert.equal(json.ziyaretci, 1);
   assert.equal(json.yeniDemoAlani, 1);
 });
+
+test('ortak ölçüm paneli için iç özet: anahtarsız kapalı, yanlış anahtar 404, iletişim e-postası gitmez', async () => {
+  const kapali = await start();
+  assert.equal((await fetch(kapali.base + '/ic/istatistik.json', { headers: { Authorization: 'Bearer ' + 'x'.repeat(40) } })).status, 404);
+  const ANAHTAR = 'o'.repeat(64);
+  const s = await start({ ISTATISTIK_OKUMA_ANAHTARI: ANAHTAR });
+  const ayse = await s.login(AYSE);
+  await s.post(ayse, '/api/feedback', { message: 'iyi', rating: 5, contact: true });
+  assert.equal((await fetch(s.base + '/ic/istatistik.json')).status, 404);
+  assert.equal((await fetch(s.base + '/ic/istatistik.json', { headers: { Authorization: 'Bearer ' + 'y'.repeat(64) } })).status, 404);
+  const r = await fetch(s.base + '/ic/istatistik.json?gun=7', { headers: { Authorization: 'Bearer ' + ANAHTAR } });
+  assert.equal(r.status, 200);
+  const j = await r.json();
+  assert.equal(j.donem.gun, 7);
+  assert.equal(j.ziyaretci, 1);
+  assert.equal(j.geriBildirim.son[0].metin, 'iyi');
+  assert.ok(!JSON.stringify(j).includes(AYSE), 'e-posta özete girmez');
+});
