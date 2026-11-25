@@ -504,6 +504,19 @@ ${link ? `<p style="margin:20px 0 0"><a href="${escapeHtml(link.href)}" style="d
       }
     }
 
+    // Ortak ölçüm paneli için özet: yalnız iç ağdan (Caddy /ic/* yolunu dışarıya kapatır) ve okuma anahtarıyla.
+    // Geri bildirimdeki iletişim e-postası çıkarılır; özet takma kimlikli sayılardan oluşur.
+    if (path === '/ic/istatistik.json' && req.method === 'GET') {
+      const key = config.statsReadKey;
+      const m = String(req.headers.authorization || '').match(/^Bearer\s+(\S+)$/i);
+      const given = createHash('sha256').update(m?.[1] || '').digest();
+      if (key.length < 32 || !m || !timingSafeEqual(given, createHash('sha256').update(key).digest())) return json(res, 404, { error: 'Bulunamadı.' });
+      const days = Math.min(Math.max(Number(url.searchParams.get('gun')) || 30, 1), 365);
+      const s = analytics.summary({ days });
+      s.geriBildirim.son = s.geriBildirim.son.map(({ iletisim, ...f }) => f);
+      return json(res, 200, s);
+    }
+
     // Yönetici: kullanım ve geri bildirim özeti
     if ((path === '/yonetim/istatistik' || path === '/yonetim/istatistik.json') && req.method === 'GET') {
       const session = store.sessions.get(cookieValue(req), config.sessionIdleMinutes);

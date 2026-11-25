@@ -177,6 +177,8 @@ Açık işlerin çoğunda termin yok; Pusula terminsiz açık işi olan projeyi 
 | Olaylar ve geri bildirim `ANALYTICS_RETENTION_DAYS` (varsayılan 180) gün sonra silinir | Veri süresiz tutulmaz |
 | Geri bildirimde e-posta yalnızca "bana dönebilirsiniz" işaretlenirse | Kişi açıkça izin vermedikçe geri bildirim anonimdir |
 
+**Ortak panelde görmek (25 Kasım 2026):** ysfdurak.com'un ortak ölçüm paneli (`olcum.ysfdurak.com/yonetim`) bu özeti sunucu içindeki ağdan `GET http://pusula:8080/ic/istatistik.json` ile okur ve öteki projelerle aynı tabloda gösterir. Ölçüm burada, Pusula'da yapılmaya devam eder; panel yalnız okur. Kapı: `ISTATISTIK_OKUMA_ANAHTARI` (en az 32 karakter, `kurulum-olcum.sh` üretir ve iki tarafa da yazar); boşsa uç kapalıdır. Caddy `/ic/*` yolunu dışarıya 404 döndürür. Geri bildirimdeki iletişim e-postası bu özete girmez.
+
 Geri bildirim düğmesi kenar çubuğunda ve **Ayarlar**'da (telefonda) durur; şirket kurulumunda da çalışır ama orada ölçüm yapılmaz. Gizlilik notuna şunu ekle: "Demo kullanımı takma kimlikle, içerik olmadan ve 180 gün süreyle ölçülür; üçüncü taraf analitik aracı ve çerezi kullanılmaz." Kişisel sitenin sayfa ziyaretleri için çerezsiz ve ücretsiz **Cloudflare Web Analytics** kullanılabilir (Cloudflare → Analytics & Logs → Web Analytics).
 
 ## 6. Claude'a bağla
