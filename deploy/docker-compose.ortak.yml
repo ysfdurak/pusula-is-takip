@@ -8,6 +8,7 @@
 name: pusula
 services:
   pusula:
+    init: true  # PID 1 olarak tini: alt süreçleri toplar (zombie birikmez), sinyalleri düzgün iletir
     build: ..
     container_name: pusula
     env_file: ../.env
