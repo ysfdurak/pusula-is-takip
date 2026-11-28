@@ -2,6 +2,7 @@
 # Önce .env.example dosyasını .env olarak kopyalayıp doldurun. HTTPS, önündeki ters vekil (IIS, nginx, Azure) ile sağlanır.
 services:
   pusula:
+    init: true  # PID 1 olarak tini: alt süreçleri toplar (zombie birikmez), sinyalleri düzgün iletir
     build: .
     image: pusula:0.6.0
     env_file: .env
